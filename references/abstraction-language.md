@@ -51,17 +51,27 @@ The goal is controlled visual simplification, not full deletion. Reduce secondar
 
 ## Level calibration
 
+The three abstraction levels must differ perceptually in structural information density, not merely in palette, brush texture, rendering style, or medium. Calibrate every abstract module across all five dimensions:
+
+- detail retention;
+- component density;
+- spatial fidelity;
+- shape fidelity; and
+- photographic surface retention.
+
+At least one major difference between every pair of abstract modules must come from structural information density. If 30%, 65%, and 90% could be mistaken for the same abstraction level with only a color or medium change, reject the result and rebuild the modules.
+
 ### 30% abstraction
 
-Keep the module immediately recognizable: approximately 70% source recognition and 30% reinterpretation. Preserve major silhouettes, objects, and spatial logic while simplifying texture, lightly grouping repeated secondary detail, and selectively replacing areas with lines, colored sketch, paint, or color blocks. A filtered photo is insufficient.
+Keep the module immediately recognizable: approximately 70% source recognition and 30% reinterpretation. Preserve most major and secondary components, strong photographic texture, original spatial relationships, major shape fidelity, and broad object placement. Only lightly reduce repetitive elements; artistic intervention remains partial. A filtered photo is insufficient, but the module must still retain the highest information density of the three abstract states.
 
 ### 65% abstraction
 
-Keep the source semantically traceable: approximately 35% recognition and 65% reinterpretation. Simplify geometry, repaint forms, flatten depth, group or omit repeated secondary objects, alter local relationships, fragment selected regions, or combine methods. Make it evidently derived from the source even when literal fidelity recedes.
+Keep the source semantically traceable: approximately 35% recognition and 65% reinterpretation. Remove or merge a substantial amount of secondary components, significantly reduce photographic surface, simplify major forms, and permit visible spatial reconstruction. Use large color masses, contours, painterly reconstruction, or source-derived geometry. Shape fidelity and spatial fidelity must be visibly lower than 30% while the scene remains clearly derived from the source.
 
 ### 90% abstraction
 
-Retain approximately 10% essential source cues and allow artistic reconstruction to dominate. Use silhouettes, expressive lines, color fields, symbols, fragments, geometry, painterly masses, collage, or strong component compression. Preserve source DNA through cues such as pose, dominant crowd event, skyline, roofline, massing, landmark structure, dominant colors, perspective direction, or characteristic outlines. Never substitute unrelated abstract art or delete the scene's semantic core.
+Retain only the semantic skeleton of the source and allow artistic reconstruction to dominate. Aggressively reduce component count, eliminate most photographic texture and secondary detail, and simplify objects into silhouettes, masses, symbolic geometry, or sparse lines. Allow major spatial and shape reconstruction while preserving only enough source DNA for recognition: pose, dominant crowd event, skyline, roofline, massing, landmark structure, dominant colors, perspective direction, or characteristic outlines. Never substitute unrelated abstract art or delete the scene's semantic core.
 
 ## Content-aware selection
 

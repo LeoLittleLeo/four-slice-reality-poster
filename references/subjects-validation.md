@@ -53,6 +53,7 @@ Never:
 20. Fall back to Logical Zone 2 before checking for an important architectural subject, or choose an architectural Anchor from minor façade detail alone.
 21. Move hidden logical boundaries to contain an important building, or force the entire building into one photographic module when a coherent cross-state treatment would strengthen the composition.
 22. Trigger architecture-anchor selection from an ordinary background building, generic streetscape façade, distant structure, incidental urban fabric, or visible area alone.
+23. Treat 30%, 65%, and 90% as the same structural abstraction level with only palette, brush texture, rendering style, or medium changes.
 
 ## Validation checklist
 
@@ -74,6 +75,9 @@ Confirm before delivery:
 - Head contour, hair edge, shoulders, clothing boundaries, and cross-slice body connections remain coherent.
 - The selected final candidate balances face identity, human continuity, modular readability, and intentional boundaries instead of maximizing full-Anchor source similarity alone.
 - The other slices contain exactly one 30%, one 65%, and one 90% structural abstraction treatment in a deliberately non-mechanical order.
+- The 30%, 65%, and 90% modules differ in detail retention, component density, spatial fidelity, shape fidelity, and photographic surface retention.
+- At least one major difference between every pair of abstract modules comes from structural information density, not only palette or rendering style.
+- Reject the result if the three abstract modules could be mistaken for the same abstraction level with different color or medium.
 - Each abstract slice uses one or more source-derived approved methods rather than filters alone.
 - Dense secondary components may be reduced, merged, grouped, or selectively omitted, but the scene remains semantically identifiable rather than emptied or replaced.
 - The primary person, identity-critical face, dominant crowd event, landmark or primary architecture, and major scene-defining masses survive component reduction.
