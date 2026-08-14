@@ -63,6 +63,8 @@ Give each visible module a stable visual core and make its assigned state readab
 
 Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, palette emphasis, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength.
 
+For the 30%, 65%, and 90% modules, at least one differentiating signal between every pair must be structural information density: detail retention, component count, spatial fidelity, shape fidelity, or photographic surface retention. Palette, brush texture, and medium changes may reinforce the difference but cannot create it alone.
+
 Keep all four modules roughly balanced in area and visual importance. Do not create one dominant main image with three tiny fragments, random collage scraps, or an unstructured montage. The Reality module may expand or contract around a protected subject, but rebalance the other modules so all four states remain substantial.
 
 Allow obvious color differences between slices. Keep them related through a small number of shared hues, accents, or emotional temperature cues rather than identical global grading.
@@ -92,6 +94,7 @@ Inspect the poster at thumbnail size and ask:
 
 - Are four roughly balanced irregular modules immediately readable?
 - Can Reality, 30%, 65%, and 90% be distinguished without explanation?
+- Do 30%, 65%, and 90% differ in structural information density across detail, component density, spatial fidelity, shape fidelity, and photographic surface retention?
 - Do visible boundaries use meaningful contours, structures, fields, or strokes rather than default rectangular rigidity?
 - Do at least two visual signals differentiate neighboring modules?
 - Does the Reality Anchor remain the clearly photographic reality state without requiring unsafe full-block restoration?
@@ -102,4 +105,4 @@ Inspect the poster at thumbnail size and ask:
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?
 
-Reject the result if the four states merge into an almost continuous illustration, if abstraction levels are perceptually interchangeable, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
+Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
