@@ -12,7 +12,7 @@
 
 ## Default hierarchy
 
-Prioritize a readable four-state modular poster over seamless cinematic blending. Make Reality, 30%, 65%, and 90% visually distinguishable at first inspection. Preserve one complete poster canvas and shared source logic, but do not make the composition look like one uniformly repainted image.
+Prioritize a readable four-state modular poster over seamless cinematic blending. Make Reality, 30%, 65%, and 90% visually distinguishable at first inspection. Use equal hidden logical zones for ownership, but prefer four designed irregular visible fragments over rigid rectangular bands.
 
 Use this hierarchy:
 
@@ -25,9 +25,13 @@ four-state readability
 
 ## Boundary language
 
-Keep the mathematical boundaries exact and allow their visual presence to remain clear. Valid boundary treatments include:
+Keep hidden logical boundaries exact. Allow visible module boundaries to depart from them while remaining clearly designed. Valid boundary sources and treatments include:
 
-- a clean straight crop edge;
+- a human silhouette or crowd contour;
+- a building edge, roofline, or skyline;
+- a tree canopy, road, rail, shadow mass, or large color-field edge;
+- a collage cut, brush edge, sketch stroke, or shape-defined mask;
+- a clean straight crop edge when it is genuinely the strongest design;
 - an abrupt but controlled medium change;
 - a deliberate tonal or chromatic break;
 - a narrow rule, gutter, or editorial separator when compositionally useful;
@@ -50,7 +54,7 @@ Semantic continuity does not require visual seamlessness. A person or building m
 
 ## Module differentiation
 
-Give each slice a stable visual core and make its assigned state readable across most of its area:
+Give each visible module a stable visual core and make its assigned state readable across most of its area:
 
 - Reality must remain unmistakably photographic and source-preserved.
 - 30% must remain source-recognizable with visible artistic intervention.
@@ -58,6 +62,8 @@ Give each slice a stable visual core and make its assigned state readable across
 - 90% must be predominantly abstract while retaining source DNA.
 
 Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, palette emphasis, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength.
+
+Keep all four modules roughly balanced in area and visual importance. Do not create one dominant main image with three tiny fragments, random collage scraps, or an unstructured montage. The Reality module may expand or contract around a protected subject, but rebalance the other modules so all four states remain substantial.
 
 Allow obvious color differences between slices. Keep them related through a small number of shared hues, accents, or emotional temperature cues rather than identical global grading.
 
@@ -82,9 +88,9 @@ Do not create broad 3%–8% feathered zones by default. Do not migrate texture c
 
 Inspect the poster at thumbnail size and ask:
 
-- Are four equal modules immediately readable?
+- Are four roughly balanced irregular modules immediately readable?
 - Can Reality, 30%, 65%, and 90% be distinguished without explanation?
-- Does each boundary look intentional rather than defective?
+- Do visible boundaries use meaningful contours, structures, fields, or strokes rather than default rectangular rigidity?
 - Do at least two visual signals differentiate neighboring modules?
 - Does the Reality Anchor remain the clearly photographic reality state without requiring unsafe full-block restoration?
 - Is the primary face core exact source content without a visible facial patch edge?

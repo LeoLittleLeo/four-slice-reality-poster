@@ -1,17 +1,17 @@
 ---
 name: four-slice-reality-poster
-description: "Transform a user-supplied photograph into one readable four-state modular mixed-media poster made of exactly four equal slices: one Reality Anchor and three visibly distinct source-derived slices at approximately 30%, 65%, and 90% structural abstraction. Use for modular reality-versus-virtual posters, progressive abstraction artworks, editorial photo/illustration hybrids, or requests to preserve the original subject identity while juxtaposing four visual states. Protect the primary face core with source pixels while preserving head, shoulder, body, and boundary continuity; do not default to full-Anchor restoration when it creates visible human stitching errors."
+description: "Transform a user-supplied photograph into one readable four-state modular mixed-media poster built from four equal hidden logical zones and four roughly balanced irregular visible modules: one Reality state and 30%, 65%, and 90% source-derived abstraction states. Use for editorial collage, contour-aware reality-versus-virtual posters, progressive abstraction artworks, or requests to preserve subject identity while juxtaposing four designed visual fragments. Protect the primary face core while allowing people-aware, architectural, painterly, and shape-defined module boundaries."
 ---
 
 # Four-Slice Reality / Abstraction Poster
 
-Create one editorial poster that visibly juxtaposes four equal modules: one photographic source region and three clearly distinct, non-linear abstraction states.
+Create one editorial poster that juxtaposes four roughly balanced, irregular visible modules governed by four equal hidden logical zones: one photographic Reality state and three clearly distinct, non-linear abstraction states.
 
 ## Default visual objective
 
 **Readable four-state modular poster first, seamless cinematic blending second.**
 
-Make the four equal slices immediately legible as intentional modules while keeping them inside one poster system. Allow clear boundaries, decisive rendering changes, and noticeable color differences. Do not dissolve the entire image into one uniformly painted scene. A boundary may be straight, sharp, tonal, chromatic, textural, or medium-based; it must look art-directed rather than accidental.
+Make the four states immediately legible as intentional visual fragments while keeping them inside one poster system. Do not require visible rectangular bands. Allow irregular, contour-aware, collage-like, brush-defined, shape-defined, architectural, and people-aware boundaries. Keep the four visible modules roughly balanced in area and visual importance; do not reduce them to one dominant image plus three scraps.
 
 Default to **Hybrid Transition**: allow backgrounds and large color fields to change abruptly, preserve semantic continuity for important people and buildings, and never force every boundary to be fully seamless. Keep all four states clearly readable; make boundaries visibly present whenever that strengthens modularity or poster design.
 
@@ -36,7 +36,7 @@ Do not force every color into every image. Adapt the palette to the source while
 
 ### Modular Color Principle
 
-Keep the four slices inside the **same cinematic emotional universe**, but do not force them into nearly identical grading. Give each module a clearly different dominant color role when useful. For example:
+Keep the four visible modules inside the **same cinematic emotional universe**, but do not force them into nearly identical grading. Give each module a clearly different dominant color role when useful. For example:
 
 ```text
 Slice A → terracotta / warm brown / sand
@@ -115,14 +115,14 @@ final candidate = full-block restoration with obvious head or body stitching err
 ## Workflow
 
 1. Inspect the supplied photograph. Identify dimensions, orientation, semantic flow, primary people and faces, architecture, landmarks, important objects, dominant shapes, and palette.
-2. Choose one semantic slicing direction: four equal vertical slices or four equal horizontal slices. Preserve the source aspect ratio and overall rectangular canvas. Never move boundaries afterward.
-3. Select exactly one Reality Anchor. If a reliable primary face exists, use the slice containing the largest visible portion of that face. Otherwise use Slice 2.
+2. Choose one semantic logical-division direction: four equal hidden vertical zones or four equal hidden horizontal zones. Preserve the source aspect ratio and overall rectangular canvas. Never move these ownership boundaries afterward; do not require visible module edges to follow them.
+3. Establish four equal hidden logical zones and select exactly one Reality Anchor ownership zone using this hierarchy: primary-face ownership first; crowd-dominant semantic ownership second; Logical Zone 2 only when neither exists or the scene is primarily non-human.
 4. Locate and protect the source primary face core before any generative edit. Preserve head, hair, shoulder, clothing, and body boundary context for continuity-aware candidate generation. Use full-Anchor protection by default only when no important person is present or when it does not create a human seam.
 5. Assign 30%, 65%, and 90% abstraction exactly once to the remaining slices. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
 6. Establish the Robot Dreams-inspired default color identity before generating the abstract slices. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract slices distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
 7. Select source-derived abstraction methods appropriate to each abstract slice. Treat abstraction as structural reinterpretation, never filter intensity.
 8. Generate the modular composition and retain the strongest visually coherent candidate before restoration. Permit reconstruction in abstract slices while retaining source DNA and human semantic continuity.
-9. Art-direct the three exact boundaries as visible module relationships. Allow sharp or obvious changes in medium, value, palette, texture, or abstraction, but eliminate halos, misalignment, duplicate forms, and other accidental compositing artifacts. Do not overwrite protected Anchor pixels.
+9. Convert the hidden four-zone ownership into four roughly balanced irregular visible modules. Derive visible edges from people, crowds, architecture, skylines, trees, roads, shadows, large color fields, or expressive strokes. Allow modules to expand or contract around protected content without changing logical ownership.
 10. For important-person scenes, restore only the face core into the coherent candidate, then compare it with any full-Anchor restoration candidate. For non-human scenes, full-Anchor restoration may remain the default.
 11. Reject any candidate with head seam distortion, broken shoulder/body continuity, or an awkward human silhouette mismatch, even if it preserves more Anchor pixels.
 12. Art-direct the poster using shared motifs, rhythm, limited palette relationships, or structural echoes without weakening face identity or human continuity.
@@ -136,12 +136,12 @@ Resolve conflicts in this order:
 2. Head, Shoulder, and Human Body Continuity.
 3. Reality Anchor Role and Local Source Preservation.
 4. Architectural Identity.
-5. Four-State Readability and Abstraction Level Assignment.
+5. Four-State Readability, Logical-Zone Ownership, and Abstraction Assignment.
 6. Robot Dreams-Inspired Color Identity.
 7. Intentional Modular Boundary Design.
 8. Artistic Experimentation.
 
-Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal logical slices while applying this protection hierarchy. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity outrank minor boundary smoothing and general artistic experimentation.
+Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal hidden logical zones while allowing irregular visible modules. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity outrank minor boundary smoothing and general artistic experimentation.
 
 ## Core principles
 
@@ -150,5 +150,5 @@ Never let a lower-priority rule modify a higher-priority protected region. Maint
 - Remove architectural detail before identity.
 - Make abstraction a structural transformation, not a filter.
 - Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this shared emotional color universe while allowing strong, intentional slice-to-slice dominant color differences.
-- Keep boundaries mathematically exact and intentionally readable.
+- Keep hidden logical ownership mathematically equal; make visible module edges irregular, designed, and readable.
 - Deliver one coherent poster, never four independent images.

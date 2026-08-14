@@ -2,19 +2,20 @@
 
 ## Contents
 
-- Canvas and equal slices
+- Canvas and equal logical zones
 - Direction selection
 - Reality Anchor
+- Crowd Anchor fallback
 - Abstraction assignment
 - Spatial freedom and cohesion
 
-## Canvas and equal slices
+## Canvas and equal logical zones
 
 Preserve the source image's aspect ratio and use its dimensions as the compositional basis unless the user explicitly requests another format. Do not stretch, compress, or arbitrarily extend the canvas.
 
-Divide the image into exactly four geometrically equal slices. Use either four equal vertical slices or four equal horizontal slices. Do not create unequal panels, a dominant center panel, or move boundaries to protect a face, person, building, or object. Build hierarchy through visual treatment rather than panel size.
+Begin with exactly four geometrically equal hidden logical zones. Use either four equal vertical ownership zones or four equal horizontal ownership zones. Use them only for Reality Anchor selection, crowd and subject ownership, 30%/65%/90% assignment, and four-state validation. Do not move these hidden boundaries to protect content.
 
-Recombine all slices into the same overall rectangle and output one poster, not four independent images.
+Translate the hidden ownership system into four visible modules that may be irregular, overlapping in influence, contour-aware, and non-rectangular. Keep them roughly balanced in area and visual importance. Recombine them into the same overall rectangle and output one poster, not four independent images.
 
 ## Direction selection
 
@@ -30,15 +31,30 @@ When a clear primary human subject exists:
 
 1. Identify the primary subject using face size, foreground placement, focus, centrality, compositional dominance, and visual salience.
 2. Estimate the visible face area falling in each fixed slice.
-3. Use the slice containing the largest portion of that primary face as the anchor.
+3. Use the logical zone containing the largest portion of that primary face as the anchor owner.
 
-If a face crosses boundaries, keep the fixed equal boundaries and use largest-area ownership. Do not custom-crop, enlarge the face slice, or reconstruct the face across panels. For multiple people, use only the primary visual subject to determine the single anchor.
+If a face crosses hidden logical boundaries, keep them fixed and use largest-area ownership. The visible Reality module may expand around the protected face or follow its contour while logical ownership remains unchanged. For multiple people, use only the primary visual subject to determine the single anchor.
 
-If no reliable primary face exists—because there is no person, faces are small or obscured, or the image is mainly architecture, landscape, object, or interior—use Slice 2: second from the left for vertical slices or second from the top for horizontal slices.
+## Crowd Anchor fallback
 
-For scenes without an important person, make the Anchor source-preserved through full-block compositing. For important-person scenes, protect the source face core while using the coherent candidate for the surrounding head, hair, shoulders, clothing, and cross-boundary body context. Do not require full-block restoration when it creates visible human stitching errors.
+When no reliable single primary face exists, check for a crowd-dominant semantic region before defaulting to Slice 2.
 
-Use `../scripts/restore_protected_anchor.py --mode face-core --face-box X0 Y0 X1 Y1` for important-person scenes and verify exact source pixels inside the face core. Use `--mode full-anchor` for non-human scenes or as a comparison candidate. Permit temperature, tone, saturation, brightness, contrast, or subtle grain only through deterministic non-generative processing that does not change identity.
+Select a slice as the Reality Anchor when:
+
+- no clear single primary-subject face exists;
+- a group of people forms the image's main semantic focus;
+- the group is visually concentrated mostly within one slice; and
+- that slice carries the strongest crowd presence, human activity density, or event significance.
+
+Determine crowd ownership by combining visible-people concentration, density of human activity, semantic importance of the group, and whether the crowd reads as one coherent event or focal cluster. Do not use raw person count alone when another slice contains the more important human event.
+
+Keep all four hidden equal boundaries fixed. Do not move or resize logical zones to accommodate a crowd. If a crowd spans multiple zones, select the zone with the strongest combined concentration and semantic importance. Allow the visible Reality module to follow the crowd grouping when the overall module system remains balanced.
+
+Use Logical Zone 2—second from the left for vertical ownership or second from the top for horizontal ownership—only when no reliable primary face exists and no zone has a clearly dominant crowd grouping, or when the scene is primarily non-human.
+
+For scenes without an important person, source-preserve the visible Reality module through an irregular source mask when available; rectangular full-block compositing is only a fallback. For important-person scenes, protect the source face core while using coherent context for the surrounding head, hair, shoulders, clothing, and cross-boundary body.
+
+Use `../scripts/restore_protected_anchor.py --mode face-core --face-box X0 Y0 X1 Y1` for important-person scenes. Use `--mode source-mask --mask MASK.png` for an irregular visible Reality module. Use `--mode full-anchor` only as a rectangular fallback or comparison candidate.
 
 ## Abstraction assignment
 
@@ -50,4 +66,4 @@ Interpret percentage as departure from photographic representation—not opacity
 
 Inside abstract slices, permit deliberate changes to object position, scale, overlap, depth, layer order, perspective emphasis, hierarchy, and occlusion. Permit merging, separation, duplication of selected fragments, and flattened depth. Exact pixel alignment with the source or neighboring slices is not required.
 
-Make the four-slice structure clearly perceptible through each module's dominant treatment and through intentional boundary design. Allow straight boundaries, decisive tonal or chromatic breaks, and distinct media. Do not require gutters or drawn divider lines, but permit them when they strengthen the editorial system. Preserve important face identity and avoid accidental body or architectural misalignment at boundaries. Relate the modules with selected palette echoes, repeated lines, directional rhythm, or shape relationships without forcing them into one uniform rendering language. Follow [intentional-modular-composition.md](intentional-modular-composition.md).
+Make the four-state structure clearly perceptible through each visible module's dominant treatment and boundary design. Derive edges from human silhouettes, crowd groupings, building contours, rooflines, skylines, tree canopies, roads or rails, shadow masses, large color fields, or painterly and sketch strokes. Preserve face identity and avoid accidental human or architectural mismatch. Follow [intentional-modular-composition.md](intentional-modular-composition.md).

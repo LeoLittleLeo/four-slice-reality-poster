@@ -31,8 +31,8 @@ Derive geometry from actual façade planes, volumes, rooflines, perspective, and
 
 Never:
 
-1. Create more or fewer than four slices, unequal slices, or independent outputs.
-2. Stretch or compress the source or move boundaries to protect content.
+1. Create more or fewer than four logical states or output them as independent images.
+2. Stretch or compress the source, or move the hidden equal logical boundaries after ownership assignment.
 3. Create more than one Reality Anchor, or discard its intended reality role without reason.
 4. Treat filters as abstraction or turn all four slices into illustrations.
 5. Force levels into sequential order or derive them from anchor distance.
@@ -47,15 +47,18 @@ Never:
 14. Regenerate the primary face core, even if the result appears photographically faithful.
 15. Let transition effects, global stylization, palette harmonization, or mixed-media consistency overwrite the protected face core.
 16. Select a full-Anchor restoration candidate that introduces head seam distortion, body continuity breaks, or an awkward human silhouette mismatch merely because it preserves more source pixels.
+17. Force all visible modules into four hard rectangular bands when irregular content-aware edges would produce a stronger composition.
+18. Collapse the design into one dominant image with three tiny fragments, random scraps, or an unstructured montage.
 
 ## Validation checklist
 
 Confirm before delivery:
 
-- Exactly four equal slices reconstruct one source-ratio canvas.
+- Exactly four equal hidden logical zones govern ownership and abstraction assignment inside one source-ratio canvas.
 - Direction follows semantic structure rather than orientation alone.
-- Exactly one anchor exists; a reliable primary face selects it by largest visible face area, otherwise Slice 2 does.
-- Fixed boundaries remain unchanged even when a face crosses them.
+- Exactly one anchor exists: a reliable primary face selects it by largest visible face area; otherwise a clearly crowd-dominant semantic slice takes ownership; Slice 2 is used only when neither exists or the scene is primarily non-human.
+- Crowd ownership reflects concentration, activity density, event significance, and coherent focal grouping—not raw person count alone.
+- Hidden logical boundaries remain unchanged even when a face or crowd crosses them; visible module edges may adapt around content.
 - The final primary face core matches the original source face; no model has redrawn, reconstructed, inferred, or stylized its identity-critical features.
 - Pixel equality for the restored face core has been verified when deterministic compositing is available; any feathering is outside that exact core.
 - No head seam distortion, body continuity break, or awkward human silhouette mismatch remains.
@@ -66,9 +69,9 @@ Confirm before delivery:
 - People remain readable through silhouette, pose, and presence; geometry and fragmentation remain controlled.
 - Important architecture loses surface detail before silhouette, massing, perspective, or landmark identity.
 - Abstract slices retain source visual DNA even when spatial relationships change.
-- The four equal modules are immediately readable at thumbnail size and neighboring slices differ through at least two deliberate visual signals.
+- Four roughly balanced irregular visible modules are immediately readable at thumbnail size, and neighboring states differ through at least two deliberate visual signals.
 - Hybrid Transition is applied: backgrounds and large color fields may break abruptly, while important people and buildings retain semantic continuity.
-- All three logical boundaries remain geometrically exact and visually intentional; straight, sharp, chromatic, tonal, textural, or medium-based boundaries are acceptable.
+- Hidden ownership zones remain geometrically equal while visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight.
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains.
 - Every slice clearly expresses Reality, 30%, 65%, or 90%; no global treatment dissolves them into one continuous illustration or abstraction gradient.
 - The poster maintains broad warm, nostalgic cinematic relationships while allowing clear, purposeful color differences among modules.

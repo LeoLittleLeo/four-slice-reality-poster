@@ -49,13 +49,14 @@ def face_core_composite(source: Image.Image, candidate: Image.Image, box: Box, f
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Restore a source face core or full Reality Anchor into a coherent candidate."
+        description="Restore a face core, irregular source mask, or full logical Anchor into a candidate."
     )
     parser.add_argument("--source", required=True, type=Path, help="Original user-supplied image")
     parser.add_argument("--generated", required=True, type=Path, help="Visually coherent candidate")
     parser.add_argument("--output", required=True, type=Path, help="Protected composite candidate")
-    parser.add_argument("--mode", required=True, choices=("face-core", "full-anchor"))
+    parser.add_argument("--mode", required=True, choices=("face-core", "source-mask", "full-anchor"))
     parser.add_argument("--face-box", nargs=4, type=int, metavar=("X0", "Y0", "X1", "Y1"))
+    parser.add_argument("--mask", type=Path, help="Grayscale or alpha mask for an irregular Reality module")
     parser.add_argument("--feather", type=int, default=0, help="Blend ring outside exact face core")
     parser.add_argument("--direction", choices=("vertical", "horizontal"))
     parser.add_argument("--anchor", type=int, choices=range(1, 5), metavar="{1,2,3,4}")
@@ -82,6 +83,15 @@ def main() -> None:
             box = tuple(args.face_box)
             final = face_core_composite(source, candidate, box, args.feather)
             message = f"Restored and verified source face core: box={box}, feather={args.feather}"
+        elif args.mode == "source-mask":
+            if args.mask is None:
+                raise SystemExit("--mask is required for --mode source-mask.")
+            with Image.open(args.mask) as mask_image:
+                if mask_image.size != source.size:
+                    raise SystemExit(f"Mask size {mask_image.size} does not match image size {source.size}.")
+                mask = mask_image.getchannel("A") if "A" in mask_image.getbands() else mask_image.convert("L")
+            final = Image.composite(source, candidate, mask)
+            message = f"Restored irregular source Reality module from mask: {args.mask}"
         else:
             if args.direction is None or args.anchor is None:
                 raise SystemExit("--direction and --anchor are required for --mode full-anchor.")
