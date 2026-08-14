@@ -36,9 +36,9 @@ If a face crosses boundaries, keep the fixed equal boundaries and use largest-ar
 
 If no reliable primary face exists—because there is no person, faces are small or obscured, or the image is mainly architecture, landscape, object, or interior—use Slice 2: second from the left for vertical slices or second from the top for horizontal slices.
 
-Make the anchor source-preserved, not regenerated. Crop it directly from the uploaded source before generation, exclude it with a hard protection mask when supported, generate only the other slices, and composite the source crop back afterward. Do not accept a newly generated photographic-looking substitute. Preserve the original subject, face, architecture, objects, geometry, photographic texture, and spatial relationships.
+For scenes without an important person, make the Anchor source-preserved through full-block compositing. For important-person scenes, protect the source face core while using the coherent candidate for the surrounding head, hair, shoulders, clothing, and cross-boundary body context. Do not require full-block restoration when it creates visible human stitching errors.
 
-Use `../scripts/restore_protected_anchor.py` to restore and verify the Anchor whenever local files are available. Default to exact source pixels. Permit temperature, tone, saturation, brightness, contrast, or subtle grain only through deterministic non-generative processing; skip grading if it could affect facial identity or if exact source equality is required.
+Use `../scripts/restore_protected_anchor.py --mode face-core --face-box X0 Y0 X1 Y1` for important-person scenes and verify exact source pixels inside the face core. Use `--mode full-anchor` for non-human scenes or as a comparison candidate. Permit temperature, tone, saturation, brightness, contrast, or subtle grain only through deterministic non-generative processing that does not change identity.
 
 ## Abstraction assignment
 

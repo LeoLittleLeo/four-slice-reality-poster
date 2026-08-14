@@ -63,7 +63,7 @@ Allow obvious color differences between slices. Keep them related through a smal
 
 ## Subject continuity
 
-Preserve the source pixels of the Reality Anchor even when that creates a strong boundary. Never blend across a protected primary face.
+Preserve the source pixels of the primary face core. Do not restore the entire Anchor when doing so causes head, hair, shoulder, clothing, or body discontinuity. Never blend generatively across the identity-critical face core.
 
 When a body or important building crosses abstract modules, default to continuous semantic form while allowing a sharp rendering change. Use an intentional editorial break only when it does not destroy human or architectural readability:
 
@@ -86,8 +86,10 @@ Inspect the poster at thumbnail size and ask:
 - Can Reality, 30%, 65%, and 90% be distinguished without explanation?
 - Does each boundary look intentional rather than defective?
 - Do at least two visual signals differentiate neighboring modules?
-- Is the Reality Anchor still exact source content?
+- Does the Reality Anchor remain the clearly photographic reality state without requiring unsafe full-block restoration?
+- Is the primary face core exact source content without a visible facial patch edge?
+- Are the head contour, hair silhouette, shoulders, clothing, and body connections coherent?
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?
 
-Reject the result if the four states merge into an almost continuous illustration, if abstraction levels are perceptually interchangeable, or if seamlessness hides the modular structure. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
+Reject the result if the four states merge into an almost continuous illustration, if abstraction levels are perceptually interchangeable, if seamlessness hides the modular structure, or if full-block restoration creates human stitching errors. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.

@@ -1,56 +1,101 @@
 #!/usr/bin/env python3
-"""Restore one logical quarter from the source and verify exact pixel equality."""
+"""Restore either a full logical Anchor or an identity-critical face core."""
 
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
 
-from PIL import Image, ImageChops
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 
-def slice_box(width: int, height: int, direction: str, anchor: int) -> tuple[int, int, int, int]:
+Box = tuple[int, int, int, int]
+
+
+def slice_box(width: int, height: int, direction: str, anchor: int) -> Box:
     index = anchor - 1
     if direction == "vertical":
         return (round(index * width / 4), 0, round((index + 1) * width / 4), height)
     return (0, round(index * height / 4), width, round((index + 1) * height / 4))
 
 
+def valid_box(box: Box, size: tuple[int, int]) -> bool:
+    left, top, right, bottom = box
+    return 0 <= left < right <= size[0] and 0 <= top < bottom <= size[1]
+
+
+def face_core_composite(source: Image.Image, candidate: Image.Image, box: Box, feather: int) -> Image.Image:
+    if not valid_box(box, source.size):
+        raise SystemExit(f"Invalid face box {box} for image size {source.size}.")
+
+    mask = Image.new("L", source.size, 0)
+    if feather > 0:
+        left, top, right, bottom = box
+        outer = (
+            max(0, left - feather),
+            max(0, top - feather),
+            min(source.width, right + feather),
+            min(source.height, bottom + feather),
+        )
+        ImageDraw.Draw(mask).rectangle(outer, fill=255)
+        mask = mask.filter(ImageFilter.GaussianBlur(max(1, feather / 2)))
+
+    ImageDraw.Draw(mask).rectangle(box, fill=255)
+    final = Image.composite(source, candidate, mask)
+    if ImageChops.difference(source.crop(box), final.crop(box)).getbbox() is not None:
+        raise SystemExit("Face-core pixel verification failed; output was not written.")
+    return final
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Paste the exact source Reality Anchor over a generated poster and verify it."
+        description="Restore a source face core or full Reality Anchor into a coherent candidate."
     )
     parser.add_argument("--source", required=True, type=Path, help="Original user-supplied image")
-    parser.add_argument("--generated", required=True, type=Path, help="Generated poster before restoration")
-    parser.add_argument("--output", required=True, type=Path, help="Final protected composite")
-    parser.add_argument("--direction", required=True, choices=("vertical", "horizontal"))
-    parser.add_argument("--anchor", required=True, type=int, choices=range(1, 5), metavar="{1,2,3,4}")
+    parser.add_argument("--generated", required=True, type=Path, help="Visually coherent candidate")
+    parser.add_argument("--output", required=True, type=Path, help="Protected composite candidate")
+    parser.add_argument("--mode", required=True, choices=("face-core", "full-anchor"))
+    parser.add_argument("--face-box", nargs=4, type=int, metavar=("X0", "Y0", "X1", "Y1"))
+    parser.add_argument("--feather", type=int, default=0, help="Blend ring outside exact face core")
+    parser.add_argument("--direction", choices=("vertical", "horizontal"))
+    parser.add_argument("--anchor", type=int, choices=range(1, 5), metavar="{1,2,3,4}")
     return parser.parse_args()
 
 
 def main() -> None:
     args = parse_args()
-    with Image.open(args.source) as source_image, Image.open(args.generated) as generated_image:
+    if args.feather < 0:
+        raise SystemExit("--feather must be non-negative.")
+
+    with Image.open(args.source) as source_image, Image.open(args.generated) as candidate_image:
         source = source_image.convert("RGBA")
-        generated = generated_image.convert("RGBA")
-        if source.size != generated.size:
+        candidate = candidate_image.convert("RGBA")
+        if source.size != candidate.size:
             raise SystemExit(
-                f"Size mismatch: source={source.size}, generated={generated.size}. "
-                "Do not resize the protected source; regenerate at the source dimensions."
+                f"Size mismatch: source={source.size}, candidate={candidate.size}. "
+                "Do not resize the protected source."
             )
 
-        box = slice_box(*source.size, args.direction, args.anchor)
-        anchor_pixels = source.crop(box)
-        final = generated.copy()
-        final.paste(anchor_pixels, box[:2])
-
-        restored = final.crop(box)
-        if ImageChops.difference(anchor_pixels, restored).getbbox() is not None:
-            raise SystemExit("Protected Anchor verification failed; output was not written.")
+        if args.mode == "face-core":
+            if args.face_box is None:
+                raise SystemExit("--face-box is required for --mode face-core.")
+            box = tuple(args.face_box)
+            final = face_core_composite(source, candidate, box, args.feather)
+            message = f"Restored and verified source face core: box={box}, feather={args.feather}"
+        else:
+            if args.direction is None or args.anchor is None:
+                raise SystemExit("--direction and --anchor are required for --mode full-anchor.")
+            box = slice_box(*source.size, args.direction, args.anchor)
+            anchor_pixels = source.crop(box)
+            final = candidate.copy()
+            final.paste(anchor_pixels, box[:2])
+            if ImageChops.difference(anchor_pixels, final.crop(box)).getbbox() is not None:
+                raise SystemExit("Full-Anchor pixel verification failed; output was not written.")
+            message = f"Restored and verified full source Anchor: anchor={args.anchor}, box={box}"
 
         args.output.parent.mkdir(parents=True, exist_ok=True)
         final.save(args.output)
-        print(f"Restored and verified source pixels in anchor {args.anchor}: box={box}")
+        print(message)
 
 
 if __name__ == "__main__":

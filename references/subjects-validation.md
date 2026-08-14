@@ -33,7 +33,7 @@ Never:
 
 1. Create more or fewer than four slices, unequal slices, or independent outputs.
 2. Stretch or compress the source or move boundaries to protect content.
-3. Create more than one Reality Anchor or structurally alter it.
+3. Create more than one Reality Anchor, or discard its intended reality role without reason.
 4. Treat filters as abstraction or turn all four slices into illustrations.
 5. Force levels into sequential order or derive them from anchor distance.
 6. Generate unrelated abstract slices or random source-independent geometry.
@@ -44,8 +44,9 @@ Never:
 11. Blend the four states into one nearly uniform painterly image or hide the modular structure behind broad feathering and continuous texture migration.
 12. Use defective boundary artifacts such as muddy blur, ragged masking, duplicated outlines, ghost edges, offset object copies, cutout halos, accidental gaps, or mismatched anatomy.
 13. Give slices unrelated palette identities or drift into neon cyberpunk, purple-magenta sci-fi glow, cold steel monochrome, random rainbow abstraction, hyper-saturated pop art, dark horror, lifeless gray, or glossy commercial-ad color unless explicitly requested.
-14. Regenerate the Reality Anchor or primary face, even if the result appears photographically faithful.
-15. Let transition effects, global stylization, palette harmonization, or mixed-media consistency overwrite a protected face or source Anchor.
+14. Regenerate the primary face core, even if the result appears photographically faithful.
+15. Let transition effects, global stylization, palette harmonization, or mixed-media consistency overwrite the protected face core.
+16. Select a full-Anchor restoration candidate that introduces head seam distortion, body continuity breaks, or an awkward human silhouette mismatch merely because it preserves more source pixels.
 
 ## Validation checklist
 
@@ -55,9 +56,11 @@ Confirm before delivery:
 - Direction follows semantic structure rather than orientation alone.
 - Exactly one anchor exists; a reliable primary face selects it by largest visible face area, otherwise Slice 2 does.
 - Fixed boundaries remain unchanged even when a face crosses them.
-- The final Anchor is the original source region restored by masking/compositing, not an AI-generated photographic reconstruction.
-- The final primary face matches the original source face; no model has redrawn, reconstructed, inferred, or stylized its features.
-- Pixel equality for the restored Anchor has been verified when deterministic compositing is available; any grading was deterministic, non-structural, and excluded from identity-critical pixels or deliberately omitted.
+- The final primary face core matches the original source face; no model has redrawn, reconstructed, inferred, or stylized its identity-critical features.
+- Pixel equality for the restored face core has been verified when deterministic compositing is available; any feathering is outside that exact core.
+- No head seam distortion, body continuity break, or awkward human silhouette mismatch remains.
+- Head contour, hair edge, shoulders, clothing boundaries, and cross-slice body connections remain coherent.
+- The selected final candidate balances face identity, human continuity, modular readability, and intentional boundaries instead of maximizing full-Anchor source similarity alone.
 - The other slices contain exactly one 30%, one 65%, and one 90% structural abstraction treatment in a deliberately non-mechanical order.
 - Each abstract slice uses one or more source-derived approved methods rather than filters alone.
 - People remain readable through silhouette, pose, and presence; geometry and fragmentation remain controlled.
