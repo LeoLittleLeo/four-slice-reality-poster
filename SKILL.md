@@ -157,7 +157,7 @@ final candidate = restoration with a facial patch, geometry mismatch, or broken 
 4. Identify the primary face and surrounding head/body continuity context before generation; do not pre-commit to source-pixel restoration.
 5. Assign 30%, 65%, and 90% abstraction exactly once to the remaining logical zones. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
 6. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract modules distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
-7. Select source-derived abstraction methods appropriate to each abstract module. Treat abstraction as structural reinterpretation, never filter intensity.
+7. Select source-derived abstraction methods appropriate to each abstract module. Treat abstraction as structural reinterpretation, never filter intensity. Reduce, merge, group, or omit non-essential repeated components when this improves clarity, but preserve the primary person, identity-critical face, dominant crowd event, landmark architecture, and major scene-defining masses.
 8. Generate the modular composition and retain the strongest visually coherent candidate before restoration. Permit reconstruction in abstract modules while retaining source DNA and human semantic continuity.
 9. Convert the hidden four-zone ownership into four roughly balanced irregular visible modules. Derive visible edges from people, crowds, architecture, skylines, trees, roads, shadows, large color fields, or expressive strokes. Allow modules to expand or contract around protected content without changing logical ownership.
 10. Run the Face Restoration Gate. If Candidate A is acceptable, skip restoration and retain A for the remaining poster-level workflow. Otherwise attempt a geometrically verified irregular-mask or aligned restoration to create Candidate B.
@@ -185,6 +185,7 @@ Never let a lower-priority rule modify a higher-priority protected region. Maint
 - Preserve primary-face identity and natural anatomy; never restore pixels merely for equality.
 - Simplify people before breaking them.
 - Remove architectural detail before identity.
+- Reduce repeated components before weakening core semantic identity.
 - Make abstraction a structural transformation, not a filter.
 - Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this shared emotional color universe while allowing strong, intentional slice-to-slice dominant color differences.
 - Keep hidden logical ownership mathematically equal; make visible module edges irregular, designed, and readable.

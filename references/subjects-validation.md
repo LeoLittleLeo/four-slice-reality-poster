@@ -49,6 +49,7 @@ Never:
 16. Select any restoration candidate that introduces facial patch appearance, geometry mismatch, jaw or cheek mismatch, hairline mismatch, skin-tone discontinuity, neck mismatch, body continuity breaks, or unnatural proportions.
 17. Force all visible modules into four hard rectangular bands when irregular content-aware edges would produce a stronger composition.
 18. Collapse the design into one dominant image with three tiny fragments, random scraps, or an unstructured montage.
+19. Treat component reduction as permission to remove the primary person, identity-critical face, dominant crowd event, landmark or primary architecture, or a major scene-defining mass.
 
 ## Validation checklist
 
@@ -69,6 +70,8 @@ Confirm before delivery:
 - The selected final candidate balances face identity, human continuity, modular readability, and intentional boundaries instead of maximizing full-Anchor source similarity alone.
 - The other slices contain exactly one 30%, one 65%, and one 90% structural abstraction treatment in a deliberately non-mechanical order.
 - Each abstract slice uses one or more source-derived approved methods rather than filters alone.
+- Dense secondary components may be reduced, merged, grouped, or selectively omitted, but the scene remains semantically identifiable rather than emptied or replaced.
+- The primary person, identity-critical face, dominant crowd event, landmark or primary architecture, and major scene-defining masses survive component reduction.
 - People remain readable through silhouette, pose, and presence; geometry and fragmentation remain controlled.
 - Important architecture loses surface detail before silhouette, massing, perspective, or landmark identity.
 - Abstract slices retain source visual DNA even when spatial relationships change.

@@ -4,6 +4,7 @@
 
 - Structural abstraction
 - Eight approved methods
+- Component reduction
 - Level calibration
 - Content-aware selection
 
@@ -24,19 +25,43 @@ Treat method and level separately: methods define how transformation happens; 30
 7. **Collage Abstraction:** Recompose source-derived photographic and illustrated material by moving, scaling, isolating, duplicating, overlapping, or re-layering selected elements. Make it editorial and designed.
 8. **Shape Reduction:** Reduce people, buildings, and objects through simplified forms, silhouettes, broad masses, or symbols. Do not confuse simplification with blur.
 
+## Component reduction
+
+Within abstract modules, use controlled component reduction when it improves abstraction clarity, compositional readability, or poster design. Reduce, merge, group, or selectively omit non-essential repeated elements instead of preserving every component one to one.
+
+Apply this especially to:
+
+- dense trees and foliage;
+- repetitive background buildings;
+- repeated windows, balconies, and façade details;
+- dense crowds of secondary people; and
+- small incidental vehicles, objects, signage fragments, and street clutter.
+
+Prefer density reduction, grouping, silhouette simplification, massing compression, and selective omission of repetitive detail. Preserve enough evidence for the source scene to remain semantically identifiable.
+
+Never remove or weaken:
+
+- the primary person;
+- the identity-critical face;
+- the dominant crowd event when crowd activity is the main subject;
+- landmark or primary architecture; or
+- major compositional masses that define the scene.
+
+The goal is controlled visual simplification, not full deletion. Reduce secondary density before altering a protected subject or scene-defining structure.
+
 ## Level calibration
 
 ### 30% abstraction
 
-Keep the slice immediately recognizable: approximately 70% source recognition and 30% reinterpretation. Preserve major silhouettes, objects, and spatial logic while simplifying texture and selectively replacing areas with lines, colored sketch, paint, or color blocks. A filtered photo is insufficient.
+Keep the module immediately recognizable: approximately 70% source recognition and 30% reinterpretation. Preserve major silhouettes, objects, and spatial logic while simplifying texture, lightly grouping repeated secondary detail, and selectively replacing areas with lines, colored sketch, paint, or color blocks. A filtered photo is insufficient.
 
 ### 65% abstraction
 
-Keep the source semantically traceable: approximately 35% recognition and 65% reinterpretation. Simplify geometry, repaint forms, flatten depth, reorganize secondary objects, alter local relationships, fragment selected regions, or combine methods. Make it evidently derived from the source even when literal fidelity recedes.
+Keep the source semantically traceable: approximately 35% recognition and 65% reinterpretation. Simplify geometry, repaint forms, flatten depth, group or omit repeated secondary objects, alter local relationships, fragment selected regions, or combine methods. Make it evidently derived from the source even when literal fidelity recedes.
 
 ### 90% abstraction
 
-Retain approximately 10% essential source cues and allow artistic reconstruction to dominate. Use silhouettes, expressive lines, color fields, symbols, fragments, geometry, painterly masses, or collage. Preserve source DNA through cues such as pose, skyline, roofline, massing, dominant colors, perspective direction, or characteristic outlines. Never substitute unrelated abstract art.
+Retain approximately 10% essential source cues and allow artistic reconstruction to dominate. Use silhouettes, expressive lines, color fields, symbols, fragments, geometry, painterly masses, collage, or strong component compression. Preserve source DNA through cues such as pose, dominant crowd event, skyline, roofline, massing, landmark structure, dominant colors, perspective direction, or characteristic outlines. Never substitute unrelated abstract art or delete the scene's semantic core.
 
 ## Content-aware selection
 
