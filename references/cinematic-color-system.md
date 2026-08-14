@@ -13,7 +13,7 @@
 
 Establish one shared palette universe before coloring individual slices. Aim for the broad emotional qualities of *Robot Dreams*—warm, nostalgic, gentle, sunlit, slightly retro, harmonious, and dreamlike without copying a specific frame. Keep the result stylized but not excessively saturated.
 
-Make all four abstraction states inhabit the same emotional world. Favor soft urban sunlight, tender melancholy, quiet optimism, softened memory-like color, editorial dreaminess, and cinematic calm. Avoid harsh, metallic, coldly futuristic, neon, horror-like, blockbuster-contrast, or random pop-art moods unless explicitly requested.
+Make all four abstraction states belong to a related emotional family without forcing identical grading. Favor soft urban sunlight, tender melancholy, quiet optimism, softened memory-like color, editorial dreaminess, and cinematic calm. Permit clearly different color emphasis in each module so the four states remain readable. Avoid harsh, metallic, coldly futuristic, neon, horror-like, blockbuster-contrast, or random pop-art moods unless explicitly requested.
 
 ## Palette families
 
@@ -36,7 +36,7 @@ Choose a small accent set and repeat it intentionally across slices to guide att
 
 ## Color behavior by slice
 
-Treat all slices as the same palette family at different degrees of transformation.
+Treat all slices as related palette families at different degrees of transformation. Allow visible differences in dominant hue, warmth, value range, or accent density when they clarify module identity.
 
 - **Reality Anchor:** Preserve it from source pixels and never use generation to harmonize it. If useful, apply warming, contrast softening, or gentle muting only through deterministic non-structural photographic processing. Exclude the protected primary face from grading when possible; otherwise keep the full Anchor unchanged. Palette unity never outranks identity lock or source preservation.
 - **30% abstraction:** Stay closest to local photographic color. Preserve much source variation while gently simplifying hues, softening saturation, compressing the palette, warming highlights, and introducing mild color blocking.
@@ -45,11 +45,11 @@ Treat all slices as the same palette family at different degrees of transformati
 
 As abstraction rises, reduce micro-variation and color noise. Merge similar hues more aggressively and make the emotional structure more legible. Higher abstraction should usually mean greater curation, not greater random variety.
 
-## Cross-slice continuity
+## Cross-slice relationship
 
-Use neighboring hue echoes, shared highlight warmth, repeated accents, continuous atmospheric tones, and gradual simplification of the same color family to soften boundaries. Continue a blue shirt as a muted blue block, a warm façade as peach or terracotta planes, or a pale sky as dusty cyan and teal atmosphere. Do not switch palettes abruptly without compositional purpose.
+Use a small number of hue echoes, shared highlight logic, or repeated accents to make the poster coherent. Do not require continuous atmospheric color or gradual hue blending across every boundary. Allow an abrupt palette shift when it deliberately announces a new abstraction state and still belongs to the broader warm, nostalgic color world.
 
-Apply color continuity together with the structural methods in [seamless-transitions.md](seamless-transitions.md); color blending alone must not replace semantic continuity.
+Apply color relationships with [intentional-modular-composition.md](intentional-modular-composition.md). Prefer readable modular contrast over color blending when the two conflict.
 
 ## Subject-specific color
 
@@ -63,21 +63,21 @@ Use sky, street, landscape, and other environmental regions to carry airy blues,
 
 Resolve color conflicts in this order:
 
-1. Global cinematic palette unity.
-2. Emotional warmth and softness.
+1. Readability of the four abstraction states.
+2. Emotional warmth and broad palette relationship.
 3. Readability of important people.
 4. Readability of important architecture.
-5. Cross-slice continuity.
-6. Abstraction-level differentiation.
+5. Intentional slice-to-slice contrast.
+6. Poster-level color coherence.
 7. Literal local color accuracy.
 
 ## Execution and validation
 
 1. Establish the global palette mood.
 2. Preserve the Reality Anchor from source. Optionally grade it with deterministic non-generative operations that cannot alter facial geometry, facial texture structure, feature placement, or identity; otherwise leave it unchanged.
-3. Apply the same warm/cool logic to all abstract slices.
+3. Give each abstract slice a distinct but related color emphasis.
 4. Increase palette compression with abstraction level.
-5. Use shared hues and atmosphere to support seamless transitions.
+5. Use selected repeated hues or accents to connect modules without smoothing away their differences.
 6. Repeat a small, controlled accent set across multiple slices.
 
-Before delivery, confirm that the poster reads as one warm, nostalgic, gentle, slightly dreamy cinematic world; the anchor belongs to that world; the 30%, 65%, and 90% slices show increasing palette interpretation; saturation and contrast remain soft but alive; accents are intentional; color helps soften seams; and no slice appears to belong to a different film.
+Before delivery, confirm that the poster reads as four distinct states inside one warm, nostalgic, gentle, slightly dreamy editorial system; the anchor belongs to that broader world; the 30%, 65%, and 90% slices show increasing palette interpretation; saturation and contrast remain controlled; accents are intentional; and color differences clarify modules without becoming random or unrelated.

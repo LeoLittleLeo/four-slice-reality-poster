@@ -1,11 +1,19 @@
 ---
 name: four-slice-reality-poster
-description: "Transform a user-supplied photograph into one coherent mixed-media poster made of exactly four equal slices: one source-preserved, non-generative photographic Reality Anchor and three source-derived slices at approximately 30%, 65%, and 90% structural abstraction. Use for four-panel reality-versus-virtual posters, progressive abstraction artworks, editorial photo/illustration hybrids, or requests to preserve the original subject identity while reinterpreting the other three regions. Protect primary-face source pixels through masking and deterministic compositing whenever available; do not use for unrelated four-image collages or simple filter variations."
+description: "Transform a user-supplied photograph into one readable four-state modular mixed-media poster made of exactly four equal slices: one source-preserved, non-generative photographic Reality Anchor and three visibly distinct source-derived slices at approximately 30%, 65%, and 90% structural abstraction. Use for modular reality-versus-virtual posters, progressive abstraction artworks, editorial photo/illustration hybrids, or requests to preserve the original subject identity while juxtaposing four visual states. Prioritize clear slice identity over seamless blending and protect primary-face source pixels through deterministic compositing whenever available; do not use for unrelated four-image collages or simple filter variations."
 ---
 
 # Four-Slice Reality / Abstraction Poster
 
-Create one continuous editorial poster in which one equal slice remains photographic and three equal slices reinterpret the same source world at distinct, non-linear abstraction levels.
+Create one editorial poster that visibly juxtaposes four equal modules: one photographic source region and three clearly distinct, non-linear abstraction states.
+
+## Default visual objective
+
+**Readable four-state modular poster first, seamless cinematic blending second.**
+
+Make the four equal slices immediately legible as intentional modules while keeping them inside one poster system. Allow clear boundaries, decisive rendering changes, and noticeable color differences. Do not dissolve the entire image into one uniformly painted scene. A boundary may be straight, sharp, tonal, chromatic, textural, or medium-based; it must look art-directed rather than accidental.
+
+Default to **Hybrid Transition**: allow backgrounds and large color fields to change abruptly, preserve semantic continuity for important people and buildings, and never force every boundary to be fully seamless. Keep all four states clearly readable; make boundaries visibly present whenever that strengthens modularity or poster design.
 
 ## Required reading
 
@@ -14,7 +22,7 @@ Before producing the artwork, read:
 - [composition-and-anchor.md](references/composition-and-anchor.md) for slicing, anchor selection, level assignment, and continuity.
 - [abstraction-language.md](references/abstraction-language.md) for the approved method library and level calibration.
 - [cinematic-color-system.md](references/cinematic-color-system.md) for the default warm, nostalgic, Robot Dreams-inspired shared palette and level-specific color compression.
-- [seamless-transitions.md](references/seamless-transitions.md) for soft, content-aware transitions across the three exact logical boundaries.
+- [intentional-modular-composition.md](references/intentional-modular-composition.md) for readable module boundaries, controlled contrast, and optional secondary transitions.
 - [subjects-validation.md](references/subjects-validation.md) for people, architecture, hard constraints, and final validation.
 
 ## Face Identity Lock & Protected Source Region
@@ -57,10 +65,10 @@ final Reality Anchor = regenerated photographic-looking image
 6. Establish one warm, nostalgic, emotionally gentle cinematic palette. Apply it generatively only to the three abstract slices; apply any Anchor grading deterministically and non-structurally, or leave the Anchor unchanged.
 7. Select source-derived abstraction methods appropriate to each abstract slice. Treat abstraction as structural reinterpretation, never filter intensity.
 8. Generate or reconstruct only the three abstract slices. Permit repositioning, rescaling, overlap, flattened depth, and changed layer order there while retaining source visual DNA. Compress local color variation more strongly as abstraction increases.
-9. Treat boundaries as soft and content-aware on the generated side. Do not allow transition effects, palette harmonization, or mixed-media strokes to enter a protected face or overwrite protected Anchor pixels.
+9. Art-direct the three exact boundaries as visible module relationships. Allow sharp or obvious changes in medium, value, palette, texture, or abstraction, but eliminate halos, misalignment, duplicate forms, and other accidental compositing artifacts. Do not overwrite protected Anchor pixels.
 10. Deterministically composite the source Anchor back into the poster and verify it against the source. Accept a visible boundary when protection conflicts with seamlessness.
-11. Art-direct the poster using shared palette, directional rhythm, repeated accents, lines, shape echoes, and visual weight without redrawing the Anchor.
-12. Inspect source preservation, face identity, palette unity, and all three transitions, then validate every required condition in [subjects-validation.md](references/subjects-validation.md) before delivery.
+11. Art-direct the poster using shared motifs, rhythm, limited palette relationships, or structural echoes without forcing every slice into one painting language.
+12. Inspect source preservation, face identity, four-state readability, intentional boundary design, and poster-level coherence, then validate every required condition in [subjects-validation.md](references/subjects-validation.md) before delivery.
 
 ## Decision priority
 
@@ -70,9 +78,9 @@ Resolve conflicts in this order:
 2. Reality Anchor Source Preservation.
 3. Human Body Continuity.
 4. Architectural Identity.
-5. Abstraction Level Assignment.
-6. Boundary Transition.
-7. Global Color Styling.
+5. Four-State Readability and Abstraction Level Assignment.
+6. Intentional Modular Boundary Design.
+7. Global Color Relationship.
 8. Artistic Experimentation.
 
 Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal logical slices while applying this protection hierarchy.
@@ -83,6 +91,6 @@ Never let a lower-priority rule modify a higher-priority protected region. Maint
 - Simplify people before breaking them.
 - Remove architectural detail before identity.
 - Make abstraction a structural transformation, not a filter.
-- Use one warm, nostalgic cinematic color world across all four states.
-- Keep boundaries mathematically exact but visually soft.
+- Keep a related warm, nostalgic cinematic color family while allowing clear slice-to-slice color differences.
+- Keep boundaries mathematically exact and intentionally readable.
 - Deliver one coherent poster, never four independent images.
