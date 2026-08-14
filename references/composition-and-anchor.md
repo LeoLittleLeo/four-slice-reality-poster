@@ -37,7 +37,7 @@ If a face crosses hidden logical boundaries, keep them fixed and use largest-are
 
 ## Crowd Anchor fallback
 
-When no reliable single primary face exists, check for a crowd-dominant semantic region before defaulting to Logical Zone 2.
+When no reliable single primary face exists, check for a crowd-dominant semantic region before evaluating architecture or defaulting to Logical Zone 2.
 
 Select a slice as the Reality Anchor when:
 
@@ -50,7 +50,38 @@ Determine crowd ownership by combining visible-people concentration, density of 
 
 Keep all four hidden equal boundaries fixed. Do not move or resize logical zones to accommodate a crowd. If a crowd spans multiple zones, select the zone with the strongest combined concentration and semantic importance. Allow the visible Reality module to follow the crowd grouping when the overall module system remains balanced.
 
-Use Logical Zone 2—second from the left for vertical ownership or second from the top for horizontal ownership—only when no reliable primary face exists and no zone has a clearly dominant crowd grouping, or when the scene is primarily non-human.
+## Architecture Anchor fallback
+
+When neither a reliable primary face nor a crowd-dominant semantic region determines the Anchor, check for an important architectural subject before using the default fallback.
+
+Treat architecture as important when it is visually prominent, carries landmark identity, strongly supports scene recognition, functions as a major compositional mass, or acts as the main non-human subject. Select the building-dominant logical zone by evaluating:
+
+- recognizable silhouette;
+- primary massing;
+- landmark features;
+- perspective-defining structure; and
+- semantic importance to the scene.
+
+Require genuine subject importance, not mere presence or background area. Ordinary background buildings, generic streetscape façades, incidental urban fabric, distant structures, and buildings that only fill space must not automatically trigger architecture-anchor selection. Large visible area alone is insufficient when the architecture does not carry scene recognition, landmark identity, compositional dominance, or main-subject status.
+
+Do not determine ownership from minor façade detail alone. If the building spans multiple logical zones, choose the zone containing the most identity-critical and semantically important share. Keep all hidden logical boundaries fixed.
+
+When an important building becomes the Reality Anchor, keep its most identity-critical portion in the photographic Reality module whenever compositionally possible. Allow other portions of the same building to extend into neighboring abstract modules to create stronger reality-versus-abstraction contrast, especially along a bridge, roofline, tower, façade rhythm, or skyline.
+
+Across those modules, preserve silhouette, primary massing, perspective, landmark identity, and major structural rhythm. Allow abstract portions to simplify surface detail, windows, texture, decoration, and minor structures. Design visible module boundaries around the architecture when useful, but never move hidden ownership boundaries to contain the building.
+
+## Default Anchor fallback
+
+Use Logical Zone 2—second from the left for vertical ownership or second from the top for horizontal ownership—only when no reliable primary face, crowd-dominant event, or important architectural subject determines ownership.
+
+Required fallback order:
+
+```text
+Primary face anchor
+→ crowd-dominant anchor
+→ important architecture anchor
+→ Logical Zone 2 fallback
+```
 
 For scenes without an important person, source-preserve the visible Reality module through an irregular source mask when useful. For important-person scenes, keep the coherent candidate final when the face already passes the Face Restoration Gate.
 

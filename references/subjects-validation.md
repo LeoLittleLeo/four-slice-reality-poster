@@ -50,6 +50,9 @@ Never:
 17. Force all visible modules into four hard rectangular bands when irregular content-aware edges would produce a stronger composition.
 18. Collapse the design into one dominant image with three tiny fragments, random scraps, or an unstructured montage.
 19. Treat component reduction as permission to remove the primary person, identity-critical face, dominant crowd event, landmark or primary architecture, or a major scene-defining mass.
+20. Fall back to Logical Zone 2 before checking for an important architectural subject, or choose an architectural Anchor from minor façade detail alone.
+21. Move hidden logical boundaries to contain an important building, or force the entire building into one photographic module when a coherent cross-state treatment would strengthen the composition.
+22. Trigger architecture-anchor selection from an ordinary background building, generic streetscape façade, distant structure, incidental urban fabric, or visible area alone.
 
 ## Validation checklist
 
@@ -57,9 +60,11 @@ Confirm before delivery:
 
 - Exactly four equal hidden logical zones govern ownership and abstraction assignment inside one source-ratio canvas.
 - Direction follows semantic structure rather than orientation alone.
-- Exactly one anchor exists: a reliable primary face selects it by largest visible face area; otherwise a clearly crowd-dominant semantic logical zone takes ownership; Logical Zone 2 is used only when neither exists or the scene is primarily non-human.
+- Exactly one anchor exists in this order: primary-face ownership, crowd-dominant ownership, important-architecture ownership, then Logical Zone 2 fallback.
 - Crowd ownership reflects concentration, activity density, event significance, and coherent focal grouping—not raw person count alone.
-- Hidden logical boundaries remain unchanged even when a face or crowd crosses them; visible module edges may adapt around content.
+- Architecture ownership reflects silhouette, primary massing, landmark features, perspective-defining structure, and semantic importance—not minor façade detail alone.
+- Ordinary background buildings do not trigger architecture ownership unless one demonstrably functions as a landmark, scene-recognition cue, major compositional subject, or main non-human subject.
+- Hidden logical boundaries remain unchanged even when a face, crowd, or important building crosses them; visible module edges may adapt around content.
 - Candidate A, the pre-restoration coherent candidate, remains eligible for final delivery.
 - The Face Restoration Gate confirms recognizable identity, natural facial proportions and feature placement, coherent jaw/cheek/hairline/neck relationships, and absence of obvious artifacts.
 - Restoration is skipped when Candidate A passes the gate.
@@ -74,6 +79,7 @@ Confirm before delivery:
 - The primary person, identity-critical face, dominant crowd event, landmark or primary architecture, and major scene-defining masses survive component reduction.
 - People remain readable through silhouette, pose, and presence; geometry and fragmentation remain controlled.
 - Important architecture loses surface detail before silhouette, massing, perspective, or landmark identity.
+- When important architecture owns the Anchor, its identity-critical portion remains photographic while other portions may continue through abstract modules with coherent silhouette, massing, perspective, landmark identity, and major structural rhythm.
 - Abstract slices retain source visual DNA even when spatial relationships change.
 - Four roughly balanced irregular visible modules are immediately readable at thumbnail size, and neighboring states differ through at least two deliberate visual signals.
 - Hybrid Transition is applied: backgrounds and large color fields may break abruptly, while important people and buildings retain semantic continuity.

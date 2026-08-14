@@ -78,6 +78,8 @@ When a body or important building crosses abstract modules, default to continuou
 
 Never create accidental duplicated limbs, double faces, ghost edges, cutout halos, or unrelated offset structures.
 
+When important architecture owns the Reality Anchor, do not force the entire building into one photographic module. Keep the identity-critical portion photographic and, when compositionally useful, continue its bridge, roofline, tower, façade rhythm, skyline, massing, or perspective through neighboring abstract modules. Use the cross-state rendering change as deliberate contrast while preserving architectural identity and structural continuity.
+
 ## Optional transitions
 
 Use transition effects only as secondary local devices. Limit them to small, content-aware areas when they improve composition without weakening module readability. Suitable devices include one continued contour, a repeated color accent, a short brush or line intrusion, or a shared horizon cue.
@@ -96,6 +98,7 @@ Inspect the poster at thumbnail size and ask:
 - Does the primary face preserve recognizable identity and natural anatomy without a patch edge?
 - If restoration was attempted, is it visibly better than the pre-restoration candidate?
 - Are the head contour, hair silhouette, shoulders, clothing, and body connections coherent?
+- If important architecture owns the Anchor, does it preserve silhouette, massing, perspective, landmark identity, and structural rhythm while using cross-module state contrast effectively?
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?
 
