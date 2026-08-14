@@ -44,9 +44,9 @@ Never:
 11. Blend the four states into one nearly uniform painterly image or hide the modular structure behind broad feathering and continuous texture migration.
 12. Use defective boundary artifacts such as muddy blur, ragged masking, duplicated outlines, ghost edges, offset object copies, cutout halos, accidental gaps, or mismatched anatomy.
 13. Give slices unrelated palette identities or drift into neon cyberpunk, purple-magenta sci-fi glow, cold steel monochrome, random rainbow abstraction, hyper-saturated pop art, dark horror, lifeless gray, or glossy commercial-ad color unless explicitly requested.
-14. Regenerate the primary face core, even if the result appears photographically faithful.
-15. Let transition effects, global stylization, palette harmonization, or mixed-media consistency overwrite the protected face core.
-16. Select a full-Anchor restoration candidate that introduces head seam distortion, body continuity breaks, or an awkward human silhouette mismatch merely because it preserves more source pixels.
+14. Perform source-face restoration without first applying the Face Restoration Gate.
+15. Replace an acceptable coherent face merely to increase source-pixel equality.
+16. Select any restoration candidate that introduces facial patch appearance, geometry mismatch, jaw or cheek mismatch, hairline mismatch, skin-tone discontinuity, neck mismatch, body continuity breaks, or unnatural proportions.
 17. Force all visible modules into four hard rectangular bands when irregular content-aware edges would produce a stronger composition.
 18. Collapse the design into one dominant image with three tiny fragments, random scraps, or an unstructured montage.
 
@@ -56,11 +56,14 @@ Confirm before delivery:
 
 - Exactly four equal hidden logical zones govern ownership and abstraction assignment inside one source-ratio canvas.
 - Direction follows semantic structure rather than orientation alone.
-- Exactly one anchor exists: a reliable primary face selects it by largest visible face area; otherwise a clearly crowd-dominant semantic slice takes ownership; Slice 2 is used only when neither exists or the scene is primarily non-human.
+- Exactly one anchor exists: a reliable primary face selects it by largest visible face area; otherwise a clearly crowd-dominant semantic logical zone takes ownership; Logical Zone 2 is used only when neither exists or the scene is primarily non-human.
 - Crowd ownership reflects concentration, activity density, event significance, and coherent focal grouping—not raw person count alone.
 - Hidden logical boundaries remain unchanged even when a face or crowd crosses them; visible module edges may adapt around content.
-- The final primary face core matches the original source face; no model has redrawn, reconstructed, inferred, or stylized its identity-critical features.
-- Pixel equality for the restored face core has been verified when deterministic compositing is available; any feathering is outside that exact core.
+- Candidate A, the pre-restoration coherent candidate, remains eligible for final delivery.
+- The Face Restoration Gate confirms recognizable identity, natural facial proportions and feature placement, coherent jaw/cheek/hairline/neck relationships, and absence of obvious artifacts.
+- Restoration is skipped when Candidate A passes the gate.
+- When restoration is attempted, Candidate B replaces A only if identity visibly improves while anatomy and continuity remain natural and no patch artifact appears.
+- Pixel restoration is used only with an irregular semantic mask or verified alignment; rectangular face-box restoration is a last fallback.
 - No head seam distortion, body continuity break, or awkward human silhouette mismatch remains.
 - Head contour, hair edge, shoulders, clothing boundaries, and cross-slice body connections remain coherent.
 - The selected final candidate balances face identity, human continuity, modular readability, and intentional boundaries instead of maximizing full-Anchor source similarity alone.

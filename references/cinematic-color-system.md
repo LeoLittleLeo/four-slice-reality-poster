@@ -38,7 +38,7 @@ Choose a small accent set and repeat it intentionally across slices to guide att
 
 Treat all slices as related palette families at different degrees of transformation. Allow visible differences in dominant hue, warmth, value range, or accent density when they clarify module identity.
 
-- **Reality Anchor:** Preserve the primary face core from source pixels and never use generation to harmonize identity-critical features. For important-person scenes, retain the coherent candidate around the face when full-block restoration would break head or body continuity. If useful, apply warming, contrast softening, or gentle muting only through deterministic non-structural processing. Palette unity never outranks face identity or human continuity.
+- **Reality Anchor:** Keep the Reality state unmistakably photographic, source-faithful, and identity-preserving. Do not require source-pixel restoration when the coherent candidate already preserves recognizable identity, natural anatomy, hairline, and face-to-neck continuity. If restoration is necessary, use only geometrically verified local restoration that demonstrably improves the face. If useful, apply warming, contrast softening, or gentle muting through deterministic non-structural processing. Palette unity never outranks face identity or human continuity.
 - **30% abstraction:** Stay closest to local photographic color. Preserve much source variation while gently simplifying hues, softening saturation, compressing the palette, warming highlights, and introducing mild color blocking.
 - **65% abstraction:** Group colors into broader masses, simplify the palette more decisively, orchestrate warm and cool relationships, and rely less on literal local color accuracy. Keep the same emotional universe.
 - **90% abstraction:** Use the smallest, most intentional palette; allow symbolic accents, large warm/cool blocks, painterly atmosphere, and abstract color rhythm. Preserve shared color DNA and avoid unrelated explosions.
@@ -61,20 +61,19 @@ Use sky, street, landscape, and other environmental regions to carry airy blues,
 
 ## Decision priority
 
-Resolve color conflicts in this order:
+Color decisions inherit the global priority in `SKILL.md`; this local list applies only after face identity, human continuity, Reality role, architectural identity, and four-state readability are secure:
 
-1. Readability of the four abstraction states.
-2. Emotional warmth and broad palette relationship.
-3. Readability of important people.
-4. Readability of important architecture.
-5. Intentional slice-to-slice contrast.
-6. Poster-level color coherence.
-7. Literal local color accuracy.
+1. Protection of already-secure face, body, Reality, and architectural structure.
+2. Readability of the four abstraction states.
+3. Emotional warmth and broad palette relationship.
+4. Intentional module-to-module contrast.
+5. Poster-level color coherence.
+6. Literal local color accuracy.
 
 ## Execution and validation
 
 1. Establish the global palette mood.
-2. Preserve the Reality Anchor from source. Optionally grade it with deterministic non-generative operations that cannot alter facial geometry, facial texture structure, feature placement, or identity; otherwise leave it unchanged.
+2. Keep the Reality Anchor photographic and source-faithful. Preserve Candidate A unchanged when it passes the Face Restoration Gate; use source restoration only after gate failure and verified alignment. Optionally grade the selected Reality candidate with deterministic non-generative operations that cannot alter facial geometry, facial texture structure, feature placement, or identity; otherwise leave it unchanged.
 3. Give each abstract slice a distinct but related color emphasis.
 4. Increase palette compression with abstraction level.
 5. Use selected repeated hues or accents to connect modules without smoothing away their differences.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Restore either a full logical Anchor or an identity-critical face core."""
+"""Create optional restoration candidates after an external Face Restoration Gate."""
 
 from __future__ import annotations
 
@@ -49,14 +49,19 @@ def face_core_composite(source: Image.Image, candidate: Image.Image, box: Box, f
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Restore a face core, irregular source mask, or full logical Anchor into a candidate."
+        description="Create an optional restoration candidate with explicit face-gate and geometry safeguards."
     )
     parser.add_argument("--source", required=True, type=Path, help="Original user-supplied image")
     parser.add_argument("--generated", required=True, type=Path, help="Visually coherent candidate")
     parser.add_argument("--output", required=True, type=Path, help="Protected composite candidate")
-    parser.add_argument("--mode", required=True, choices=("face-core", "source-mask", "full-anchor"))
+    parser.add_argument("--mode", required=True, choices=("face-mask", "face-core", "source-mask", "full-anchor"))
     parser.add_argument("--face-box", nargs=4, type=int, metavar=("X0", "Y0", "X1", "Y1"))
     parser.add_argument("--mask", type=Path, help="Grayscale or alpha mask for an irregular Reality module")
+    parser.add_argument("--aligned-source", type=Path, help="Geometrically registered source image for face restoration")
+    parser.add_argument("--face-gate-failed", action="store_true", help="Confirm Candidate A failed the Face Restoration Gate")
+    parser.add_argument("--alignment-verified", action="store_true", help="Confirm source-to-candidate face geometry was verified")
+    parser.add_argument("--mask-excludes-primary-face", action="store_true", help="Confirm a source-mask has zero coverage over the primary face")
+    parser.add_argument("--no-primary-face", action="store_true", help="Confirm full-anchor restoration cannot overwrite a primary face")
     parser.add_argument("--feather", type=int, default=0, help="Blend ring outside exact face core")
     parser.add_argument("--direction", choices=("vertical", "horizontal"))
     parser.add_argument("--anchor", type=int, choices=range(1, 5), metavar="{1,2,3,4}")
@@ -67,6 +72,16 @@ def main() -> None:
     args = parse_args()
     if args.feather < 0:
         raise SystemExit("--feather must be non-negative.")
+    if args.mode in ("face-mask", "face-core") and not args.face_gate_failed:
+        raise SystemExit("Face restoration is conditional; pass --face-gate-failed only after Candidate A fails the gate.")
+    if args.mode in ("face-mask", "face-core") and not args.alignment_verified:
+        raise SystemExit("Pixel-level face restoration requires verified source-to-candidate geometry; pass --alignment-verified only after checking alignment.")
+    if args.aligned_source is not None and not args.alignment_verified:
+        raise SystemExit("--aligned-source requires --alignment-verified.")
+    if args.mode == "source-mask" and not args.mask_excludes_primary_face:
+        raise SystemExit("--mode source-mask requires --mask-excludes-primary-face so it cannot bypass the Face Restoration Gate.")
+    if args.mode == "full-anchor" and not args.no_primary_face:
+        raise SystemExit("--mode full-anchor is restricted to scenes confirmed to have no primary face; pass --no-primary-face.")
 
     with Image.open(args.source) as source_image, Image.open(args.generated) as candidate_image:
         source = source_image.convert("RGBA")
@@ -77,12 +92,28 @@ def main() -> None:
                 "Do not resize the protected source."
             )
 
-        if args.mode == "face-core":
+        restoration_source = source
+        if args.aligned_source is not None:
+            with Image.open(args.aligned_source) as aligned_image:
+                restoration_source = aligned_image.convert("RGBA")
+            if restoration_source.size != candidate.size:
+                raise SystemExit("Aligned source size does not match candidate size.")
+
+        if args.mode == "face-mask":
+            if args.mask is None:
+                raise SystemExit("--mask is required for --mode face-mask.")
+            with Image.open(args.mask) as mask_image:
+                if mask_image.size != candidate.size:
+                    raise SystemExit(f"Mask size {mask_image.size} does not match image size {candidate.size}.")
+                mask = mask_image.getchannel("A") if "A" in mask_image.getbands() else mask_image.convert("L")
+            final = Image.composite(restoration_source, candidate, mask)
+            message = "Created gated irregular face-restoration candidate; compare it against Candidate A"
+        elif args.mode == "face-core":
             if args.face_box is None:
                 raise SystemExit("--face-box is required for --mode face-core.")
             box = tuple(args.face_box)
-            final = face_core_composite(source, candidate, box, args.feather)
-            message = f"Restored and verified source face core: box={box}, feather={args.feather}"
+            final = face_core_composite(restoration_source, candidate, box, args.feather)
+            message = f"Created last-fallback rectangular face candidate: box={box}, feather={args.feather}"
         elif args.mode == "source-mask":
             if args.mask is None:
                 raise SystemExit("--mask is required for --mode source-mask.")

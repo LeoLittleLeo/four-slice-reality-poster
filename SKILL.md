@@ -1,6 +1,6 @@
 ---
 name: four-slice-reality-poster
-description: "Transform a user-supplied photograph into one readable four-state modular mixed-media poster built from four equal hidden logical zones and four roughly balanced irregular visible modules: one Reality state and 30%, 65%, and 90% source-derived abstraction states. Use for editorial collage, contour-aware reality-versus-virtual posters, progressive abstraction artworks, or requests to preserve subject identity while juxtaposing four designed visual fragments. Protect the primary face core while allowing people-aware, architectural, painterly, and shape-defined module boundaries."
+description: "Transform a user-supplied photograph into one readable four-state modular mixed-media poster built from four equal hidden logical zones and four roughly balanced irregular visible modules: one Reality state and 30%, 65%, and 90% source-derived abstraction states. Use for editorial collage, contour-aware reality-versus-virtual posters, progressive abstraction artworks, or identity-preserving four-state portraits. Accept a visually coherent generated face when identity and anatomy are already sound; use source-face restoration only as a gated fallback that demonstrably improves the result."
 ---
 
 # Four-Slice Reality / Abstraction Poster
@@ -81,50 +81,87 @@ Before producing the artwork, read:
 
 ## Face Identity Lock & Protected Source Region
 
-Treat the primary face core as the non-generative protected source region. **The primary face is not content that should be faithfully regenerated. It is source content that should not be regenerated at all whenever source-preserving compositing is available.** Do not assume that the entire rectangular Anchor must always be restored.
+Preserve primary-face identity without assuming that pixel restoration is always necessary. Keep the strongest visually coherent candidate eligible for final delivery.
+
+### Face Restoration Gate
+
+After producing the strongest visually coherent candidate, inspect the primary face before performing any source restoration. When it already meets the following conditions, accept it as the selected face candidate, skip restoration, and continue to poster-level art direction and validation:
+
+- recognizable identity;
+- correct facial proportions;
+- natural eye, nose, and mouth placement;
+- coherent jaw and cheek contour;
+- coherent hairline;
+- coherent face-to-neck connection; and
+- no obvious facial generation artifact.
+
+Do not composite source pixels merely to increase pixel equality. Attempt restoration only when the coherent candidate has a meaningful identity or facial-structure failure.
+
+Use this decision flow:
+
+```text
+coherent candidate
+→ Face Restoration Gate
+    ├─ face acceptable → skip restoration → poster-level validation
+    └─ face unacceptable → attempt restoration
+                              ↓
+                         validate restoration
+                              ↓
+                    select only if visually better
+                              ↓
+                    poster-level validation
+```
+
+Prefer restoration methods in this order:
+
+1. no restoration when the face is acceptable;
+2. irregular semantic face mask;
+3. aligned or registered source-face restoration;
+4. rectangular face-box restoration only as a last fallback.
+
+Do not perform pixel-level restoration when source and candidate face geometry cannot be verified as aligned.
 
 Use this execution model:
 
-1. Determine the four exact logical slices, Reality Anchor, primary face core, head contour, hair edge, shoulders, clothing edge, and cross-boundary body connections before generation.
-2. Protect the identity-critical face core with a hard source mask. Keep the larger head and body context available for boundary-aware continuity unless a broader mask is demonstrably safe.
-3. Preserve the strongest visually coherent generated candidate before any restoration; never downgrade it automatically to an intermediate state.
-4. Produce a face-core restoration candidate by compositing only the identity-critical source face pixels back into the coherent candidate. Use `scripts/restore_protected_anchor.py --mode face-core --face-box ...` when local files are available.
-5. Optionally produce a full-Anchor restoration candidate for comparison, especially for scenes without an important person. Do not select it when it introduces head, hair, shoulder, clothing, body, or silhouette mismatch.
-6. Select the final candidate by face identity and human continuity, not by maximum Anchor pixel similarity alone.
+1. Determine the four logical zones, Reality Anchor, primary face, head contour, hairline, jaw, neck, shoulders, clothing edge, and cross-boundary body connections.
+2. Preserve the strongest visually coherent generated candidate before any restoration.
+3. Run the Face Restoration Gate. Skip restoration when identity, facial anatomy, hairline, and face-to-neck continuity are acceptable, then continue to poster-level validation.
+4. If restoration is necessary, create Candidate B with an irregular semantic face mask or verified aligned source face. Use a rectangular face box only as a last fallback.
+5. Compare Candidate A, the pre-restoration coherent candidate, with Candidate B. Select B only when identity improves and anatomy, head/jaw/neck continuity, skin tone, and compositing quality remain natural.
+6. Reject B and return to A whenever restoration introduces a facial patch, geometry mismatch, hairline mismatch, skin-tone discontinuity, or unnatural proportions.
 
-If the Anchor contains the primary face, treat the face core as the highest-priority non-generative region. Never redraw or infer the eyes, nose, mouth, eyebrows, identity-bearing facial proportions, feature placement, texture structure, or identity characteristics. Preserve the surrounding head contour, hair silhouette, shoulder line, clothing edge, and body connection from the visually coherent candidate when replacing the full Anchor would break them.
+Never replace a visually coherent face with a source-restored face when restoration makes the person less natural. A restoration candidate must demonstrate actual visual improvement before it may become final.
 
-For important-person scenes, default to exact source pixels for the face core, not the full Anchor rectangle. Allow a small deterministic feather ring outside the exact core to avoid a facial patch edge, but verify that the core itself remains pixel-identical. Apply optional grading only through deterministic non-structural processing. For scenes without an important person, full-Anchor restoration remains valid.
+Exact source pixels are preferred only when they can be restored without damaging visual coherence. Identity preservation—not mandatory pixel identity—is the final goal.
 
 Required invariant:
 
 ```text
-final primary face = original source face
+final primary face identity = preserved
 final human continuity = coherent head contour + coherent shoulders/body + intentional module boundary
 ```
 
 Never accept:
 
 ```text
-final primary face = AI reconstruction of original face
-final candidate = full-block restoration with obvious head or body stitching errors
+final candidate = restoration with a facial patch, geometry mismatch, or broken head/body continuity
 ```
 
-**Protect the primary face, not necessarily the entire Anchor block, when full-block restoration causes visible human seam distortion.** A visually coherent candidate with preserved face identity is preferable to a stricter source-restored candidate that introduces obvious head or body stitching errors.
+**A visually coherent candidate with preserved face identity is preferable to a source-restored candidate that introduces facial or human stitching errors.**
 
 ## Workflow
 
 1. Inspect the supplied photograph. Identify dimensions, orientation, semantic flow, primary people and faces, architecture, landmarks, important objects, dominant shapes, and palette.
 2. Choose one semantic logical-division direction: four equal hidden vertical zones or four equal hidden horizontal zones. Preserve the source aspect ratio and overall rectangular canvas. Never move these ownership boundaries afterward; do not require visible module edges to follow them.
 3. Establish four equal hidden logical zones and select exactly one Reality Anchor ownership zone using this hierarchy: primary-face ownership first; crowd-dominant semantic ownership second; Logical Zone 2 only when neither exists or the scene is primarily non-human.
-4. Locate and protect the source primary face core before any generative edit. Preserve head, hair, shoulder, clothing, and body boundary context for continuity-aware candidate generation. Use full-Anchor protection by default only when no important person is present or when it does not create a human seam.
-5. Assign 30%, 65%, and 90% abstraction exactly once to the remaining slices. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
-6. Establish the Robot Dreams-inspired default color identity before generating the abstract slices. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract slices distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
-7. Select source-derived abstraction methods appropriate to each abstract slice. Treat abstraction as structural reinterpretation, never filter intensity.
-8. Generate the modular composition and retain the strongest visually coherent candidate before restoration. Permit reconstruction in abstract slices while retaining source DNA and human semantic continuity.
+4. Identify the primary face and surrounding head/body continuity context before generation; do not pre-commit to source-pixel restoration.
+5. Assign 30%, 65%, and 90% abstraction exactly once to the remaining logical zones. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
+6. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract modules distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
+7. Select source-derived abstraction methods appropriate to each abstract module. Treat abstraction as structural reinterpretation, never filter intensity.
+8. Generate the modular composition and retain the strongest visually coherent candidate before restoration. Permit reconstruction in abstract modules while retaining source DNA and human semantic continuity.
 9. Convert the hidden four-zone ownership into four roughly balanced irregular visible modules. Derive visible edges from people, crowds, architecture, skylines, trees, roads, shadows, large color fields, or expressive strokes. Allow modules to expand or contract around protected content without changing logical ownership.
-10. For important-person scenes, restore only the face core into the coherent candidate, then compare it with any full-Anchor restoration candidate. For non-human scenes, full-Anchor restoration may remain the default.
-11. Reject any candidate with head seam distortion, broken shoulder/body continuity, or an awkward human silhouette mismatch, even if it preserves more Anchor pixels.
+10. Run the Face Restoration Gate. If Candidate A is acceptable, skip restoration and retain A for the remaining poster-level workflow. Otherwise attempt a geometrically verified irregular-mask or aligned restoration to create Candidate B.
+11. Let Candidate B replace Candidate A only when identity improves without unnatural anatomy, patch appearance, skin mismatch, or broken head/jaw/neck/body continuity.
 12. Art-direct the poster using shared motifs, rhythm, limited palette relationships, or structural echoes without weakening face identity or human continuity.
 13. Inspect face identity, head/body continuity, four-state readability, intentional boundary design, and poster-level coherence, then validate every required condition in [subjects-validation.md](references/subjects-validation.md) before delivery.
 
@@ -132,7 +169,7 @@ final candidate = full-block restoration with obvious head or body stitching err
 
 Resolve conflicts in this order:
 
-1. Primary Face Identity Lock.
+1. Primary Face Identity and Natural Facial Coherence.
 2. Head, Shoulder, and Human Body Continuity.
 3. Reality Anchor Role and Local Source Preservation.
 4. Architectural Identity.
@@ -145,7 +182,7 @@ Never let a lower-priority rule modify a higher-priority protected region. Maint
 
 ## Core principles
 
-- Preserve the primary face core exactly; retain the most coherent head/body context around it.
+- Preserve primary-face identity and natural anatomy; never restore pixels merely for equality.
 - Simplify people before breaking them.
 - Remove architectural detail before identity.
 - Make abstraction a structural transformation, not a filter.

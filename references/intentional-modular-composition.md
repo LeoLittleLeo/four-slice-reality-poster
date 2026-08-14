@@ -56,7 +56,7 @@ Semantic continuity does not require visual seamlessness. A person or building m
 
 Give each visible module a stable visual core and make its assigned state readable across most of its area:
 
-- Reality must remain unmistakably photographic and source-preserved.
+- Reality must remain unmistakably photographic, source-faithful, and identity-preserving; source-pixel equality is not mandatory.
 - 30% must remain source-recognizable with visible artistic intervention.
 - 65% must show substantial reconstruction and reduced photographic fidelity.
 - 90% must be predominantly abstract while retaining source DNA.
@@ -69,7 +69,7 @@ Allow obvious color differences between slices. Keep them related through a smal
 
 ## Subject continuity
 
-Preserve the source pixels of the primary face core. Do not restore the entire Anchor when doing so causes head, hair, shoulder, clothing, or body discontinuity. Never blend generatively across the identity-critical face core.
+Preserve primary-face identity. Do not restore source pixels when the coherent candidate already has natural anatomy and recognizable identity. If restoration is needed, use an irregular semantic mask or verified aligned source face and reject any result that damages head, hair, jaw, neck, shoulder, clothing, or body continuity.
 
 When a body or important building crosses abstract modules, default to continuous semantic form while allowing a sharp rendering change. Use an intentional editorial break only when it does not destroy human or architectural readability:
 
@@ -93,9 +93,10 @@ Inspect the poster at thumbnail size and ask:
 - Do visible boundaries use meaningful contours, structures, fields, or strokes rather than default rectangular rigidity?
 - Do at least two visual signals differentiate neighboring modules?
 - Does the Reality Anchor remain the clearly photographic reality state without requiring unsafe full-block restoration?
-- Is the primary face core exact source content without a visible facial patch edge?
+- Does the primary face preserve recognizable identity and natural anatomy without a patch edge?
+- If restoration was attempted, is it visibly better than the pre-restoration candidate?
 - Are the head contour, hair silhouette, shoulders, clothing, and body connections coherent?
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?
 
-Reject the result if the four states merge into an almost continuous illustration, if abstraction levels are perceptually interchangeable, if seamlessness hides the modular structure, or if full-block restoration creates human stitching errors. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
+Reject the result if the four states merge into an almost continuous illustration, if abstraction levels are perceptually interchangeable, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.

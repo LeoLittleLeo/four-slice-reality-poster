@@ -37,7 +37,7 @@ If a face crosses hidden logical boundaries, keep them fixed and use largest-are
 
 ## Crowd Anchor fallback
 
-When no reliable single primary face exists, check for a crowd-dominant semantic region before defaulting to Slice 2.
+When no reliable single primary face exists, check for a crowd-dominant semantic region before defaulting to Logical Zone 2.
 
 Select a slice as the Reality Anchor when:
 
@@ -52,9 +52,9 @@ Keep all four hidden equal boundaries fixed. Do not move or resize logical zones
 
 Use Logical Zone 2—second from the left for vertical ownership or second from the top for horizontal ownership—only when no reliable primary face exists and no zone has a clearly dominant crowd grouping, or when the scene is primarily non-human.
 
-For scenes without an important person, source-preserve the visible Reality module through an irregular source mask when available; rectangular full-block compositing is only a fallback. For important-person scenes, protect the source face core while using coherent context for the surrounding head, hair, shoulders, clothing, and cross-boundary body.
+For scenes without an important person, source-preserve the visible Reality module through an irregular source mask when useful. For important-person scenes, keep the coherent candidate final when the face already passes the Face Restoration Gate.
 
-Use `../scripts/restore_protected_anchor.py --mode face-core --face-box X0 Y0 X1 Y1` for important-person scenes. Use `--mode source-mask --mask MASK.png` for an irregular visible Reality module. Use `--mode full-anchor` only as a rectangular fallback or comparison candidate.
+When restoration is genuinely needed, prefer `../scripts/restore_protected_anchor.py --mode face-mask --face-gate-failed --alignment-verified --mask MASK.png`. Supply `--aligned-source ALIGNED.png` when a registered source has been prepared. Use `--mode face-core --face-gate-failed --alignment-verified --face-box X0 Y0 X1 Y1` only as a last fallback. Use `--mode source-mask --mask-excludes-primary-face` only for a non-face irregular Reality module. Use full-anchor restoration only for scenes confirmed to have no primary face.
 
 ## Abstraction assignment
 

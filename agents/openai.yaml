@@ -1,4 +1,4 @@
 interface:
   display_name: "Four-Slice Reality Poster"
-  short_description: "Create four-slice photo-to-abstraction posters"
-  default_prompt: "Use $four-slice-reality-poster to transform my photo into one coherent four-slice reality and abstraction poster."
+  short_description: "Create four-state irregular modular photo posters"
+  default_prompt: "Use $four-slice-reality-poster to transform my photo into a readable four-state poster with irregular modules and identity-safe face handling."
