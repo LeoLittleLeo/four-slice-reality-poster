@@ -15,6 +15,60 @@ Make the four equal slices immediately legible as intentional modules while keep
 
 Default to **Hybrid Transition**: allow backgrounds and large color fields to change abruptly, preserve semantic continuity for important people and buildings, and never force every boundary to be fully seamless. Keep all four states clearly readable; make boundaries visibly present whenever that strengthens modularity or poster design.
 
+## Default Color Identity — Robot Dreams-Inspired
+
+Treat the Robot Dreams-inspired cinematic palette as a **default visual identity of this Skill**, not merely an optional grading suggestion.
+
+Unless the user explicitly requests another color direction, make the final poster inhabit a warm, nostalgic, sunlit, slightly retro, emotionally gentle color world inspired by the broad visual feeling of *Robot Dreams*.
+
+Build primarily from a controlled family of:
+
+- cream and warm beige;
+- dusty peach and muted coral;
+- terracotta and warm brown;
+- sunlit ochre and muted yellow;
+- dusty sky blue and powder blue;
+- muted teal and softened blue-green;
+- sage and dusty olive;
+- restrained tomato red, coral, navy, or warm denim accents.
+
+Do not force every color into every image. Adapt the palette to the source while preserving this broad emotional identity.
+
+### Modular Color Principle
+
+Keep the four slices inside the **same cinematic emotional universe**, but do not force them into nearly identical grading. Give each module a clearly different dominant color role when useful. For example:
+
+```text
+Slice A → terracotta / warm brown / sand
+Slice B → cream / dusty peach / warm beige
+Slice C → dusty blue / muted teal
+Slice D → ochre / muted yellow / soft brick
+```
+
+Treat these as examples, not fixed assignments. Do not derive a fixed hue from abstraction level. Use color differences to strengthen four-module readability.
+
+### Chromatic Separation
+
+Allow deliberate color contrast to create a visible boundary. Prefer dominant hue change, warm/cool contrast, value contrast, large color-field change, or different accent emphasis over artificial divider lines. Accept a clear chromatic boundary when both sides remain inside the broader Robot Dreams-inspired palette family. Do not automatically smooth away intentional color differences.
+
+### Color Character
+
+Default toward medium-low to medium saturation, soft but alive color, gentle sunlight, open highlights, calm shadows, slightly faded cinematic color, warm/cool balance, and a small repeated accent set.
+
+Avoid neon cyberpunk, purple-magenta sci-fi glow, random rainbow abstraction, aggressive HDR, crushed blacks, glossy commercial-advertising color, cold steel monochrome, lifeless gray, and excessive candy saturation unless the user explicitly requests them.
+
+### Core Color Rule
+
+```text
+ONE ROBOT DREAMS-INSPIRED COLOR UNIVERSE
++
+FOUR DISTINCT DOMINANT COLOR ROLES
+=
+ONE COHERENT BUT CLEARLY MODULAR POSTER
+```
+
+Do not achieve coherence by making all four slices color-identical. Follow [cinematic-color-system.md](references/cinematic-color-system.md) for detailed implementation.
+
 ## Required reading
 
 Before producing the artwork, read:
@@ -62,7 +116,7 @@ final Reality Anchor = regenerated photographic-looking image
 3. Select exactly one Reality Anchor. If a reliable primary face exists, use the slice containing the largest visible portion of that face. Otherwise use Slice 2.
 4. Extract and protect the source Reality Anchor before any generative edit. If it contains the primary face, lock that face as the highest-priority non-generative source region.
 5. Assign 30%, 65%, and 90% abstraction exactly once to the remaining slices. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
-6. Establish one warm, nostalgic, emotionally gentle cinematic palette. Apply it generatively only to the three abstract slices; apply any Anchor grading deterministically and non-structurally, or leave the Anchor unchanged.
+6. Establish the Robot Dreams-inspired default color identity before generating the abstract slices. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract slices distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
 7. Select source-derived abstraction methods appropriate to each abstract slice. Treat abstraction as structural reinterpretation, never filter intensity.
 8. Generate or reconstruct only the three abstract slices. Permit repositioning, rescaling, overlap, flattened depth, and changed layer order there while retaining source visual DNA. Compress local color variation more strongly as abstraction increases.
 9. Art-direct the three exact boundaries as visible module relationships. Allow sharp or obvious changes in medium, value, palette, texture, or abstraction, but eliminate halos, misalignment, duplicate forms, and other accidental compositing artifacts. Do not overwrite protected Anchor pixels.
@@ -79,11 +133,11 @@ Resolve conflicts in this order:
 3. Human Body Continuity.
 4. Architectural Identity.
 5. Four-State Readability and Abstraction Level Assignment.
-6. Intentional Modular Boundary Design.
-7. Global Color Relationship.
+6. Robot Dreams-Inspired Color Identity.
+7. Intentional Modular Boundary Design.
 8. Artistic Experimentation.
 
-Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal logical slices while applying this protection hierarchy.
+Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal logical slices while applying this protection hierarchy. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity outrank minor boundary smoothing and general artistic experimentation.
 
 ## Core principles
 
@@ -91,6 +145,6 @@ Never let a lower-priority rule modify a higher-priority protected region. Maint
 - Simplify people before breaking them.
 - Remove architectural detail before identity.
 - Make abstraction a structural transformation, not a filter.
-- Keep a related warm, nostalgic cinematic color family while allowing clear slice-to-slice color differences.
+- Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this shared emotional color universe while allowing strong, intentional slice-to-slice dominant color differences.
 - Keep boundaries mathematically exact and intentionally readable.
 - Deliver one coherent poster, never four independent images.
