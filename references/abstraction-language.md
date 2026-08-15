@@ -14,12 +14,73 @@ Make abstraction an actual reinterpretation of form, structure, space, or visual
 
 Treat method and level separately: methods define how transformation happens; 30%, 65%, and 90% define how far it departs from photographic representation. Combine methods when useful and allow the same method at different levels.
 
+## Method diversity and dominant language
+
+The three abstract modules must not only differ in abstraction level; they must also differ clearly in their dominant abstraction language.
+
+For each abstract module:
+
+1. select exactly one **Primary Abstraction Method**;
+2. optionally select up to two **Supporting Methods**;
+3. make the Primary Method perceptually dominant in the final appearance; and
+4. prevent Supporting Methods from visually overriding the Primary Method.
+
+Across the 30%, 65%, and 90% abstraction modules, prefer three perceptually distinct Primary Abstraction Methods.
+
+Do not solve abstraction diversity merely through different palettes, textures, brush styles, or different amounts of the same visual treatment.
+
+### Primary-method diversity rule
+
+By default:
+
+```text
+30% Primary Method ≠ 65% Primary Method ≠ 90% Primary Method
+
+A Primary Method may repeat only when source content makes repetition clearly more appropriate than available alternatives. When repetition is necessary, the repeated method must operate through substantially different structural logic.
+
+For example:
+
+GOOD
+
+30% → Colored Sketch
+65% → Painterly Abstraction
+90% → Geometric Abstraction
+GOOD
+
+30% → Line Abstraction
+65% → Fragmentation
+90% → Shape Reduction
+
+Avoid:
+
+30% → Color Blocking + light detail
+65% → Color Blocking + medium simplification
+90% → Color Blocking + large simplified masses
+
+This is merely one abstraction language at three intensities and does not provide sufficient four-state diversity.
+
+Anti-convergence rule
+
+Do not let all abstraction methods converge visually toward broad filled color regions.
+
+In particular:
+
+Line Abstraction should remain recognizably line-driven.
+Colored Sketch should retain visible hand-drawn stroke language.
+Painterly Abstraction should remain brush- or paint-mass-driven.
+Geometric Abstraction should remain plane-, facet-, or geometry-driven.
+Fragmentation should remain displacement-, splitting-, repetition-, or reconstruction-driven.
+Collage Abstraction should remain layering- and recomposition-driven.
+Shape Reduction should remain silhouette-, symbol-, or simplified-form-driven.
+
+A module fails method separation when its nominal method is only detectable in the prompt but the visible result is primarily generic color blocking.
+
 ## Eight approved methods
 
 1. **Line Abstraction:** Reduce detail to contour, structural, architectural, perspective, and directional lines. At stronger levels, detach, overlap, extend, or simplify lines while preserving major structure and direction.
 2. **Colored Sketch:** Reinterpret with colored pencil, crayon, pastel, marker, or hand-drawn architectural strokes. Use color as part of the language; do not default to plain graphite.
 3. **Painterly Abstraction:** Replace detail with watercolor, gouache, oil-like, acrylic-like, thick-paint, or expressive brush masses. Preserve structure at lower levels and let brushwork dominate at higher levels.
-4. **Color Blocking:** Compress continuous tones, textures, shadows, and gradients into fewer broad color regions. Use it to control information density and abstraction strength.
+4. **Color Blocking:** Compress continuous tones, textures, shadows, and gradients into fewer broad color regions when broad color organization is genuinely useful to the source structure. Treat Color Blocking primarily as a **supporting abstraction language**, not the universal default representation of abstraction. By default, Color Blocking should support another Primary Method by simplifying tonal or chromatic information without replacing that method's defining visual structure. For example: - support Colored Sketch by simplifying background tonal regions; - support Painterly Abstraction by organizing large underlying color masses; - support Geometric Abstraction by simplifying plane colors; - support Shape Reduction by clarifying silhouettes and major masses. Do not automatically translate higher abstraction into larger, flatter, or fewer color blocks. Do not use Color Blocking as the Primary Method for more than one abstract module by default. Color Blocking may become a Primary Method only when the source image contains strong naturally occurring graphic color fields, shadows, façades, sky/ground divisions, signage, clothing masses, or similarly appropriate chromatic structures. Avoid generic posterized regions that erase the perceptual identity of the selected Primary Method.
 5. **Geometric Abstraction:** Derive planes, polygons, facets, rectangles, triangles, or volumes from source silhouettes, masses, perspective, and structure. Avoid unrelated random polygons.
 6. **Fragmentation:** Deliberately split, offset, rotate, repeat, displace, overlap, reorder, separate, or partially remove source elements. Make reconstruction intentional, never like broken masking or generation artifacts.
 7. **Collage Abstraction:** Recompose source-derived photographic and illustrated material by moving, scaling, isolating, duplicating, overlapping, or re-layering selected elements. Make it editorial and designed.
