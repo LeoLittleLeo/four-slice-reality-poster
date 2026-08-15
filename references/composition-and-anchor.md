@@ -2,12 +2,15 @@
 
 ## Contents
 
-- Canvas and equal logical zones
-- Direction selection
-- Reality Anchor
-- Crowd Anchor fallback
-- Abstraction assignment
-- Spatial freedom and cohesion
+* Canvas and equal logical zones
+* Source ownership exclusivity
+* Direction selection
+* Reality Anchor
+* Crowd Anchor fallback
+* Architecture Anchor fallback
+* Default Anchor fallback
+* Abstraction assignment
+* Spatial freedom and cohesion
 
 ## Canvas and equal logical zones
 
@@ -15,7 +18,82 @@ Preserve the source image's aspect ratio and use its dimensions as the compositi
 
 Begin with exactly four geometrically equal hidden logical zones. Use either four equal vertical ownership zones or four equal horizontal ownership zones. Use them only for Reality Anchor selection, crowd and subject ownership, 30%/65%/90% assignment, and four-state validation. Do not move these hidden boundaries to protect content.
 
-Translate the hidden ownership system into four visible modules that may be irregular, overlapping in influence, contour-aware, and non-rectangular. Keep them roughly balanced in area and visual importance. Recombine them into the same overall rectangle and output one poster, not four independent images.
+Translate the hidden ownership system into four visible modules that may be irregular, contour-aware, and non-rectangular. Visible modules may overlap slightly in treatment or boundary influence, but they must not duplicate or transfer recognizable source content across logical owners. Keep the four modules roughly balanced in area and visual importance. Recombine them into the same overall rectangle and output one poster, not four independent images.
+
+## Source ownership exclusivity
+
+Treat the four hidden logical zones as exclusive source-content ownership regions, not merely abstraction-assignment guides.
+
+Every visible source-derived fragment must have one original spatial provenance in the source image and must remain owned by the logical zone containing that provenance.
+
+Default invariant:
+
+```text
+one source region
+→ one logical owner
+→ one visible interpretation
+```
+
+Do not reproduce the same recognizable source region independently in multiple modules.
+
+A module may reinterpret, simplify, fragment, repaint, redraw, geometrize, or locally rearrange the source content it owns, but it must not import and re-render substantial recognizable source content owned by another logical zone.
+
+### No cross-module cloning
+
+Never create multiple visible copies of the same source-derived:
+
+* person;
+* face;
+* body;
+* building section;
+* landmark feature;
+* tree or vegetation cluster;
+* vehicle;
+* object;
+* skyline segment;
+* roofline segment;
+* façade section;
+* crowd cluster;
+* road section; or
+* other recognizable source region
+
+across different modules merely to strengthen collage, fragmentation, rhythm, or abstraction diversity.
+
+Do not use repetition as a shortcut for making modules visually distinct.
+
+Non-semantic decorative repetition is allowed only when it does not create a second readable copy of a source object or scene-defining structure. Repeated micro-motifs, strokes, textures, marks, or tiny fragments may be used as local editorial devices.
+
+### Continuous subjects are not duplicates
+
+A person, building, crowd, road, skyline, tree canopy, or other large subject may naturally cross multiple hidden logical zones.
+
+When this occurs, each module may render only the portion of that continuous subject that spatially belongs to its own logical zone.
+
+For example:
+
+```text
+source building spans Zone 1 + Zone 2 + Zone 3
+
+Zone 1 → render the Zone-1 portion
+Zone 2 → render the Zone-2 portion
+Zone 3 → render the Zone-3 portion
+```
+
+This is one continuous subject rendered through multiple abstraction states, not three copies of the building.
+
+Preserve enough alignment, silhouette continuity, perspective continuity, structural rhythm, or pose continuity for the viewer to read it as one subject crossing module boundaries.
+
+Never restart the full subject inside each module.
+
+### Visible-boundary freedom does not transfer ownership
+
+Irregular visible module boundaries may expand or contract around contours for composition, but this does not transfer source ownership.
+
+Visible-boundary flexibility may change which treatment visually occupies a small boundary area, but it must not cause an entire source object or recognizable source region to be duplicated into another module.
+
+Use boundary overlap only as a narrow transition device, not as permission to repeat source content.
+
+When a visible module crosses a hidden ownership boundary for contour-aware design, treat the crossing as a local rendering transition only. Do not use it to introduce a second copy of content whose source provenance belongs elsewhere.
 
 ## Direction selection
 
@@ -35,20 +113,22 @@ When a clear primary human subject exists:
 
 If a face crosses hidden logical boundaries, keep them fixed and use largest-area ownership. The visible Reality module may expand around the protected face or follow its contour while logical ownership remains unchanged. For multiple people, use only the primary visual subject to determine the single anchor.
 
+Expansion of the visible Reality module around a protected face is a local treatment exception, not a transfer of source ownership. Do not duplicate the face, head, body, or surrounding scene into neighboring modules.
+
 ## Crowd Anchor fallback
 
 When no reliable single primary face exists, check for a crowd-dominant semantic region before evaluating architecture or defaulting to Logical Zone 2.
 
 Select a slice as the Reality Anchor when:
 
-- no clear single primary-subject face exists;
-- a group of people forms the image's main semantic focus;
-- the group is visually concentrated mostly within one slice; and
-- that slice carries the strongest crowd presence, human activity density, or event significance.
+* no clear single primary-subject face exists;
+* a group of people forms the image's main semantic focus;
+* the group is visually concentrated mostly within one slice; and
+* that slice carries the strongest crowd presence, human activity density, or event significance.
 
 Determine crowd ownership by combining visible-people concentration, density of human activity, semantic importance of the group, and whether the crowd reads as one coherent event or focal cluster. Do not use raw person count alone when another slice contains the more important human event.
 
-Keep all four hidden equal boundaries fixed. Do not move or resize logical zones to accommodate a crowd. If a crowd spans multiple zones, select the zone with the strongest combined concentration and semantic importance. Allow the visible Reality module to follow the crowd grouping when the overall module system remains balanced.
+Keep all four hidden equal boundaries fixed. Do not move or resize logical zones to accommodate a crowd. If a crowd spans multiple zones, select the zone with the strongest combined concentration and semantic importance. Allow the visible Reality module to follow the crowd grouping when the overall module system remains balanced, but do not reproduce the entire crowd event in neighboring modules.
 
 ## Architecture Anchor fallback
 
@@ -56,17 +136,19 @@ When neither a reliable primary face nor a crowd-dominant semantic region determ
 
 Treat architecture as important when it is visually prominent, carries landmark identity, strongly supports scene recognition, functions as a major compositional mass, or acts as the main non-human subject. Select the building-dominant logical zone by evaluating:
 
-- recognizable silhouette;
-- primary massing;
-- landmark features;
-- perspective-defining structure; and
-- semantic importance to the scene.
+* recognizable silhouette;
+* primary massing;
+* landmark features;
+* perspective-defining structure; and
+* semantic importance to the scene.
 
 Require genuine subject importance, not mere presence or background area. Ordinary background buildings, generic streetscape façades, incidental urban fabric, distant structures, and buildings that only fill space must not automatically trigger architecture-anchor selection. Large visible area alone is insufficient when the architecture does not carry scene recognition, landmark identity, compositional dominance, or main-subject status.
 
 Do not determine ownership from minor façade detail alone. If the building spans multiple logical zones, choose the zone containing the most identity-critical and semantically important share. Keep all hidden logical boundaries fixed.
 
-When an important building becomes the Reality Anchor, keep its most identity-critical portion in the photographic Reality module whenever compositionally possible. Allow other portions of the same building to extend into neighboring abstract modules to create stronger reality-versus-abstraction contrast, especially along a bridge, roofline, tower, façade rhythm, or skyline.
+When an important building becomes the Reality Anchor, keep its most identity-critical portion in the photographic Reality module whenever compositionally possible. Allow other portions of the same building to continue through neighboring abstract modules to create stronger reality-versus-abstraction contrast, especially along a bridge, roofline, tower, façade rhythm, or skyline.
+
+This continuation must follow source provenance. Each neighboring module may reinterpret only the building portion that originally lies within its own logical zone. Do not regenerate the entire building in each module.
 
 Across those modules, preserve silhouette, primary massing, perspective, landmark identity, and major structural rhythm. Allow abstract portions to simplify surface detail, windows, texture, decoration, and minor structures. Design visible module boundaries around the architecture when useful, but never move hidden ownership boundaries to contain the building.
 
@@ -93,8 +175,24 @@ Assign exactly one 30%, one 65%, and one 90% abstraction treatment to the three 
 
 Interpret percentage as departure from photographic representation—not opacity, modified pixel count, blur, saturation, or filter strength.
 
+Abstraction assignment changes how a logical zone is represented; it does not change which source content that zone owns.
+
 ## Spatial freedom and cohesion
 
-Inside abstract slices, permit deliberate changes to object position, scale, overlap, depth, layer order, perspective emphasis, hierarchy, and occlusion. Permit merging, separation, duplication of selected fragments, and flattened depth. Exact pixel alignment with the source or neighboring slices is not required.
+Inside each abstract module, permit deliberate changes to position, scale, overlap, depth, layer order, perspective emphasis, hierarchy, occlusion, merging, separation, and flattened depth **only for source content owned by that module**.
 
-Make the four-state structure clearly perceptible through each visible module's dominant treatment and boundary design. Derive edges from human silhouettes, crowd groupings, building contours, rooflines, skylines, tree canopies, roads or rails, shadow masses, large color fields, or painterly and sketch strokes. Preserve face identity and avoid accidental human or architectural mismatch. Follow [intentional-modular-composition.md](intentional-modular-composition.md).
+Spatial reconstruction must remain locally derived from the module's own source region.
+
+Do not duplicate recognizable source fragments across modules.
+
+Do not import a complete person, building, landmark, crowd cluster, skyline section, road section, or other recognizable source structure from another logical zone merely because it improves composition.
+
+Local displacement is permitted, but displacement should normally remain within or near the source fragment's owning visible module. Do not displace a recognizable object so far that it reads as a second independent instance or appears to belong to another logical owner.
+
+When a subject physically crosses multiple logical zones in the source, preserve it as one continuous cross-module subject. Each module should reinterpret its corresponding portion rather than independently regenerating the whole subject.
+
+Exact pixel alignment with the source or neighboring modules is not required, but semantic provenance must remain clear. Cross-boundary reconstruction may alter rendering language while preserving the source order and continuity of major forms.
+
+Make the four-state structure clearly perceptible through each visible module's dominant treatment and boundary design. Derive edges from human silhouettes, crowd groupings, building contours, rooflines, skylines, tree canopies, roads or rails, shadow masses, large color fields, or painterly and sketch strokes.
+
+Preserve face identity and avoid accidental human or architectural mismatch, repeated source regions, cloned objects, restarted structures, or duplicated scene-defining forms. Follow [intentional-modular-composition.md](intentional-modular-composition.md).
