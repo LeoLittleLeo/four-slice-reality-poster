@@ -915,19 +915,24 @@ def _broad_curve(npos: int, kind: str, amplitude: float) -> List[float]:
 def collage_torn_path(npos: int, axis: int, nominal_frac: float, band_frac: float,
                       curve_kind: str, rng: random.Random,
                       roughness: float, scale: float = 1.0) -> List[int]:
-    """One torn paper boundary around a nominal profile.
+    """One torn paper boundary — ANGULAR, not wavy.
 
-    Torn-paper edges are ANGULAR, not wavy: straight-ish runs with sudden
-    direction changes (piecewise-linear drift between random control points),
-    sharp V-notches, and a micro fiber jag, clamped to a deviation band.
+    Torn paper tears along runs and jumps; it does not undulate like a wave.
+    The edge is therefore dominated by:
+    - gentle piecewise-linear wander with MODEST amplitude (~1% of the axis),
+      so there is no large low-frequency undulation;
+    - sharp localized V-notches (torn jumps, up to ~5% of the axis);
+    - a +/-1 px micro jag with a tiny 2px de-alias only (corners stay sharp).
+
     Boundaries generated from different seeds are independent — never
     parallel copies. Deterministic via `rng`.
     """
     band_px = max(2, int(axis * band_frac))
     nom = nominal_frac * axis
-    n_ctrl = max(4, min(48, npos // 24))
+    wander = max(2, int(axis * 0.01))                # modest overall drift
+    n_ctrl = max(6, npos // 14)                      # straight runs of ~12-20px
     xs = [round(i * (npos - 1) / max(1, n_ctrl - 1)) for i in range(n_ctrl)]
-    ys = [nom + rng.uniform(-1.0, 1.0) * band_px * 0.7 for _ in range(n_ctrl)]
+    ys = [nom + rng.uniform(-1.0, 1.0) * wander for _ in range(n_ctrl)]
     path = [0.0] * npos
     for k in range(n_ctrl - 1):
         x0, x1 = xs[k], xs[k + 1]
@@ -936,19 +941,20 @@ def collage_torn_path(npos: int, axis: int, nominal_frac: float, band_frac: floa
         for i in range(x0, x1 + 1):
             t = (i - x0) / span
             path[i] = y0 + (y1 - y0) * t
-    # sharp V-notches: localized torn jumps with a quadratic profile
-    n_notch = max(2, npos // 120)
+    # sharp localized V-notches: the character of a torn jump
+    n_notch = max(3, npos // 45)
+    notch_amp = max(2, int(axis * 0.05))
     for _ in range(n_notch):
         pos = rng.randrange(0, npos)
-        width = rng.randint(3, 10)
-        depth = rng.uniform(0.5, 1.2) * band_px * 0.8 * max(0.5, roughness)
+        width = rng.randint(4, 14)
+        depth = rng.uniform(0.5, 1.1) * notch_amp * max(0.5, roughness)
         sign = 1.0 if rng.random() < 0.5 else -1.0
         for i in range(max(0, pos - width), min(npos, pos + width + 1)):
             t = 1.0 - abs(i - pos) / max(1, width)
             path[i] += sign * depth * (t * t)
-    # micro fiber jag (local continuity via a single tiny smoothing pass)
-    path = [path[i] + rng.randint(-2, 2) for i in range(npos)]
-    path = moving_average(path, 3)
+    # micro jag + tiny 2px de-alias (keeps corners sharp, kills ECG aliasing)
+    path = [path[i] + rng.randint(-1, 1) for i in range(npos)]
+    path = moving_average(path, 2)
     lo = max(0, int(nom - band_px))
     hi = min(axis - 1, int(nom + band_px))
     return [min(hi, max(lo, int(round(v)))) for v in path]
@@ -1083,7 +1089,7 @@ def collage_fiber_masks(masks: List[Image.Image], width: int, height: int,
         n = len(bdata)
         keep = bytearray(n)
         for i in range(n):
-            if bdata[i] and rng.random() < 0.72:   # broken micro sections
+            if bdata[i] and rng.random() < 0.55:   # broken micro sections (sparse)
                 keep[i] = 255
         bands.append(Image.frombytes("L", (width, height), bytes(keep)))
     return bands
@@ -1568,7 +1574,7 @@ def cmd_compose(args: argparse.Namespace) -> None:
         masks = [Image.open(z["mask"]).convert("L") for z in manifest["zones"]]
         z_order = manifest.get("z_order") or collage_z_order(manifest.get("layout", "horizontal-layered"))
         canvas = draw_collage_paper(canvas, masks, z_order, width, height,
-                                    manifest.get("paper_edge_width", 9),
+                                    manifest.get("paper_edge_width", 6),
                                     manifest.get("paper_shadow", 20),
                                     manifest.get("collage_overlap", 5),
                                     manifest.get("seed", DEFAULT_SEED))
@@ -1756,7 +1762,7 @@ def collage_overlay_mask(manifest: dict, masks: List[Image.Image],
         return None
     seed = int(manifest.get("seed", DEFAULT_SEED))
     bands = collage_fiber_masks(masks, width, height,
-                                manifest.get("paper_edge_width", 9), seed)
+                                manifest.get("paper_edge_width", 6), seed)
     union = bands[0].copy()
     for b in bands[1:]:
         union = ImageChops.lighter(union, b)
@@ -2026,7 +2032,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--paper-edge-width",
         type=int,
-        default=9,
+        default=6,
         help="collage mode: exposed deckled paper-fiber band width in px",
     )
     parser.add_argument(

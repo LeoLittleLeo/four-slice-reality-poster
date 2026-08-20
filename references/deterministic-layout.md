@@ -34,8 +34,10 @@ The default boundary family is a **layered torn-paper collage**: one designed
 editorial object, not four strips with lines between them. Four paper pieces
 are layered (z-ordered) with composition-driven sizes and **angular deckled
 torn silhouettes** — straight-ish runs with sudden direction changes and sharp
-V-notches, NOT smooth sine waves. The paper body, deckled fiber edges and
-one-sided shadows are **region geometry**, not a decorative line drawn on top.
+V-notches, with only modest wander (~1% of the slice axis) and NO broad
+low-frequency undulation: torn paper tears along runs and jumps, it does not
+undulate like a wave. The paper body, deckled fiber edges and one-sided
+shadows are **region geometry**, not a decorative line drawn on top.
 
 ```text
 TORN EDGE IS REGION GEOMETRY,
@@ -275,8 +277,8 @@ Options:
 - `--collage-roughness 1.0` — collage: medium tear amplitude multiplier.
 - `--collage-overlap 5` — collage: visual paper-overlap / one-sided shadow
   offset in px.
-- `--paper-edge-width 9` — collage: exposed deckled paper-fiber band width in
-  px.
+- `--paper-edge-width 6` — collage: exposed deckled paper-fiber band width in
+  px (sparse, broken micro sections).
 - `--paper-shadow 20` — collage: one-sided paper shadow opacity 0..255
   (`0` disables).
 - `--paper-texture subtle|none` — collage: subtle deterministic paper grain

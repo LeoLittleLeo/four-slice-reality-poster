@@ -34,50 +34,62 @@ A higher abstraction level does not grant permission to duplicate, restart, or r
 
 Abstraction must operate primarily on the source content owned by the current logical zone.
 
-## Shared Material Language Override
+## Shared Material System, Distinct Methods
 
 When using Layered Collage Composition (`--boundary collage`), the three
-abstract states are allowed and encouraged to share **one dominant material /
-medium family**.
+abstract states share **one material SYSTEM** — the editorial print / paper /
+grain / warm Robot Dreams palette / torn-edge finish that the deterministic
+pipeline applies uniformly. This is what makes the poster read as one physical
+object instead of four unrelated filters.
 
-Do NOT force method diversity when it damages poster coherence. In collage
-mode, distinguish abstraction levels primarily through:
+Sharing the material system does NOT allow sharing the abstraction METHOD.
+The three abstract states MUST use three **different Primary Abstraction
+Methods**:
 
-* structural information density;
-* component omission;
-* shape merging;
-* edge simplification;
-* surface-detail reduction;
-* spatial compression;
-* graphic massing;
-* representational distance.
+```text
+30% Primary Method ≠ 65% Primary Method ≠ 90% Primary Method  (HARD REQUIREMENT)
+```
 
-A 30%, 65%, and 90% region may all use a shared editorial print / paper
-collage language while remaining clearly different in abstraction level.
+Differentiate the three states through BOTH:
+
+* a distinct Primary Abstraction Method per state (line, sketch, painterly,
+  geometric, fragmentation, collage, shape reduction, ink wash, cartoon
+  pixel, ...); and
+* structural information density / component omission / shape merging / edge
+  simplification / surface-detail reduction / spatial compression / graphic
+  massing / representational distance.
 
 ```text
 LEVEL ≠ MEDIUM
 ```
 
-For example:
+A method is not bound to a level (30% may use ink wash, 90% may use
+painterly), but the three chosen methods must be distinct. For example:
 
 ```text
-30% = detailed print-like reinterpretation
-65% = grouped shapes / reduced façade and foliage detail
-90% = large graphic blocks / sparse structural cues
-```
+GOOD (same material system, distinct methods)
 
-Do not default to:
+30% = Colored Sketch (print-like)
+65% = Painterly Abstraction (print-like)
+90% = Shape Reduction (print-like)
+```
 
 ```text
-30 pencil
-65 polygon
-90 watercolor
+BAD (same material system AND same method at three intensities)
+
+30% = Color Blocking + light detail
+65% = Color Blocking + medium simplification
+90% = Color Blocking + large simplified masses
 ```
 
-merely to prove the regions differ. The method library below remains
-available; it is simply not mandatory to diversify the medium in the default
-collage family.
+```text
+BAD (unrelated mediums with no shared system)
+
+30 pencil + 65 low-poly + 90 watercolor
+```
+
+All methods stay inside the shared editorial print / paper / warm palette
+system — distinct structurally, unified materially.
 
 ## Method diversity and dominant language
 
@@ -98,15 +110,18 @@ Method diversity does not override source-content ownership.
 
 ### Primary-method diversity rule
 
-By default:
+**Required (hard):**
 
 ```text
 30% Primary Method ≠ 65% Primary Method ≠ 90% Primary Method
 ```
 
-A Primary Method may repeat only when source content makes repetition clearly more appropriate than available alternatives.
+The three abstract states of one poster MUST use three different Primary
+Abstraction Methods. Repetition of a Primary Method across the three abstract
+states is not permitted.
 
-When repetition is necessary, the repeated method must operate through substantially different structural logic.
+If a method repeats because the available alternatives are unsuitable,
+re-select the whole set: no two abstract states may share a Primary Method.
 
 For example:
 
