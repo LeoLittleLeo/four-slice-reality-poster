@@ -319,8 +319,10 @@ Options:
 - `--class-weights person=200,architecture=120,road=80,sky=60` — optional
   per-class boundary-reward weights in contour mode.
 - `--levels 30,65,90` — a permutation of the three abstraction levels,
-  assigned in spatial order to the three non-anchor zones. Choose a
-  non-mechanical permutation based on balance, meaning, rhythm, and color.
+  assigned in spatial order to the three non-anchor zones. Default: an
+  **auto-staggered** seed/source-derived permutation (never the sequential
+  `30,65,90`), so the three abstract states are always non-linearly arranged.
+  Pass an explicit permutation for composition-driven choices.
 - `--margin 0.12` — context margin around each zone crop, as a fraction of the
   zone's bounding box. Give the model enough context to keep the scene
   semantically connected.

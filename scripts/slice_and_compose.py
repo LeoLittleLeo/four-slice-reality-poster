@@ -34,6 +34,7 @@ import json
 import math
 import random
 import sys
+import zlib
 from collections import deque
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -42,6 +43,16 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 Box = Tuple[int, int, int, int]
 LEVELS = (30, 65, 90)
+# Non-sequential default permutations (everything except the identity
+# 30,65,90): the script's default level assignment is staggered, never
+# spatially sequential.
+NON_SEQUENTIAL_PERMUTATIONS = [
+    (30, 90, 65),
+    (65, 30, 90),
+    (65, 90, 30),
+    (90, 30, 65),
+    (90, 65, 30),
+]
 BIG = 10 ** 6        # face penalty weight
 STEP = 6             # max column change per row in boundary path search
 BALANCE_RATIO = 2.5  # warn when max/min zone area ratio exceeds this
@@ -1205,6 +1216,17 @@ def pick_anchor(masks: List[Image.Image], face_boxes: List[Box]) -> int:
     return best
 
 
+def auto_levels(source: Path, seed: int) -> List[int]:
+    """Deterministic staggered default level permutation.
+
+    Picks one of the non-sequential permutations (30/65/90 never in spatial
+    order) from a stable hash of `source` and `seed`, so different photos get
+    different staggers while the same source + seed always repeats exactly.
+    """
+    idx = (zlib.crc32(str(source).encode()) ^ seed) % len(NON_SEQUENTIAL_PERMUTATIONS)
+    return list(NON_SEQUENTIAL_PERMUTATIONS[idx])
+
+
 def assign_levels(anchor: int, levels: List[int]) -> Dict[int, int]:
     non_anchor = [i for i in range(4) if i != anchor]
     return {zone: level for zone, level in zip(non_anchor, levels)}
@@ -1296,9 +1318,14 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     else:
         anchor = int(args.anchor) - 1  # CLI is 1-based like restore_protected_anchor.py
 
-    if sorted(args.levels) != sorted(LEVELS):
-        raise SystemExit(f"--levels must be a permutation of {list(LEVELS)}; got {args.levels}")
-    level_map = assign_levels(anchor, args.levels)
+    if args.levels is None:
+        levels = auto_levels(source, args.seed)
+        print(f"Auto staggered levels -> {','.join(str(v) for v in levels)}")
+    else:
+        levels = args.levels
+    if sorted(levels) != sorted(LEVELS):
+        raise SystemExit(f"--levels must be a permutation of {list(LEVELS)}; got {levels}")
+    level_map = assign_levels(anchor, levels)
 
     workdir = Path(args.workdir)
     crops_dir = workdir / "crops"
@@ -1947,8 +1974,10 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--levels",
-        default="30,65,90",
-        help="Permutation of 30,65,90 assigned in spatial order to the three non-anchor zones",
+        default=None,
+        help="Permutation of 30,65,90 assigned in spatial order to the three "
+             "non-anchor zones; default: auto-staggered seed/source-derived "
+             "permutation (never the sequential 30,65,90)",
     )
     parser.add_argument(
         "--margin",
@@ -2152,7 +2181,8 @@ def main() -> None:
         if args.source is None or args.direction is None:
             raise SystemExit("--source and --direction are required for --mode prepare.")
         args.face_boxes = parse_face_boxes(args.face_boxes)
-        args.levels = [int(x) for x in args.levels.split(",")]
+        if args.levels is not None:
+            args.levels = [int(x) for x in args.levels.split(",")]
         args.class_weights = parse_class_weights(args.class_weights)
         cmd_prepare(args)
     elif args.mode == "compose":
