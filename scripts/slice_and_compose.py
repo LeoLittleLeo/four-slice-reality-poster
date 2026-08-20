@@ -646,6 +646,9 @@ def cmd_prepare(args: argparse.Namespace) -> None:
             }
         )
 
+    feather = args.feather if args.feather is not None else max(4, int(0.02 * min(width, height)))
+    feather = min(feather, max(2, min(width, height) // 8))
+
     manifest = {
         "source": str(source),
         "direction": args.direction,
@@ -653,6 +656,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "size": [width, height],
         "anchor": anchor + 1,
         "margin": args.margin,
+        "feather": feather,
         "head_mask": str(head_mask_path) if head_mask_path else None,
         "face_boxes": [list(b) for b in args.face_boxes],
         "zones": manifest_zones,
@@ -699,7 +703,28 @@ def differs_masked(ref: Image.Image, out: Image.Image, mask_region: Image.Image)
     return masked.getbbox() is not None
 
 
+def soft_mask(mask: Image.Image, feather: int) -> Image.Image:
+    """Blur a binary mask so compositing produces a soft transition band."""
+    if feather <= 0:
+        return mask
+    return mask.filter(ImageFilter.GaussianBlur(feather))
+
+
+def opaque_core(mask: Image.Image, feather: int) -> Image.Image:
+    """Pixels where the softened mask is fully opaque (value == 255).
+
+    Image.composite is exact wherever the mask is 255, so the anchor/head
+    source-equality guarantee holds exactly on this core; the soft transition
+    band around it is intentionally blended and exempt from the check.
+    """
+    if feather <= 0:
+        return mask
+    blurred = mask.filter(ImageFilter.GaussianBlur(feather))
+    return blurred.point(lambda v: 255 if v >= 255 else 0)
+
+
 def enforce_anchor(canvas: Image.Image, source: Path, manifest: dict) -> Image.Image:
+    feather = manifest.get("feather", 0)
     anchor = manifest["anchor"] - 1
     zone = manifest["zones"][anchor]
     box = tuple(zone["box"])
@@ -708,16 +733,19 @@ def enforce_anchor(canvas: Image.Image, source: Path, manifest: dict) -> Image.I
         src = im.convert("RGBA")
     if src.size != canvas.size:
         raise SystemExit("Source/canvas size mismatch in anchor enforcement.")
-    canvas = Image.composite(src, canvas, mask)
-    if differs_masked(src.crop(box), canvas.crop(box), mask.crop(box)):
+    canvas = Image.composite(src, canvas, soft_mask(mask, feather))
+    core = opaque_core(mask, feather)
+    if differs_masked(src.crop(box), canvas.crop(box), core.crop(box)):
         raise SystemExit("Anchor pixel verification failed; output was not written.")
     head_path = manifest.get("head_mask")
     if head_path:
         head = Image.open(head_path).convert("L")
         hb = head.getbbox()
         if hb is not None:
-            canvas = Image.composite(src, canvas, head)
-            if differs_masked(src.crop(hb), canvas.crop(hb), head.crop(hb)):
+            head_feather = min(feather, 8)
+            canvas = Image.composite(src, canvas, soft_mask(head, head_feather))
+            core_head = opaque_core(head, head_feather)
+            if differs_masked(src.crop(hb), canvas.crop(hb), core_head.crop(hb)):
                 raise SystemExit("Head pixel verification failed; output was not written.")
     return canvas
 
@@ -754,8 +782,7 @@ def cmd_compose(args: argparse.Namespace) -> None:
         )
         region = rendered.crop(rel)
         mask_region = Image.open(z["mask"]).convert("L").crop(box)
-        if args.feather > 0:
-            mask_region = mask_region.filter(ImageFilter.GaussianBlur(args.feather))
+        mask_region = soft_mask(mask_region, manifest.get("feather", 0))
         canvas.paste(region, (box[0], box[1]), mask_region)
         print(f"Pasted zone {z['index'] + 1} at {box[:2]} level={z['level']}")
 
@@ -792,9 +819,11 @@ def cmd_verify(args: argparse.Namespace) -> None:
     masks = [Image.open(z["mask"]).convert("L") for z in zones]
     check_tiling(masks, width, height)
 
+    feather = manifest.get("feather", 0)
     anchor = manifest["anchor"] - 1
     box = tuple(zones[anchor]["box"])
-    if differs_masked(src.crop(box), out.crop(box), masks[anchor].crop(box)):
+    anchor_core = opaque_core(masks[anchor], feather)
+    if differs_masked(src.crop(box), out.crop(box), anchor_core.crop(box)):
         raise SystemExit("Anchor region differs from source; layout guarantee broken.")
 
     head_path = manifest.get("head_mask")
@@ -802,7 +831,8 @@ def cmd_verify(args: argparse.Namespace) -> None:
         head = Image.open(head_path).convert("L")
         hb = head.getbbox()
         if hb is not None:
-            if differs_masked(src.crop(hb), out.crop(hb), head.crop(hb)):
+            head_core = opaque_core(head, min(feather, 8))
+            if differs_masked(src.crop(hb), out.crop(hb), head_core.crop(hb)):
                 raise SystemExit("Head region differs from source; head protection broken.")
 
     for fb in manifest.get("face_boxes", []):
@@ -935,8 +965,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--feather",
         type=int,
-        default=0,
-        help="Optional small blur ring in px for pasted zone edges (0 = hard edge)",
+        default=None,
+        help="Soft transition width in px for zone boundaries (default: auto, "
+             "~2%% of the smaller dimension, capped at 12.5%%; 0 = hard edges)",
     )
     return parser.parse_args()
 
@@ -961,7 +992,7 @@ def parse_class_weights(raw: str) -> Dict[str, int]:
 
 def main() -> None:
     args = parse_args()
-    if args.feather < 0:
+    if args.feather is not None and args.feather < 0:
         raise SystemExit("--feather must be non-negative.")
     if args.band <= 0 or args.min_zone <= 0:
         raise SystemExit("--band and --min-zone must be positive.")

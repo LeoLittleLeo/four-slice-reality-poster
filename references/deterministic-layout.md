@@ -187,8 +187,10 @@ Options:
   of the slice axis.
 - `--masks-dir DIR` — required for `--boundary mask`; four grayscale masks
   `zone0.png`..`zone3.png` (255 = region).
-- `--feather N` — optional small blur ring (px) on pasted zone edges; keep it
-  small or zero by default, since visible boundaries are desired.
+- `--feather N` — soft transition width in px for zone boundaries. Defaults to
+  ~2% of the smaller image dimension (capped at 12.5%); `0` restores hard
+  edges. Wider values soften boundaries further but shrink the exact-source
+  core and can blur the four states together.
 
 ## Verbatim prompt blocks
 
@@ -257,8 +259,11 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
   re-run with a wider `--band`, a forced anchor, or supplied masks.
 - Append the same global color-identity sentence to every zone prompt so the
   four rendered slices stay inside one Robot Dreams-inspired universe.
-- Do not feather boundaries by default; only a small optional `--feather` is
-  permitted when it strengthens the composition.
+- Soft transitions are the default: every zone (including the Reality Anchor
+  and the head) is composited through a softened mask, so boundaries blend
+  smoothly instead of cutting at one razor pixel. Pass `--feather 0` for hard
+  editorial edges, and avoid very wide feathers that blur the four states
+  together.
 - A one-shot full-poster generation must still pass `--mode verify`; any grid,
   strip, or contact-sheet output is rejected regardless of other qualities.
 
@@ -268,9 +273,9 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
 
 - the output size differs from the source;
 - the four zone masks do not tile the canvas exactly (any gap or overlap);
-- the Reality Anchor region differs from the source inside its mask;
-- the head protection region differs from the source (primary face never
-  reconstructed); or
+- the Reality Anchor core or head core differs from the source (the
+  fully-opaque interior of the softened mask must equal the source; the soft
+  transition band around it is intentionally blended and exempt); or
 - the scene is structurally repeated (any layout where the full photograph
   appears more than once — grid, strip, contact sheet).
 

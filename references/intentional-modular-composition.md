@@ -86,7 +86,7 @@ When important architecture owns the Reality Anchor, do not force the entire bui
 
 Use transition effects only as secondary local devices. Limit them to small, content-aware areas when they improve composition without weakening module readability. Suitable devices include one continued contour, a repeated color accent, a short brush or line intrusion, or a shared horizon cue.
 
-Do not create broad 3%–8% feathered zones by default. Do not migrate texture continuously across all boundaries. Do not turn the full canvas into a single abstraction gradient or one common painterly surface.
+A modest default soft transition band (script `--feather`, ~2% of the smaller dimension) is applied so boundaries are not razor-hard; keep it small — broad 3%–8% feathered zones that blur states together are still rejected. Do not migrate texture continuously across all boundaries. Do not turn the full canvas into a single abstraction gradient or one common painterly surface.
 
 ## Validation
 
