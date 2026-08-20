@@ -92,15 +92,19 @@ when a simple straight layout is the strongest design choice.
 ### Scheme A — per-zone crop re-render (default)
 
 1. `--mode prepare` defines the four regions, selects the anchor, assigns
-   30%/65%/90%, and writes one context crop per zone (region bounding box
-   plus a small margin so the model can see its neighbors).
+   30%/65%/90%, writes one context crop per zone (region bounding box plus a
+   small margin so the model can see its neighbors), and derives a **head
+   protection mask** — a generous expansion of the `--face-boxes` covering
+   hair and jaw/neck (or a supplied `--head-mask`).
 2. The image model re-renders each **non-anchor** crop at its assigned level,
    using the per-zone render prompt block below. The model never sees a
    "four-slice poster" instruction; it only re-renders one slice.
 3. `--mode compose` resizes each rendered crop back to the exact crop box,
    crops out the margin, and pastes the region back masked by its zone mask at
    fixed coordinates. The Reality Anchor is always composited from the source
-   through its own zone mask.
+   through its own zone mask, and the **head protection mask is then
+   force-composited from the source on top** — so the primary head is the
+   original photograph even when a face box straddles a zone boundary.
 
 ### Scheme B — full-canvas mask inpaint
 
@@ -158,8 +162,12 @@ Options:
   (second from left/top). `1..4` forces a zone (1-based, matching
   `restore_protected_anchor.py`).
 - `--face-boxes "x0,y0,x1,y1;..."` — semicolon-separated face boxes used for
-  automatic anchor selection, contour face avoidance, boundary snapping, and
-  the built-in `person` silhouette heuristic.
+  automatic anchor selection, contour face avoidance, boundary snapping, the
+  built-in `person` silhouette heuristic, and the default head protection mask.
+- `--head-mask DIR/path` — optional grayscale head mask (source size). The head
+  region is always composited from the source regardless of which zone it
+  falls in, so the primary face can never be reconstructed. Defaults to a
+  generous expansion of `--face-boxes` (hair + jaw/neck).
 - `--auto-semantic` / `--no-auto-semantic` — built-in semantic heuristics for
   `person`/`sky`/`road` in contour mode (on by default).
 - `--class-masks-dir DIR` — optional dir with `person.png`,
@@ -235,6 +243,11 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
 - The Reality Anchor is always composited from the source through its own zone
   mask; the anchor region never comes from the model in Scheme A, and is
   force-restored in Scheme B.
+- The head protection mask is force-composited from the source on top of the
+  anchor, so the primary head is the original photograph even when a face box
+  straddles a zone boundary (e.g. in rect or mask mode, which have no
+  automatic face avoidance). Give accurate `--face-boxes` or supply a
+  `--head-mask` whenever a scene contains a primary person.
 - Contour boundaries are semantic + edge-aware: they follow strong edges and
   class boundaries (silhouettes, rooflines, horizon, road lines), avoid
   important interiors (people, architecture) and faces. Built-in `sky`/`road`
@@ -256,7 +269,9 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
 - the output size differs from the source;
 - the four zone masks do not tile the canvas exactly (any gap or overlap);
 - the Reality Anchor region differs from the source inside its mask;
-- or the scene is structurally repeated (any layout where the full photograph
+- the head protection region differs from the source (primary face never
+  reconstructed); or
+- the scene is structurally repeated (any layout where the full photograph
   appears more than once — grid, strip, contact sheet).
 
 It warns (does not fail) when:

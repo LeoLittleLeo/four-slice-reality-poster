@@ -110,12 +110,12 @@ def rect_masks(direction: str, width: int, height: int) -> List[Image.Image]:
 
 
 def edge_and_face_images(img: Image.Image, width: int, height: int,
-                         face_boxes: List[Box]) -> Tuple[Image.Image, Image.Image]:
+                         protect_boxes: List[Box]) -> Tuple[Image.Image, Image.Image]:
     gray = img.convert("L")
     edges = gray.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.GaussianBlur(5))
     face = Image.new("L", (width, height), 0)
     draw = ImageDraw.Draw(face)
-    for (x0, y0, x1, y1) in face_boxes:
+    for (x0, y0, x1, y1) in protect_boxes:
         pad = 10
         draw.rectangle(
             (max(0, x0 - pad), max(0, y0 - pad), min(width - 1, x1 + pad), min(height - 1, y1 + pad)),
@@ -209,6 +209,34 @@ def person_from_faces(face_boxes: List[Box], width: int, height: int) -> Image.I
             min(height, y1 + int(fh * 5)),
         )
         draw.rectangle((body[0], body[1], body[2] - 1, body[3] - 1), fill=255)
+    return mask
+
+
+def head_boxes_from_faces(face_boxes: List[Box], width: int, height: int) -> List[Box]:
+    """Expand each face box into a generous head region.
+
+    A bare face box covers only the face; hair, jaw, and neck live outside it,
+    so boundaries hugging the box would still cut the head. The head region
+    extends ~0.5 face height upward (hair), ~0.7 face height downward (chin +
+    neck), and ~0.3 face width on each side.
+    """
+    boxes: List[Box] = []
+    for (x0, y0, x1, y1) in face_boxes:
+        fw, fh = x1 - x0, y1 - y0
+        boxes.append((
+            max(0, int(x0 - 0.3 * fw)),
+            max(0, int(y0 - 0.5 * fh)),
+            min(width, int(x1 + 0.3 * fw)),
+            min(height, int(y1 + 0.7 * fh)),
+        ))
+    return boxes
+
+
+def head_mask_from_boxes(head_boxes: List[Box], width: int, height: int) -> Image.Image:
+    mask = Image.new("L", (width, height), 0)
+    draw = ImageDraw.Draw(mask)
+    for (x0, y0, x1, y1) in head_boxes:
+        draw.rectangle((x0, y0, x1 - 1, y1 - 1), fill=255)
     return mask
 
 
@@ -385,10 +413,10 @@ def optimize_boundary(score_data: array.array, stride: int,
     return path
 
 
-def snap_off_faces(path: List[int], face_boxes: List[Box], lo: int, hi: int,
+def snap_off_faces(path: List[int], protect_boxes: List[Box], lo: int, hi: int,
                    lb: Optional[List[int]]) -> List[int]:
-    """Push boundary rows out of any face box they cut through."""
-    for (bx0, by0, bx1, by1) in face_boxes:
+    """Push boundary rows out of any protected box they cut through."""
+    for (bx0, by0, bx1, by1) in protect_boxes:
         for r in range(max(0, by0), min(len(path), by1)):
             x = path[r]
             if bx0 < x < bx1:
@@ -405,7 +433,7 @@ def snap_off_faces(path: List[int], face_boxes: List[Box], lo: int, hi: int,
 
 def contour_masks(direction: str, width: int, height: int,
                   edges: Image.Image, face: Image.Image,
-                  face_boxes: List[Box], band: float, min_zone: float,
+                  protect_boxes: List[Box], band: float, min_zone: float,
                   sem: Dict[str, Image.Image],
                   weights: Dict[str, int]) -> List[Image.Image]:
     """Compute 3 irregular boundaries via semantic + edge-aware path search."""
@@ -413,7 +441,7 @@ def contour_masks(direction: str, width: int, height: int,
     if direction == "horizontal":
         edges = edges.rotate(90, expand=True)
         face = face.rotate(90, expand=True)
-        face_boxes = rotated_face_boxes(face_boxes, width, height)
+        protect_boxes = rotated_face_boxes(protect_boxes, width, height)
         sem = {name: m.rotate(90, expand=True) for name, m in sem.items()}
         width, height = height, width
     score_data = build_score(edges, face, sem, weights)
@@ -436,7 +464,7 @@ def contour_masks(direction: str, width: int, height: int,
         if prev_path is not None:
             lb = [p + min_sep for p in prev_path]
         path = optimize_boundary(score_data, stride, lo, hi, STEP, lb)
-        path = snap_off_faces(path, face_boxes, lo, hi, lb)
+        path = snap_off_faces(path, protect_boxes, lo, hi, lb)
         paths.append(path)
         prev_path = path
     return masks_from_paths(direction, orig_w, orig_h, paths)
@@ -553,21 +581,28 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         width, height = im.size
         img = im.convert("RGB")
 
+    head_boxes = head_boxes_from_faces(args.face_boxes, width, height)
+    head_mask = None
+    if args.head_mask is not None:
+        head_mask = load_class_mask(args.head_mask, width, height, "head")
+    elif head_boxes:
+        head_mask = head_mask_from_boxes(head_boxes, width, height)
+
     if args.boundary == "rect":
         masks = rect_masks(args.direction, width, height)
     elif args.boundary == "contour":
-        edges, face = edge_and_face_images(img, width, height, args.face_boxes)
+        edges, face = edge_and_face_images(img, width, height, head_boxes)
         sem = build_semantic_images(img, width, height, args.face_boxes,
                                     args.auto_semantic, args.class_masks_dir)
         masks = contour_masks(args.direction, width, height, edges, face,
-                              args.face_boxes, args.band, args.min_zone,
+                              head_boxes, args.band, args.min_zone,
                               sem, args.class_weights)
     else:  # mask
         masks = load_masks_dir(args.masks_dir, width, height)
     check_tiling(masks, width, height)
 
     if args.anchor == "auto":
-        anchor = pick_anchor(masks, args.face_boxes)
+        anchor = pick_anchor(masks, head_boxes)
     else:
         anchor = int(args.anchor) - 1  # CLI is 1-based like restore_protected_anchor.py
 
@@ -581,6 +616,11 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     rendered_dir = workdir / "rendered"
     for d in (crops_dir, masks_dir, rendered_dir):
         d.mkdir(parents=True, exist_ok=True)
+
+    head_mask_path = None
+    if head_mask is not None:
+        head_mask_path = masks_dir / "head.png"
+        head_mask.save(head_mask_path)
 
     manifest_zones = []
     for i, mask in enumerate(masks):
@@ -613,6 +653,8 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "size": [width, height],
         "anchor": anchor + 1,
         "margin": args.margin,
+        "head_mask": str(head_mask_path) if head_mask_path else None,
+        "face_boxes": [list(b) for b in args.face_boxes],
         "zones": manifest_zones,
     }
     manifest_path = workdir / "manifest.json"
@@ -621,6 +663,9 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     print(f"Prepared deterministic four-zone layout -> {manifest_path}")
     print(f"Direction={args.direction}  boundary={args.boundary}  "
           f"size={width}x{height}  anchor=Logical Zone {anchor + 1}")
+    if head_mask is not None:
+        print(f"Head protection: {head_mask_path} "
+              f"({', '.join(str(tuple(b)) for b in head_boxes) or 'supplied mask'})")
     for z in manifest_zones:
         kind = "anchor" if z["level"] == "anchor" else f"{z['level']}% abstraction"
         print(
@@ -666,6 +711,14 @@ def enforce_anchor(canvas: Image.Image, source: Path, manifest: dict) -> Image.I
     canvas = Image.composite(src, canvas, mask)
     if differs_masked(src.crop(box), canvas.crop(box), mask.crop(box)):
         raise SystemExit("Anchor pixel verification failed; output was not written.")
+    head_path = manifest.get("head_mask")
+    if head_path:
+        head = Image.open(head_path).convert("L")
+        hb = head.getbbox()
+        if hb is not None:
+            canvas = Image.composite(src, canvas, head)
+            if differs_masked(src.crop(hb), canvas.crop(hb), head.crop(hb)):
+                raise SystemExit("Head pixel verification failed; output was not written.")
     return canvas
 
 
@@ -744,6 +797,21 @@ def cmd_verify(args: argparse.Namespace) -> None:
     if differs_masked(src.crop(box), out.crop(box), masks[anchor].crop(box)):
         raise SystemExit("Anchor region differs from source; layout guarantee broken.")
 
+    head_path = manifest.get("head_mask")
+    if head_path:
+        head = Image.open(head_path).convert("L")
+        hb = head.getbbox()
+        if hb is not None:
+            if differs_masked(src.crop(hb), out.crop(hb), head.crop(hb)):
+                raise SystemExit("Head region differs from source; head protection broken.")
+
+    for fb in manifest.get("face_boxes", []):
+        fb_box = tuple(fb)
+        owners = [i for i, m in enumerate(masks) if mask_region_area(m, fb_box) > 0]
+        if len(owners) > 1:
+            print(f"  warning: face box {fb_box} spans zones {[o + 1 for o in owners]}; "
+                  "the head mask still protects identity, but a boundary cuts the head region.")
+
     counts = [m.histogram()[255] for m in masks]
     ratio = max(counts) / max(1, min(counts))
     if ratio > BALANCE_RATIO:
@@ -761,6 +829,7 @@ def cmd_verify(args: argparse.Namespace) -> None:
     print(
         f"Verified: one continuous {width}x{height} image, 4 exactly-tiled regions "
         f"(boundary={manifest['boundary']}), anchor (zone {anchor + 1}) == source, "
+        f"head {'protected' if manifest.get('head_mask') else 'unprotected (no face boxes)'}, "
         "scene appears once."
     )
 
@@ -793,6 +862,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--face-boxes",
         help='Semicolon list of x0,y0,x1,y1 boxes, e.g. "10,20,80,140;200,30,260,150"',
+    )
+    parser.add_argument(
+        "--head-mask",
+        type=Path,
+        help="Optional grayscale head mask (source size): the head region is always "
+             "composited from the source regardless of which zone it falls in. "
+             "Defaults to a generous expansion of --face-boxes covering hair and jaw/neck.",
     )
     parser.add_argument(
         "--levels",

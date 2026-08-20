@@ -97,7 +97,7 @@ Confirm before delivery:
 - Module boundaries are irregular and content-aware by default (contour mode follows strong edges and class boundaries — silhouettes, rooflines, horizon, road lines — and avoids people, architecture interiors, and faces; mask mode uses supplied content masks), not rigid strips — unless rect strips are deliberately chosen as the strongest design.
 - Contour semantic heuristics are sanity-checked: built-in sky/road/person masks are overridden by supplied `--class-masks-dir` masks or disabled with `--no-auto-semantic` whenever they misdetect a scene.
 - The four zone masks tile the canvas exactly with no gaps or overlaps; zone areas stay roughly balanced (the script warns when max/min exceeds 2.5).
-- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zone masks tile the canvas exactly, and the Reality Anchor region equals the source inside its mask.
+- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zone masks tile the canvas exactly, the Reality Anchor region equals the source inside its mask, and the head protection region equals the source (the primary face is never reconstructed, even when a face box straddles a zone boundary).
 - Per-zone rendered crops were composed at fixed coordinates through their zone masks without scaling, gaps, or overlaps; no grid, strip, or contact-sheet layout was delivered.
 - Every slice clearly expresses Reality, 30%, 65%, or 90%; no global treatment dissolves them into one continuous illustration or abstraction gradient.
 - The poster maintains broad warm, nostalgic cinematic relationships while allowing clear, purposeful color differences among modules.
