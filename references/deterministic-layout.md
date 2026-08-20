@@ -76,9 +76,11 @@ produce identical seams (`--seed`, default 42).
 By default the seams are hard/near-hard cuts (`feather = 1` px anti-alias)
 and compose draws an optional physical **paper seam overlay**
 (`--seam-style paper`, default): a narrow warm ivory / aged-paper fiber edge
-with variable width (2..`--fiber-width` px) and a faint offset shadow. The
-overlay is visual only — the four zone masks underneath still tile the canvas
-exactly.
+with variable width (2..`--fiber-width` px) and a faint offset shadow
+(`--seam-shadow`, `--seam-offset`). The ivory is **adaptive**: on bright local
+backgrounds it blends toward a darker aged-beige tone so the paper edge stays
+visible on both light and dark photographs. The overlay is visual only — the
+four zone masks underneath still tile the canvas exactly.
 
 ### `contour` (optional) — Semantic Contour Boundary
 
@@ -230,6 +232,10 @@ Options:
   same seams).
 - `--seam-style paper|none` — torn mode: overlay a warm torn-paper seam
   (default `paper`) or leave hard cuts (`none`).
+- `--seam-shadow 0..255` — torn mode: paper shadow opacity (default 26; `0`
+  disables the faint offset shadow).
+- `--seam-offset px` — torn mode: paper shadow offset perpendicular to the
+  seam (default 3).
 - `--anchor auto|1|2|3|4` — `auto` uses the largest face overlap inside the
   zone masks; when no face boxes are given, it falls back to Logical Zone 2
   (second from left/top). `1..4` forces a zone (1-based, matching

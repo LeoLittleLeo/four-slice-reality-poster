@@ -652,21 +652,26 @@ def torn_paths(direction: str, width: int, height: int,
 
 
 def draw_paper_seams(canvas: Image.Image, seams: List[List[int]], direction: str,
-                     fiber_width: int, seed: int) -> Image.Image:
+                     fiber_width: int, seed: int,
+                     shadow_alpha: int = 26, shadow_offset: int = 3) -> Image.Image:
     """Overlay variable-width warm paper-fiber seams (visual only).
 
     The four zone masks keep exact tiling underneath; this only paints a
     narrow warm ivory / aged-paper edge along each seam with a faint offset
     shadow, so the poster reads as a physical editorial torn-paper collage.
-    Deterministic via `seed`.
+    The ivory is **adaptive**: on bright local backgrounds it blends toward a
+    darker aged-beige tone so the paper edge stays visible on both light and
+    dark photographs (no hard-coded pure white). Deterministic via `seed`.
     """
     fiber_width = max(1, fiber_width)
     rng = random.Random(seed + 777)
     overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
     od = ImageDraw.Draw(overlay)
-    ivory = (243, 237, 219, 255)   # warm off-white / aged cream beige
-    shadow = (30, 24, 14, 26)      # faint low-opacity paper shadow
-    shadow_offset = 3
+    bright_ivory = (243, 237, 219)     # warm off-white / aged cream beige
+    aged_ivory = (198, 184, 152)       # darker aged-paper beige for bright backgrounds
+    shadow = (30, 24, 14, max(0, min(255, shadow_alpha)))
+    shadow_offset = max(0, shadow_offset)
+    canvas_rgb = canvas.convert("RGB")
     for path in seams:
         if direction == "vertical":
             pts = [(path[r], r) for r in range(len(path))]
@@ -674,7 +679,15 @@ def draw_paper_seams(canvas: Image.Image, seams: List[List[int]], direction: str
             pts = [(c, path[c]) for c in range(len(path))]
         if not pts:
             continue
-        widths = [rng.randint(2, fiber_width) for _ in pts]  # 2..7px variable width
+        widths = [rng.randint(2, fiber_width) for _ in pts]  # 2..N px variable width
+        # adaptive ivory: bright local background -> blend toward aged beige
+        ivories = []
+        for (x, y) in pts:
+            r, g, b = canvas_rgb.getpixel((x, y))
+            lum = (r + g + b) / 3.0 / 255.0
+            blend = lum * 0.45  # 0 on black bg, up to 45% toward aged on white bg
+            ivories.append(tuple(int(bright_ivory[c] * (1.0 - blend) + aged_ivory[c] * blend)
+                                 for c in range(3)) + (255,))
         # faint shadow first (offset perpendicular to the seam), then ivory tube
         for (x, y), w in zip(pts, widths):
             r = w + 1
@@ -682,9 +695,9 @@ def draw_paper_seams(canvas: Image.Image, seams: List[List[int]], direction: str
                 od.ellipse((x + shadow_offset - r, y - r, x + shadow_offset + r, y + r), fill=shadow)
             else:
                 od.ellipse((x - r, y + shadow_offset - r, x + r, y + shadow_offset + r), fill=shadow)
-        for (x, y), w in zip(pts, widths):
+        for (x, y), w, col in zip(pts, widths, ivories):
             r = w
-            od.ellipse((x - r, y - r, x + r, y + r), fill=ivory)
+            od.ellipse((x - r, y - r, x + r, y + r), fill=col)
     canvas.alpha_composite(overlay)
     return canvas
 
@@ -881,6 +894,8 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "seams": seams if seams else None,
         "seam_style": args.seam_style if args.boundary == "torn" else "none",
         "fiber_width": args.fiber_width,
+        "seam_shadow": args.seam_shadow,
+        "seam_offset": args.seam_offset,
         "torn_band": args.torn_band,
         "torn_roughness": args.torn_roughness,
         "torn_scale": args.torn_scale,
@@ -1023,7 +1038,9 @@ def cmd_compose(args: argparse.Namespace) -> None:
             and manifest.get("seams")):
         canvas = draw_paper_seams(canvas, manifest["seams"], manifest["direction"],
                                   manifest.get("fiber_width", 7),
-                                  manifest.get("seed", DEFAULT_SEED))
+                                  manifest.get("seed", DEFAULT_SEED),
+                                  manifest.get("seam_shadow", 26),
+                                  manifest.get("seam_offset", 3))
     save_output(canvas, Path(args.output))
     print(f"Composed one continuous poster -> {args.output}")
 
@@ -1055,7 +1072,7 @@ def paper_seam_mask(manifest: dict, width: int, height: int) -> Optional[Image.I
     rng = random.Random(int(manifest.get("seed", DEFAULT_SEED)) + 777)
     mask = Image.new("L", (width, height), 0)
     d = ImageDraw.Draw(mask)
-    shadow_offset = 3
+    shadow_offset = max(0, int(manifest.get("seam_offset", 3)))
     for path in seams:
         if direction == "vertical":
             pts = [(path[r], r) for r in range(len(path))]
@@ -1308,6 +1325,18 @@ def parse_args() -> argparse.Namespace:
         help="torn mode: overlay a warm torn-paper seam on the composed poster (paper) or leave hard cuts (none)",
     )
     parser.add_argument(
+        "--seam-shadow",
+        type=int,
+        default=26,
+        help="torn mode: paper shadow opacity 0..255 (0 disables the faint offset shadow; default 26)",
+    )
+    parser.add_argument(
+        "--seam-offset",
+        type=int,
+        default=3,
+        help="torn mode: paper shadow offset in px perpendicular to the seam (default 3)",
+    )
+    parser.add_argument(
         "--min-zone",
         type=float,
         default=0.15,
@@ -1390,6 +1419,10 @@ def main() -> None:
         raise SystemExit("--torn-band/--torn-roughness/--torn-scale must be positive.")
     if args.fiber_width < 1:
         raise SystemExit("--fiber-width must be >= 1.")
+    if not 0 <= args.seam_shadow <= 255:
+        raise SystemExit("--seam-shadow must be in 0..255.")
+    if args.seam_offset < 0:
+        raise SystemExit("--seam-offset must be non-negative.")
     if args.mode == "prepare":
         if args.source is None or args.direction is None:
             raise SystemExit("--source and --direction are required for --mode prepare.")
