@@ -4,7 +4,7 @@
 
 * Structural abstraction
 * Method diversity and dominant language
-* Eight approved methods
+* Ten approved methods
 * Component reduction
 * Level calibration
 * Content-aware selection
@@ -104,12 +104,14 @@ In particular:
 * Fragmentation should remain splitting-, displacement-, separation-, or reconstruction-driven.
 * Collage Abstraction should remain cropping-, layering-, masking-, and recomposition-driven.
 * Shape Reduction should remain silhouette-, symbol-, or simplified-form-driven.
+* Chinese Ink Wash should remain ink-, wash-, and brush-driven — tonal gradation (浓淡干湿), bleed, paper, and negative space — not generic gray color blocks or a grayscale filter.
+* Cartoon Pixel should remain pixel-grid- and cartoon-shape-driven — not a downsampled, pixelated, or blurred copy of the photograph.
 
 A module fails method separation when its nominal method is only detectable in the prompt but the visible result is primarily generic color blocking.
 
 A module also fails method separation when visual diversity is achieved by cloning recognizable source content into multiple modules.
 
-## Eight approved methods
+## Ten approved methods
 
 ### 1. Line Abstraction
 
@@ -262,6 +264,47 @@ For architecture, preserve landmark silhouette, massing, perspective cues, or ch
 At stronger abstraction levels, reduce internal details before removing scene-defining outer structure.
 
 Operate only on source content owned by the current logical zone.
+
+### 9. Chinese Ink Wash (水墨)
+
+Reinterpret the owned source content through the language of Chinese ink-wash painting: brush-drawn structure, ink tonal gradation (焦浓重淡清 — burnt, thick, heavy, light, and clear ink), wet/dry brush contrast, wash bleed and paper absorption, soft edge loss, and deliberate negative space (留白). It is a brush- and ink-driven painting language — never a grayscale filter, a duotone preset, or generic gray color blocking.
+
+Default treatment:
+
+* Keep warm paper tone and restrained color washes (浅绛 light-ochre or 淡彩 pale washes) so the module stays inside the shared warm, nostalgic, sunlit, slightly retro cinematic universe.
+* True monochrome ink (pure ink on paper white) is a deliberate stylistic choice and requires user direction.
+* Do not drift into lifeless gray, cold steel monochrome, or muddy neutral washes.
+
+Level behavior:
+
+* 30%: ink rendering with source structure, massing, and spatial relationships largely preserved (工笔-leaning) — the composition stays recognizable under an ink tonal structure with light wash.
+* 65%: stronger 写意 interpretation — simplified forms, dry-brush structure, wash masses, and partial 留白 while silhouette and massing remain traceable.
+* 90%: 写意 skeleton — minimal brush strokes, dominant 留白, sparse ink accents, retaining only the essential source silhouette, massing, or directional structure.
+
+Rules:
+
+* Ink structure must derive from the owned source content (silhouette, massing, landscape rhythm, architecture structure) — never decorative generic mountains, pines, or stock ink motifs.
+* Preserve the semantic skeleton of the source so the module stays traceable to this photograph.
+* Do not import or clone recognizable source content from another logical zone.
+* Operate only on source content owned by the current logical zone.
+
+### 10. Cartoon Pixel (卡通像素)
+
+Reinterpret the owned source content as pixel-art-driven cartoon rendering: a visible pixel grid, a limited pixel palette, bold cartoon outlines, simplified flat shapes, and optional dithering. The module must be **rebuilt as a pixel composition** — never a downsampled, pixelated, or blurred copy of the photograph.
+
+Level behavior:
+
+* 30%: source-faithful pixel re-render — the pixel grid and limited palette are already perceptible while structure, placement, and shape fidelity stay true to the source.
+* 65%: clearer cartoon conversion — simplified shapes, bold cartoon outlines, reduced pixel palette, flat fills, and stronger silhouette logic.
+* 90%: minimal pixel iconography — strongly reduced pixel shapes, symbols, and silhouettes while retaining the source's semantic skeleton (pose, skyline, roofline, massing, or characteristic outline).
+
+Rules:
+
+* Pixelation must be structural: rebuild the composition at a lower pixel resolution with intentional pixel-shape logic and a restricted palette. A pixelate filter applied to the photograph is not abstraction.
+* Keep the pixel palette muted and inside the Robot Dreams-inspired family by default; avoid neon or candy saturation unless the user directs it.
+* Cartoon outlines must follow the owned source content.
+* Do not import or clone recognizable source content from another logical zone.
+* Operate only on source content owned by the current logical zone.
 
 ## Component reduction
 
@@ -449,7 +492,9 @@ Therefore a 90% abstraction may be:
 * symbolic geometry;
 * expressive painting;
 * reduced silhouettes;
-* collage reconstruction; or
+* collage reconstruction;
+* ink-wash strokes with dominant negative space;
+* minimal pixel-art iconography; or
 * another approved source-derived abstraction language.
 
 It does not need to contain broad filled color regions.
@@ -576,6 +621,14 @@ For dense foliage, clouds, crowds, street clutter, repetitive buildings, or repe
 
 Do not duplicate an entire tree cluster, skyline, road section, cloud formation, building row, or other recognizable environmental region into another module.
 
+### Fit of the newer methods
+
+Chinese Ink Wash suits landscape, atmospheric, architectural, and poetic modules; it also works for people when a 写意 silhouette or symbolic figure strengthens the module.
+
+Cartoon Pixel suits people, urban scenes, architecture, and objects; it reads strongest at 65% and 90%.
+
+Choose either like any other method — by the owned content and the module's desired perceptual mechanism — and respect the primary-diversity rule. Both methods still operate only on source content owned by their logical zone.
+
 ### Cross-module selection rule
 
 After selecting methods for all three abstract modules, inspect the set together.
@@ -616,6 +669,14 @@ or:
 30% → Painterly Abstraction
 65% → Geometric Abstraction
 90% → Sparse Line Abstraction
+```
+
+or:
+
+```text
+30% → Colored Sketch
+65% → Chinese Ink Wash
+90% → Cartoon Pixel
 ```
 
 These examples illustrate method diversity only.
