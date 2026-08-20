@@ -91,8 +91,10 @@ Confirm before delivery:
 - Hidden ownership zones remain geometrically equal while visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight.
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains.
 - The final image is ONE continuous source-ratio canvas tiled by four adjacent regions that share edges; the scene appears exactly once.
-- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zones tile the canvas exactly, and the Reality Anchor region equals the source.
-- Per-zone rendered crops were composed at fixed integer coordinates without scaling, gaps, or overlaps; no grid, strip, or contact-sheet layout was delivered.
+- Module boundaries are irregular and content-aware by default (contour mode follows strong edges and avoids faces; mask mode uses supplied content masks), not rigid strips — unless rect strips are deliberately chosen as the strongest design.
+- The four zone masks tile the canvas exactly with no gaps or overlaps; zone areas stay roughly balanced (the script warns when max/min exceeds 2.5).
+- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zone masks tile the canvas exactly, and the Reality Anchor region equals the source inside its mask.
+- Per-zone rendered crops were composed at fixed coordinates through their zone masks without scaling, gaps, or overlaps; no grid, strip, or contact-sheet layout was delivered.
 - Every slice clearly expresses Reality, 30%, 65%, or 90%; no global treatment dissolves them into one continuous illustration or abstraction gradient.
 - The poster maintains broad warm, nostalgic cinematic relationships while allowing clear, purposeful color differences among modules.
 - The 30% slice remains closest to local photographic color, the 65% slice uses stronger grouping, and the 90% slice is most interpretive while retaining shared color DNA.

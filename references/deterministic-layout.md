@@ -3,6 +3,7 @@
 ## Contents
 
 - Why deterministic slicing
+- Boundary styles
 - The two schemes
 - CLI reference
 - Verbatim prompt blocks
@@ -12,38 +13,83 @@
 ## Why deterministic slicing
 
 The image model decides **how to render**, never **where to cut**. Every slicing
-decision in this Skill is a deterministic integer operation performed by
+decision in this Skill is a deterministic operation performed by
 `scripts/slice_and_compose.py`, so the deliverable is geometrically guaranteed
 to be one continuous image tiled by four adjacent regions of the source — never
 a 2x2 grid, strip, or contact sheet of four full-image versions.
 
 The four states remain the four hidden logical zones of
 [composition-and-anchor.md](composition-and-anchor.md); the script simply turns
-them into exact pixel coordinates.
+them into exact pixel regions.
+
+## Boundary styles
+
+`--boundary` selects how the four regions are cut. All three styles tile the
+canvas exactly (no gaps, no overlaps) and keep the Reality Anchor protected.
+
+### `contour` (default) — irregular, content-aware boundaries
+
+The script derives irregular boundaries automatically from the source:
+
+1. Build an edge-energy image (`FIND_EDGES` + blur) and a face-penalty image
+   from the supplied `--face-boxes`.
+2. For each of the three internal boundaries, run a deterministic path search
+   (sliding-window dynamic programming) from one canvas edge to the other. The
+   path maximizes the edge strength it follows — so boundaries align with
+   building contours, rooflines, skylines, tree canopies, roads, shadows, and
+   other strong image edges — while a large penalty keeps it off faces.
+3. Each boundary is constrained to a balance band around its nominal equal
+   edge (`--band`, default 0.18 of the slice axis) and separated from its
+   neighbors by at least `--min-zone` (default 0.15), so the four regions stay
+   roughly balanced in area.
+4. A final pass snaps any boundary row that still cuts a face box off the face.
+
+This is the recommended default: fully automatic, deterministic, irregular,
+and content-following.
+
+### `mask` — supplied content-aware masks
+
+The agent (or user) provides four grayscale masks `zone0.png` .. `zone3.png`
+in `--masks-dir` (255 = region). The script:
+
+- binarizes each mask;
+- resolves overlaps deterministically (lower zone index wins);
+- fills any gaps from the nearest owned pixel (multi-source BFS);
+- validates that every zone is non-empty and that the four masks tile the
+  canvas exactly.
+
+Use this for hand-painted boundaries, semantic-segmentation masks, or
+silhouette-aware regions. Keep the supplied masks roughly balanced in area;
+the script warns when the max/min area ratio exceeds 2.5.
+
+### `rect` — equal strips (fallback)
+
+Four equal vertical or horizontal strips at exact integer coordinates
+(`exact_edges` distributes any remainder so strips tile perfectly). Available
+when a simple straight layout is the strongest design choice.
 
 ## The two schemes
 
 ### Scheme A — per-zone crop re-render (default)
 
-1. `--mode prepare` cuts the source into four exact zones (vertical or
-   horizontal), selects the anchor, assigns 30%/65%/90%, and writes one context
-   crop per zone (zone rect plus a small margin so the model can see its
-   neighbors).
+1. `--mode prepare` defines the four regions, selects the anchor, assigns
+   30%/65%/90%, and writes one context crop per zone (region bounding box
+   plus a small margin so the model can see its neighbors).
 2. The image model re-renders each **non-anchor** crop at its assigned level,
    using the per-zone render prompt block below. The model never sees a
    "four-slice poster" instruction; it only re-renders one slice.
 3. `--mode compose` resizes each rendered crop back to the exact crop box,
-   crops out the margin, pastes the region at its fixed integer coordinates,
-   and force-pastes the Reality Anchor from the source.
+   crops out the margin, and pastes the region back masked by its zone mask at
+   fixed coordinates. The Reality Anchor is always composited from the source
+   through its own zone mask.
 
 ### Scheme B — full-canvas mask inpaint
 
-1. `--mode prepare --masks` additionally writes one full-canvas mask per
-   non-anchor zone.
-2. The image model inpaints the full canvas with the mask, keeping everything
-   outside the mask unchanged.
-3. `--mode enforce-anchor` force-pastes the source anchor back onto the
-   inpainted canvas regardless of model behavior, then saves.
+1. `--mode prepare` always writes the zone masks to `workdir/masks/zone{i}.png`.
+2. The image model inpaints the full canvas with one zone mask at a time,
+   keeping everything outside the mask unchanged.
+3. `--mode enforce-anchor` force-composites the source anchor back onto the
+   inpainted canvas through the anchor mask regardless of model behavior.
 
 Scheme A is preferred: it is fully deterministic and never lets the model
 modify more than one zone at a time.
@@ -52,10 +98,21 @@ modify more than one zone at a time.
 
 ```text
 # 1. Define the layout (deterministic)
+#    contour-aware irregular boundaries (default)
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction vertical \
+    --source photo.png --direction vertical --boundary contour \
     --anchor auto --face-boxes "100,60,180,150;330,120,410,210" \
-    --levels 65,90,30 --workdir work/ [--masks]
+    --levels 65,90,30 --workdir work/
+
+#    supplied content-aware masks
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --direction vertical --boundary mask \
+    --masks-dir my_masks/ --anchor auto --levels 65,90,30 --workdir work/
+
+#    equal strips (fallback)
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --direction vertical --boundary rect \
+    --anchor auto --levels 65,90,30 --workdir work/
 
 # 2a. Render each non-anchor crop in work/crops/zone{i}.png with the
 #     per-zone render prompt block, save to work/rendered/zone{i}.png
@@ -75,20 +132,26 @@ python scripts/slice_and_compose.py --mode verify \
 
 Options:
 
-- `--direction vertical|horizontal` — four equal vertical or horizontal zones.
-- `--anchor auto|1|2|3|4` — `auto` uses the largest face-box overlap per zone;
-  when no face boxes are given, it falls back to Logical Zone 2 (second from
-  left/top). `1..4` forces a zone (1-based, matching
+- `--direction vertical|horizontal` — slice direction.
+- `--boundary contour|mask|rect` — boundary style (default `contour`).
+- `--anchor auto|1|2|3|4` — `auto` uses the largest face overlap inside the
+  zone masks; when no face boxes are given, it falls back to Logical Zone 2
+  (second from left/top). `1..4` forces a zone (1-based, matching
   `restore_protected_anchor.py`).
-- `--face-boxes "x0,y0,x1,y1;..."` — semicolon-separated face boxes used only
-  for automatic anchor selection.
+- `--face-boxes "x0,y0,x1,y1;..."` — semicolon-separated face boxes used for
+  automatic anchor selection, contour face avoidance, and boundary snapping.
 - `--levels 30,65,90` — a permutation of the three abstraction levels,
   assigned in spatial order to the three non-anchor zones. Choose a
   non-mechanical permutation based on balance, meaning, rhythm, and color.
 - `--margin 0.12` — context margin around each zone crop, as a fraction of the
-  zone's slice width/height. Give the model enough context to keep the scene
+  zone's bounding box. Give the model enough context to keep the scene
   semantically connected.
-- `--masks` — also write full-canvas inpaint masks (Scheme B).
+- `--band 0.18` — contour mode: max boundary deviation from the nominal equal
+  edge, as a fraction of the slice axis.
+- `--min-zone 0.15` — contour mode: minimum zone width/height, as a fraction
+  of the slice axis.
+- `--masks-dir DIR` — required for `--boundary mask`; four grayscale masks
+  `zone0.png`..`zone3.png` (255 = region).
 - `--feather N` — optional small blur ring (px) on pasted zone edges; keep it
   small or zero by default, since visible boundaries are desired.
 
@@ -135,12 +198,19 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
 
 ## Engineering rules
 
-- Never change the canvas size or zone aspect ratios: scaling zones is the
-  source of seams, ghost edges, and double faces. All geometry is integer;
-  the only resize allowed is the compose step's forced restore of a rendered
-  crop to its exact crop box.
-- The Reality Anchor is always pasted from the source; the anchor zone never
-  goes through the model in Scheme A, and is force-restored in Scheme B.
+- Never change the canvas size or region aspect ratios: scaling regions is the
+  source of seams, ghost edges, and double faces. All geometry is integer; the
+  only resize allowed is the compose step's forced restore of a rendered crop
+  to its exact crop box.
+- The four zone masks always tile the canvas exactly: overlaps are resolved,
+  gaps are filled, and every zone is non-empty. The script refuses to prepare
+  or verify a layout that leaves gaps or overlaps.
+- The Reality Anchor is always composited from the source through its own zone
+  mask; the anchor region never comes from the model in Scheme A, and is
+  force-restored in Scheme B.
+- Contour boundaries follow strong edges and avoid face boxes; if a boundary
+  still cuts a face, the layout should be re-run with a wider `--band`, a
+  forced anchor, or supplied masks.
 - Append the same global color-identity sentence to every zone prompt so the
   four rendered slices stay inside one Robot Dreams-inspired universe.
 - Do not feather boundaries by default; only a small optional `--feather` is
@@ -153,10 +223,13 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
 `--mode verify` fails when:
 
 - the output size differs from the source;
-- the four zones do not tile the full canvas exactly (gaps or overlaps);
-- the Reality Anchor region differs from the source;
+- the four zone masks do not tile the canvas exactly (any gap or overlap);
+- the Reality Anchor region differs from the source inside its mask;
 - or the scene is structurally repeated (any layout where the full photograph
   appears more than once — grid, strip, contact sheet).
 
-It warns (does not fail) when a non-anchor zone is pixel-identical to its
-source slice, meaning no abstraction was applied.
+It warns (does not fail) when:
+
+- the zone areas are unbalanced (max/min ratio above 2.5), or
+- a non-anchor zone is pixel-identical to its source slice, meaning no
+  abstraction was applied.
