@@ -4,18 +4,21 @@
 The image model never decides the slicing. This script:
 
 - defines four regions that tile the source exactly (no gaps, no overlaps):
-  * --boundary rect     -> four equal vertical/horizontal strips (integer coords)
-  * --boundary contour  -> contour-aware irregular regions whose boundaries
-                           follow strong edges while staying off faces and
-                           within a balance band (default)
+  * --boundary torn     -> ordered torn-paper seams: three continuous
+                           edge-to-edge multi-scale irregular seams over four
+                           sequential regions (default)
+  * --boundary contour  -> optional semantic + edge-aware contour boundaries
+                           that follow silhouettes, rooflines, horizons
   * --boundary mask     -> four content-aware masks supplied by the agent,
                            normalized to exact tiling automatically
+  * --boundary rect     -> four equal vertical/horizontal strips (fallback)
 - writes one per-zone context crop for separate rendering (Scheme A) and the
   zone masks used for masked compositing and for full-canvas inpaint
   (Scheme B);
 - composes the final poster by pasting rendered zones back at fixed
   coordinates, always keeping the Reality Anchor pasted from the source
-  (--mode compose / --mode enforce-anchor);
+  (--mode compose / --mode enforce-anchor), and optionally overlays a warm
+  torn-paper seam for --boundary torn;
 - verifies that the output is one continuous source-ratio image whose scene
   appears exactly once, with the anchor region unchanged (--mode verify).
 
@@ -28,6 +31,8 @@ from __future__ import annotations
 import argparse
 import array
 import json
+import math
+import random
 import sys
 from collections import deque
 from pathlib import Path
@@ -40,6 +45,14 @@ LEVELS = (30, 65, 90)
 BIG = 10 ** 6        # face penalty weight
 STEP = 6             # max column change per row in boundary path search
 BALANCE_RATIO = 2.5  # warn when max/min zone area ratio exceeds this
+
+# Torn-strip (default) parameters. Each seam is conceptually
+#   nominal position + broad low-frequency drift + medium tear + micro fiber.
+DEFAULT_SEED = 42          # deterministic torn generator seed
+TORN_BAND_DEFAULT = 0.06   # typical torn deviation (~6% of the slice axis)
+TORN_EXCURSION_MULT = 1.5  # local excursion cap = torn_band * this (9% at default)
+TORN_MIN_SEP_FRAC = 0.04   # minimum seam separation (fraction of the slice axis)
+TORN_MICRO = 1             # +/-1 px high-frequency fiber jitter
 
 # Semantic + edge-aware weights. Boundary score per pixel =
 #   w_edge * FIND_EDGES
@@ -488,6 +501,194 @@ def masks_from_paths(direction: str, width: int, height: int,
     return masks
 
 
+# ---------------------------------------------------------------------------
+# Torn-strip boundaries (multi-scale, deterministic, DEFAULT)
+# ---------------------------------------------------------------------------
+
+def moving_average(values: List[float], window: int) -> List[float]:
+    """Box moving average via prefix sums (shortened at the edges)."""
+    n = len(values)
+    if n == 0:
+        return []
+    window = max(1, min(window, n))
+    pref = [0.0] * (n + 1)
+    for i, v in enumerate(values):
+        pref[i + 1] = pref[i] + v
+    out = [0.0] * n
+    half = window // 2
+    for i in range(n):
+        lo = max(0, i - half)
+        hi = min(n, i + half + 1)
+        out[i] = (pref[hi] - pref[lo]) / (hi - lo)
+    return out
+
+
+def filtered_noise(rng: random.Random, length: int, amplitude: float,
+                   window: int) -> List[float]:
+    """Smooth, bounded, deterministic noise (3 box-filter passes).
+
+    Produces medium-frequency tear variation with local continuity — never the
+    per-pixel independent ECG jitter of bare `random.randint` noise.
+    """
+    if length <= 1:
+        return [0.0] * length
+    raw = [rng.uniform(-1.0, 1.0) for _ in range(length)]
+    cur = raw
+    for _ in range(3):
+        cur = moving_average(cur, window)
+    peak = max((abs(v) for v in cur), default=1.0) or 1.0
+    scale = amplitude / peak
+    return [v * scale for v in cur]
+
+
+def avoid_head_boxes(seam: List[int], protect_boxes: List[Box], lo: int, hi: int,
+                     direction: str) -> List[int]:
+    """Locally push a seam out of protected head boxes (hard avoidance).
+
+    Each crossing row is moved to the nearer side of the head box with a small
+    gap and clamped to the seam's deviation band. A later light smoothing pass
+    blends the pushed segment back into the original trajectory, so the detour
+    stays short and never wraps around the subject. Body, buildings, roads,
+    sky and other subjects are NOT avoided — the seam may cut straight through
+    them.
+    """
+    if not protect_boxes:
+        return seam
+    gap = 2
+    for (bx0, by0, bx1, by1) in protect_boxes:
+        if direction == "vertical":
+            r0, r1 = max(0, by0), min(len(seam), by1)
+            for r in range(r0, r1):
+                x = seam[r]
+                if bx0 < x < bx1:
+                    target = (bx0 - gap) if (x - bx0) <= (bx1 - x) else (bx1 + gap)
+                    seam[r] = min(hi, max(lo, target))
+        else:
+            c0, c1 = max(0, bx0), min(len(seam), bx1)
+            for c in range(c0, c1):
+                y = seam[c]
+                if by0 < y < by1:
+                    target = (by0 - gap) if (y - by0) <= (by1 - y) else (by1 + gap)
+                    seam[c] = min(hi, max(lo, target))
+    return seam
+
+
+def torn_paths(direction: str, width: int, height: int,
+               protect_boxes: List[Box], torn_band: float,
+               roughness: float, scale: float, seed: int,
+               min_sep_frac: float = TORN_MIN_SEP_FRAC) -> List[List[int]]:
+    """Generate the 3 ordered torn-paper seams (deterministic).
+
+    Each seam is a continuous edge-to-edge path built from three frequency
+    scales:
+
+        seam = nominal + broad low-frequency drift + medium tear + micro fiber
+
+    and then:
+    - clamped to a deviation band around its nominal 1/4, 1/2 or 3/4 edge
+      (typical deviation ~ `torn_band`, local cap ~ `torn_band * 1.5`);
+    - kept ordered and separated from its neighbours (`min_sep_frac`);
+    - pushed around protected head boxes with smooth reconnection;
+    - lightly smoothed so pushed segments reconnect without large detours.
+
+    It does NOT use FIND_EDGES, semantic class weights, or the contour
+    dynamic program, and it deliberately ignores building/silhouette/road/
+    horizon contours — the seams may cut straight through ordinary objects.
+    Identical source/direction/seed/params produce identical seams.
+    Returns 3 paths in original image space (vertical: x per row;
+    horizontal: y per column).
+    """
+    if direction == "vertical":
+        npos = max(2, height)
+        axis = width
+    else:
+        npos = max(2, width)
+        axis = height
+    axis = max(1, axis)
+    nominal = [axis * k // 4 for k in (1, 2, 3)]
+    exc = max(2, int(axis * torn_band * TORN_EXCURSION_MULT))
+    min_sep = max(4, int(axis * min_sep_frac))
+    paths: List[List[int]] = []
+    prev = None
+    for k, nom in enumerate(nominal):
+        rng = random.Random(seed + k * 101)
+        # 1) broad low-frequency drift (sine sum, correlated over the canvas)
+        broad = [0.0] * npos
+        amp_broad = axis * torn_band * 0.55
+        n_sines = 2 + (k % 2)
+        for _ in range(n_sines):
+            freq = rng.uniform(0.5, 2.5) * (2.0 * math.pi / max(1, npos)) * (1.0 / max(0.25, scale))
+            phase = rng.uniform(0.0, 2.0 * math.pi)
+            a = amp_broad * rng.uniform(0.4, 1.0)
+            for i in range(npos):
+                broad[i] += a * math.sin(freq * i + phase)
+        # 2) medium-frequency tear (smoothed noise)
+        window = max(3, int(npos * 0.04 / max(0.25, scale)))
+        amp_tear = axis * torn_band * 0.5 * max(0.0, roughness)
+        tear = filtered_noise(rng, npos, amp_tear, window)
+        # 3) high-frequency micro fiber jaggedness (±1 px, continuous)
+        micro = [rng.randint(-TORN_MICRO, TORN_MICRO) for _ in range(npos)]
+        seam = [nom + broad[i] + tear[i] + micro[i] for i in range(npos)]
+        lo = max(0, nom - exc)
+        hi = min(axis - 1, nom + exc)
+        seam = [min(hi, max(lo, int(round(v)))) for v in seam]
+        if prev is not None:
+            seam = [max(seam[i], prev[i] + min_sep) for i in range(npos)]
+            seam = [min(hi, max(lo, v)) for v in seam]
+        seam = avoid_head_boxes(seam, protect_boxes, lo, hi, direction)
+        if prev is not None:
+            seam = [max(seam[i], prev[i] + min_sep) for i in range(npos)]
+            seam = [min(hi, max(lo, v)) for v in seam]
+        # smooth reconnection of pushed head segments (and general seam softness)
+        smooth_w = max(3, int(npos * 0.02))
+        seam = [int(round(v)) for v in moving_average([float(v) for v in seam], smooth_w)]
+        seam = [min(hi, max(lo, v)) for v in seam]
+        if prev is not None:
+            seam = [max(seam[i], prev[i] + min_sep) for i in range(npos)]
+            seam = [min(hi, max(lo, v)) for v in seam]
+        paths.append(seam)
+        prev = seam
+    return paths
+
+
+def draw_paper_seams(canvas: Image.Image, seams: List[List[int]], direction: str,
+                     fiber_width: int, seed: int) -> Image.Image:
+    """Overlay variable-width warm paper-fiber seams (visual only).
+
+    The four zone masks keep exact tiling underneath; this only paints a
+    narrow warm ivory / aged-paper edge along each seam with a faint offset
+    shadow, so the poster reads as a physical editorial torn-paper collage.
+    Deterministic via `seed`.
+    """
+    fiber_width = max(1, fiber_width)
+    rng = random.Random(seed + 777)
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    od = ImageDraw.Draw(overlay)
+    ivory = (243, 237, 219, 255)   # warm off-white / aged cream beige
+    shadow = (30, 24, 14, 26)      # faint low-opacity paper shadow
+    shadow_offset = 3
+    for path in seams:
+        if direction == "vertical":
+            pts = [(path[r], r) for r in range(len(path))]
+        else:
+            pts = [(c, path[c]) for c in range(len(path))]
+        if not pts:
+            continue
+        widths = [rng.randint(2, fiber_width) for _ in pts]  # 2..7px variable width
+        # faint shadow first (offset perpendicular to the seam), then ivory tube
+        for (x, y), w in zip(pts, widths):
+            r = w + 1
+            if direction == "vertical":
+                od.ellipse((x + shadow_offset - r, y - r, x + shadow_offset + r, y + r), fill=shadow)
+            else:
+                od.ellipse((x - r, y + shadow_offset - r, x + r, y + shadow_offset + r), fill=shadow)
+        for (x, y), w in zip(pts, widths):
+            r = w
+            od.ellipse((x - r, y - r, x + r, y + r), fill=ivory)
+    canvas.alpha_composite(overlay)
+    return canvas
+
+
 def normalize_masks(masks: List[Image.Image], width: int, height: int) -> List[Image.Image]:
     """Make supplied masks disjoint and gap-free: lower index wins overlaps,
     gaps are filled from the nearest owned pixel (BFS)."""
@@ -588,8 +789,21 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     elif head_boxes:
         head_mask = head_mask_from_boxes(head_boxes, width, height)
 
+    # seam-avoidance boxes: expanded head boxes, else the supplied head mask bbox
+    avoid_boxes = head_boxes
+    if not avoid_boxes and head_mask is not None:
+        hb = head_mask.getbbox()
+        if hb is not None:
+            avoid_boxes = [tuple(hb)]
+
+    seams = None
     if args.boundary == "rect":
         masks = rect_masks(args.direction, width, height)
+    elif args.boundary == "torn":
+        seams = torn_paths(args.direction, width, height, avoid_boxes,
+                           args.torn_band, args.torn_roughness, args.torn_scale,
+                           args.seed)
+        masks = masks_from_paths(args.direction, width, height, seams)
     elif args.boundary == "contour":
         edges, face = edge_and_face_images(img, width, height, head_boxes)
         sem = build_semantic_images(img, width, height, args.face_boxes,
@@ -646,8 +860,15 @@ def cmd_prepare(args: argparse.Namespace) -> None:
             }
         )
 
-    feather = args.feather if args.feather is not None else max(4, int(0.02 * min(width, height)))
-    feather = min(feather, max(2, min(width, height) // 8))
+    # Per-mode feather strategy: torn is a hard physical tear (1px anti-alias),
+    # the other modes keep the broad soft transition.
+    if args.feather is not None:
+        feather = args.feather
+    elif args.boundary == "torn":
+        feather = 1
+    else:
+        feather = max(4, int(0.02 * min(width, height)))
+        feather = min(feather, max(2, min(width, height) // 8))
 
     manifest = {
         "source": str(source),
@@ -657,6 +878,13 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "anchor": anchor + 1,
         "margin": args.margin,
         "feather": feather,
+        "seams": seams if seams else None,
+        "seam_style": args.seam_style if args.boundary == "torn" else "none",
+        "fiber_width": args.fiber_width,
+        "torn_band": args.torn_band,
+        "torn_roughness": args.torn_roughness,
+        "torn_scale": args.torn_scale,
+        "seed": args.seed,
         "head_mask": str(head_mask_path) if head_mask_path else None,
         "face_boxes": [list(b) for b in args.face_boxes],
         "zones": manifest_zones,
@@ -667,6 +895,9 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     print(f"Prepared deterministic four-zone layout -> {manifest_path}")
     print(f"Direction={args.direction}  boundary={args.boundary}  "
           f"size={width}x{height}  anchor=Logical Zone {anchor + 1}")
+    if args.boundary == "torn":
+        print(f"Torn: band={args.torn_band} roughness={args.torn_roughness} "
+              f"scale={args.torn_scale} seed={args.seed} seam_style={args.seam_style}")
     if head_mask is not None:
         print(f"Head protection: {head_mask_path} "
               f"({', '.join(str(tuple(b)) for b in head_boxes) or 'supplied mask'})")
@@ -787,6 +1018,12 @@ def cmd_compose(args: argparse.Namespace) -> None:
         print(f"Pasted zone {z['index'] + 1} at {box[:2]} level={z['level']}")
 
     canvas = enforce_anchor(canvas, source, manifest)
+    if (manifest.get("boundary") == "torn"
+            and manifest.get("seam_style") == "paper"
+            and manifest.get("seams")):
+        canvas = draw_paper_seams(canvas, manifest["seams"], manifest["direction"],
+                                  manifest.get("fiber_width", 7),
+                                  manifest.get("seed", DEFAULT_SEED))
     save_output(canvas, Path(args.output))
     print(f"Composed one continuous poster -> {args.output}")
 
@@ -800,6 +1037,108 @@ def cmd_enforce_anchor(args: argparse.Namespace) -> None:
     canvas = enforce_anchor(canvas, Path(manifest["source"]), manifest)
     save_output(canvas, Path(args.output))
     print(f"Anchor (Logical Zone {manifest['anchor']}) enforced from source -> {args.output}")
+
+
+def paper_seam_mask(manifest: dict, width: int, height: int) -> Optional[Image.Image]:
+    """Binary mask of every pixel the torn paper-seam overlay paints.
+
+    Uses the same seeded width sequence as `draw_paper_seams` (shadow reach
+    included), so verify can exclude the intentional paper fiber from the
+    exact source-equality core — the fiber is a visual overlay, like the soft
+    transition band, and must not break the anchor/head guarantee.
+    """
+    seams = manifest.get("seams") or []
+    direction = manifest.get("direction", "vertical")
+    fiber_width = max(1, manifest.get("fiber_width", 7))
+    if not seams:
+        return None
+    rng = random.Random(int(manifest.get("seed", DEFAULT_SEED)) + 777)
+    mask = Image.new("L", (width, height), 0)
+    d = ImageDraw.Draw(mask)
+    shadow_offset = 3
+    for path in seams:
+        if direction == "vertical":
+            pts = [(path[r], r) for r in range(len(path))]
+        else:
+            pts = [(c, path[c]) for c in range(len(path))]
+        if not pts:
+            continue
+        widths = [rng.randint(2, fiber_width) for _ in pts]
+        for (x, y), w in zip(pts, widths):
+            r = w + 1  # shadow reach (with its perpendicular offset)
+            if direction == "vertical":
+                d.ellipse((x + shadow_offset - r, y - r, x + shadow_offset + r, y + r), fill=255)
+            else:
+                d.ellipse((x - r, y + shadow_offset - r, x + r, y + shadow_offset + r), fill=255)
+            r = w  # ivory tube
+            d.ellipse((x - r, y - r, x + r, y + r), fill=255)
+    return mask
+
+
+def check_torn_topology(manifest: dict, masks: List[Image.Image],
+                        width: int, height: int) -> None:
+    """Torn-strip topology validation for --boundary torn.
+
+    Fails when seams are missing, do not span the canvas, cross or collapse,
+    or break the ordered four-region structure (islands, pockets, loops).
+    Warns on large excursions from the nominal boundaries.
+    """
+    seams = manifest.get("seams")
+    direction = manifest["direction"]
+    axis = width if direction == "vertical" else height
+    npos = height if direction == "vertical" else width
+    if not seams or len(seams) != 3:
+        raise SystemExit("torn layout requires exactly 3 internal seams.")
+    for s in seams:
+        if len(s) != npos:
+            raise SystemExit("torn seam does not span the full canvas.")
+        worst = max((abs(s[i] - s[i - 1]) for i in range(1, len(s))), default=0)
+        if worst > max(12, int(0.02 * axis)):
+            print(f"  warning: torn seam has a large local jump ({worst}px); "
+                  "it may look jagged.")
+    min_sep = max(4, int(axis * TORN_MIN_SEP_FRAC))
+    for i in range(npos):
+        if not (seams[0][i] + min_sep <= seams[1][i] and seams[1][i] + min_sep <= seams[2][i]):
+            raise SystemExit("torn seams cross or collapse; ordered topology broken.")
+    for k, s in enumerate(seams):
+        nom = axis * (k + 1) / 4.0
+        dev = max((abs(v - nom) for v in s), default=0)
+        if dev > 0.2 * axis:
+            raise SystemExit(f"torn seam {k + 1} deviates {dev:.0f}px from its nominal "
+                             "boundary; ordered strip topology is destroyed.")
+        if dev > 0.12 * axis:
+            print(f"  warning: torn seam {k + 1} deviates up to {dev:.0f}px from its "
+                  "nominal boundary.")
+    # no islands / pockets / loops: every zone is one interval per row/column
+    if direction == "vertical":
+        for zi, m in enumerate(masks):
+            px = m.load()
+            for y in range(height):
+                runs = 0
+                prev_on = False
+                for x in range(width):
+                    on = px[x, y] > 127
+                    if on and not prev_on:
+                        runs += 1
+                    prev_on = on
+                if runs > 1:
+                    raise SystemExit(f"Zone {zi + 1} has islands/pockets at row {y}; "
+                                     "torn topology broken.")
+    else:
+        for zi, m in enumerate(masks):
+            px = m.load()
+            for x in range(width):
+                runs = 0
+                prev_on = False
+                for y in range(height):
+                    on = px[x, y] > 127
+                    if on and not prev_on:
+                        runs += 1
+                    prev_on = on
+                if runs > 1:
+                    raise SystemExit(f"Zone {zi + 1} has islands/pockets at column {x}; "
+                                     "torn topology broken.")
+    print("  torn topology OK: 3 continuous ordered seams, no islands or pockets.")
 
 
 def cmd_verify(args: argparse.Namespace) -> None:
@@ -819,10 +1158,20 @@ def cmd_verify(args: argparse.Namespace) -> None:
     masks = [Image.open(z["mask"]).convert("L") for z in zones]
     check_tiling(masks, width, height)
 
+    if manifest.get("boundary") == "torn":
+        check_torn_topology(manifest, masks, width, height)
+
     feather = manifest.get("feather", 0)
+    seam_band = None
+    if (manifest.get("boundary") == "torn"
+            and manifest.get("seam_style") == "paper"
+            and manifest.get("seams")):
+        seam_band = paper_seam_mask(manifest, width, height)
     anchor = manifest["anchor"] - 1
     box = tuple(zones[anchor]["box"])
     anchor_core = opaque_core(masks[anchor], feather)
+    if seam_band is not None:
+        anchor_core = ImageChops.subtract(anchor_core, seam_band)
     if differs_masked(src.crop(box), out.crop(box), anchor_core.crop(box)):
         raise SystemExit("Anchor region differs from source; layout guarantee broken.")
 
@@ -832,6 +1181,8 @@ def cmd_verify(args: argparse.Namespace) -> None:
         hb = head.getbbox()
         if hb is not None:
             head_core = opaque_core(head, min(feather, 8))
+            if seam_band is not None:
+                head_core = ImageChops.subtract(head_core, seam_band)
             if differs_masked(src.crop(hb), out.crop(hb), head_core.crop(hb)):
                 raise SystemExit("Head region differs from source; head protection broken.")
 
@@ -880,9 +1231,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--direction", choices=("vertical", "horizontal"), help="Slice direction (prepare)")
     parser.add_argument(
         "--boundary",
-        choices=("rect", "contour", "mask"),
-        default="contour",
-        help="Boundary style: contour-aware irregular edges (default), rect strips, or supplied masks",
+        choices=("torn", "contour", "mask", "rect"),
+        default="torn",
+        help="Boundary style: torn (default) ordered torn-paper seams, contour "
+             "(optional) semantic + edge-aware contours, mask supplied masks, "
+             "rect equal strips",
     )
     parser.add_argument(
         "--anchor",
@@ -915,7 +1268,44 @@ def parse_args() -> argparse.Namespace:
         "--band",
         type=float,
         default=0.18,
-        help="contour mode: max boundary deviation from the nominal equal edge, as a fraction of the slice axis",
+        help="contour mode only: max boundary deviation from the nominal equal edge, as a fraction of the slice axis",
+    )
+    parser.add_argument(
+        "--torn-band",
+        type=float,
+        default=TORN_BAND_DEFAULT,
+        help="torn mode: typical global seam deviation as a fraction of the slice axis "
+             "(default 0.06 = ~6%%; local tears may reach ~9%%)",
+    )
+    parser.add_argument(
+        "--torn-roughness",
+        type=float,
+        default=1.0,
+        help="torn mode: multiplier for medium/high-frequency tear amplitude (0 = smoother)",
+    )
+    parser.add_argument(
+        "--torn-scale",
+        type=float,
+        default=1.0,
+        help="torn mode: multiplier for tear wavelength (larger = longer, broader tears)",
+    )
+    parser.add_argument(
+        "--fiber-width",
+        type=int,
+        default=7,
+        help="torn mode: max paper-fiber seam width in px (variable 2..N)",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=DEFAULT_SEED,
+        help="Deterministic random seed for the torn generator (same inputs -> same seams)",
+    )
+    parser.add_argument(
+        "--seam-style",
+        choices=("none", "paper"),
+        default="paper",
+        help="torn mode: overlay a warm torn-paper seam on the composed poster (paper) or leave hard cuts (none)",
     )
     parser.add_argument(
         "--min-zone",
@@ -996,6 +1386,10 @@ def main() -> None:
         raise SystemExit("--feather must be non-negative.")
     if args.band <= 0 or args.min_zone <= 0:
         raise SystemExit("--band and --min-zone must be positive.")
+    if args.torn_band <= 0 or args.torn_roughness < 0 or args.torn_scale <= 0:
+        raise SystemExit("--torn-band/--torn-roughness/--torn-scale must be positive.")
+    if args.fiber_width < 1:
+        raise SystemExit("--fiber-width must be >= 1.")
     if args.mode == "prepare":
         if args.source is None or args.direction is None:
             raise SystemExit("--source and --direction are required for --mode prepare.")

@@ -23,13 +23,62 @@ four-state readability
 → optional local blending
 ```
 
-## Boundary language
+## Boundary families
 
-Keep hidden logical boundaries exact. Allow visible module boundaries to depart from them while remaining clearly designed. Valid boundary sources and treatments include:
+Boundary language is split into two families. **Torn-Strip is the DEFAULT**;
+**Semantic Contour is optional** and must be chosen explicitly.
 
-- a human silhouette or crowd contour;
-- a building edge, roofline, or skyline;
-- a tree canopy, road, rail, shadow mass, or large color-field edge;
+The governing principle for the default family:
+
+```text
+IRREGULAR EDGE ≠ IRREGULAR TERRITORY
+
+Make the seams irregular.
+Keep the four regions topologically simple and sequential.
+
+Torn boundaries are layout-defined seams, not semantic segmentation contours.
+```
+
+### A. Torn-Strip Boundary — DEFAULT
+
+- three continuous edge-to-edge seams;
+- approximately follows the logical slice direction;
+- irregular but not strongly meandering;
+- independent from most semantic object contours;
+- may cut across buildings, roads, vegetation, sky, mountains, crowds and
+  bodies;
+- must avoid the protected primary head;
+- retains ordered strip topology;
+- uses hard or near-hard cuts (script `feather = 1`);
+- may expose a narrow warm paper-fiber seam (`--seam-style paper`);
+- must not use broad feathering.
+
+Keep hidden logical boundaries exact. The three internal seams start near the
+nominal 1/4, 1/2 and 3/4 boundaries, run edge-to-edge, and stay inside a
+narrow deviation band (`--torn-band`, ~6%). Irregularity belongs to the seam
+geometry, not to the global module topology.
+
+### B. Semantic Contour Boundary — OPTIONAL
+
+The optional family (`--boundary contour`) derives boundaries from semantic
+structure:
+
+- silhouette;
+- person contour;
+- architecture edge;
+- roofline;
+- skyline;
+- road;
+- horizon;
+- large color field.
+
+Semantic Contour is optional and is NOT the default boundary family. Choose
+it explicitly when a composition genuinely benefits from contour-following
+regions (see [deterministic-layout.md](deterministic-layout.md) for the
+algorithm).
+
+Valid boundary sources and treatments common to both families include:
+
 - a collage cut, brush edge, sketch stroke, or shape-defined mask;
 - a clean straight crop edge when it is genuinely the strongest design;
 - an abrupt but controlled medium change;
@@ -38,7 +87,10 @@ Keep hidden logical boundaries exact. Allow visible module boundaries to depart 
 - a sharp transition from photograph to line, paint, color block, collage, or geometry;
 - a limited contour or motif crossing that connects modules without hiding the division.
 
-Do not soften a boundary merely because it is visible. Refine it only when it resembles an error: white halos, ragged masking, double edges, offset copies, mismatched anatomy, accidental gaps, muddy feathering, or uncontrolled generation residue.
+Do not soften a boundary merely because it is visible. Refine it only when it
+resembles an error: white halos, ragged masking, double edges, offset copies,
+mismatched anatomy, accidental gaps, muddy feathering, or uncontrolled
+generation residue.
 
 ## Hybrid Transition
 
@@ -86,14 +138,27 @@ When important architecture owns the Reality Anchor, do not force the entire bui
 
 Use transition effects only as secondary local devices. Limit them to small, content-aware areas when they improve composition without weakening module readability. Suitable devices include one continued contour, a repeated color accent, a short brush or line intrusion, or a shared horizon cue.
 
-A modest default soft transition band (script `--feather`, ~2% of the smaller dimension) is applied so boundaries are not razor-hard; keep it small — broad 3%–8% feathered zones that blur states together are still rejected. Do not migrate texture continuously across all boundaries. Do not turn the full canvas into a single abstraction gradient or one common painterly surface.
+Feathering is per boundary family: `contour`/`mask`/`rect` use a modest soft
+transition band (script `--feather`, ~2% of the smaller dimension), while
+`torn` uses hard near-1px cuts plus the physical paper-seam overlay — its look
+is a hard tear, not a soft blend. Broad 3%–8% feathered zones that blur states
+together are still rejected in every family. Do not migrate texture
+continuously across all boundaries. Do not turn the full canvas into a single
+abstraction gradient or one common painterly surface.
 
 ## Validation
 
 Inspect the poster at thumbnail size and ask:
 
-- Are four roughly balanced irregular modules immediately readable?
+- Are four roughly balanced sequential regions immediately readable?
 - Is the output one continuous image tiled by four adjacent regions, or four full-image versions in a grid/strip/contact sheet? Reject any layout where the scene is repeated.
+- Do the four states still read as four broad sequential regions?
+- Do the three seams read as intentional torn-paper cuts?
+- Are the seams irregular without turning the regions into arbitrary blobs?
+- Do the seams remain approximately aligned with the chosen slicing direction?
+- Are there any islands, loops, U-shaped wraps or excessive excursions?
+- Does the primary head remain untouched?
+- Does the seam feel like a physical editorial collage cut rather than semantic segmentation?
 - Can Reality, 30%, 65%, and 90% be distinguished without explanation?
 - Do 30%, 65%, and 90% differ in structural information density across detail, component density, spatial fidelity, shape fidelity, and photographic surface retention?
 - Do visible boundaries use meaningful contours, structures, fields, or strokes rather than default rectangular rigidity?
@@ -106,4 +171,4 @@ Inspect the poster at thumbnail size and ask:
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?
 
-Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
+Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. In the default torn family, also reject if the torn boundary repeatedly follows object contours, wraps around an entire person or building, creates blob-shaped territories, or destroys the ordered four-region structure. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.

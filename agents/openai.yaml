@@ -1,4 +1,4 @@
 interface:
   display_name: "Four-Slice Reality Poster"
-  short_description: "Create four-state irregular modular photo posters"
-  default_prompt: "Use $four-slice-reality-poster to transform my photo into ONE continuous poster: four adjacent regions of a single image, each region showing a different slice of the photo in a different state (Reality / 30% / 65% / 90% abstraction). Never output a 2x2 grid or four full-image versions."
+  short_description: "Create four-state torn-paper editorial photo posters"
+  default_prompt: "Use $four-slice-reality-poster to transform my photo into ONE continuous poster: four ordered regions separated by three irregular torn-paper seams (Reality / 30% / 65% / 90% abstraction). Never output a 2x2 grid or four full-image versions."

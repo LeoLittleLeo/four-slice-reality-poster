@@ -3,6 +3,7 @@
 ## Contents
 
 * Canvas and equal logical zones
+* Ordered Strip Topology
 * Source ownership exclusivity
 * Direction selection
 * Reality Anchor
@@ -18,7 +19,68 @@ Preserve the source image's aspect ratio and use its dimensions as the compositi
 
 Begin with exactly four geometrically equal hidden logical zones. Use either four equal vertical ownership zones or four equal horizontal ownership zones. Use them only for Reality Anchor selection, crowd and subject ownership, 30%/65%/90% assignment, and four-state validation. Do not move these hidden boundaries to protect content.
 
-Translate the hidden ownership system into four visible modules that may be irregular, contour-aware, and non-rectangular. Visible modules may overlap slightly in treatment or boundary influence, but they must not duplicate or transfer recognizable source content across logical owners. Keep the four modules roughly balanced in area and visual importance. Recombine them into the same overall rectangle and output one poster, not four independent images: the four visible modules tile the same continuous canvas at source scale, share edges, and the scene appears exactly once. Never deliver a 2×2 grid, strip, or contact sheet of four full-image versions.
+Translate the hidden ownership system into four visible modules governed by
+the **Ordered Strip Topology** (see below). In the default torn family the
+modules are four sequential regions with irregular seam edges; in the optional
+contour family they may follow semantic contours. In every family the visible
+modules must not duplicate or transfer recognizable source content across
+logical owners, must tile the same continuous canvas at source scale, share
+edges, and the scene must appear exactly once. Never deliver a 2×2 grid,
+strip, or contact sheet of four full-image versions.
+
+## Ordered Strip Topology
+
+The default boundary family (torn) must preserve the sequential four-region
+order of the hidden logical zones. Visible boundaries may deviate locally, but
+every internal boundary must remain **one continuous edge-to-edge seam**, and
+the global module topology must stay simple and ordered.
+
+For horizontal slicing:
+
+```text
+Zone 1 broadly remains above Zone 2.
+Zone 2 broadly remains above Zone 3.
+Zone 3 broadly remains above Zone 4.
+```
+
+For vertical slicing:
+
+```text
+Zone 1 broadly remains left of Zone 2.
+Zone 2 broadly remains left of Zone 3.
+Zone 3 broadly remains left of Zone 4.
+```
+
+Requirements:
+
+```text
+Visible boundaries may deviate locally, but every internal boundary must remain
+one continuous edge-to-edge seam.
+
+Do not convert the four zones into arbitrary blob-shaped territories.
+```
+
+Never:
+
+- create isolated islands;
+- create enclosed pockets;
+- create contour loops;
+- create U-shaped regions wrapping around subjects;
+- create large peninsulas;
+- create large wedges that destroy the ordered four-zone structure;
+- snake a region around an entire person or building; or
+- reverse a boundary's direction repeatedly.
+
+Principle:
+
+```text
+Irregularity belongs to the seam geometry, not to the global module topology.
+```
+
+The script enforces this topology for `--boundary torn` (`--mode verify`
+checks seam continuity, ordering, separation, and the absence of
+islands/pockets), and `--boundary mask` may produce any topology the supplied
+masks define.
 
 ## Source ownership exclusivity
 
@@ -194,6 +256,6 @@ When a subject physically crosses multiple logical zones in the source, preserve
 
 Exact pixel alignment with the source or neighboring modules is not required, but semantic provenance must remain clear. Cross-boundary reconstruction may alter rendering language while preserving the source order and continuity of major forms.
 
-Make the four-state structure clearly perceptible through each visible module's dominant treatment and boundary design. Derive edges from human silhouettes, crowd groupings, building contours, rooflines, skylines, tree canopies, roads or rails, shadow masses, large color fields, or painterly and sketch strokes.
+Make the four-state structure clearly perceptible through each visible module's dominant treatment and boundary design. In the optional **semantic contour** family, derive edges from human silhouettes, crowd groupings, building contours, rooflines, skylines, tree canopies, roads or rails, shadow masses, large color fields, or painterly and sketch strokes. In the **default torn** family, do NOT derive seams from semantic contours: seams are layout-defined multi-scale torn-paper cuts that may cross any ordinary subject, and the only hard avoidance is the protected primary head.
 
 Preserve face identity and avoid accidental human or architectural mismatch, repeated source regions, cloned objects, restarted structures, or duplicated scene-defining forms. Follow [intentional-modular-composition.md](intentional-modular-composition.md).

@@ -58,6 +58,7 @@ Never:
 23. Treat 30%, 65%, and 90% as the same structural abstraction level with only palette, brush texture, rendering style, or medium changes.
 24. Output the four states as four full-image versions of the photograph — a 2×2 grid, a strip, a contact sheet, or any layout where the full scene appears more than once — instead of one continuous image tiled by four adjacent regions.
 25. Force the whole primary body or a whole building into exactly one abstraction state. Cross-state presence is allowed and encouraged when it strengthens the poster; only accidental duplication (clones, double faces, ghost edges) is forbidden.
+26. In the default torn family, create blob-shaped territories, isolated islands, enclosed pockets, contour loops, U-shaped wraps around subjects, large peninsulas or wedges that destroy the ordered four-region structure, or seams that repeatedly follow object contours. Torn seams are layout-defined cuts, not semantic segmentation contours; irregularity belongs to the seam geometry, not to the global module topology.
 
 ## Validation checklist
 
@@ -89,15 +90,34 @@ Confirm before delivery:
 - Important architecture loses surface detail before silhouette, massing, perspective, or landmark identity.
 - When important architecture owns the Anchor, its identity-critical portion remains photographic while other portions may continue through abstract modules with coherent silhouette, massing, perspective, landmark identity, and major structural rhythm.
 - Abstract slices retain source visual DNA even when spatial relationships change.
-- Four roughly balanced irregular visible modules are immediately readable at thumbnail size, and neighboring states differ through at least two deliberate visual signals.
+- Four roughly balanced, ordered sequential regions are immediately readable at thumbnail size, and neighboring states differ through at least two deliberate visual signals.
 - Hybrid Transition is applied: backgrounds and large color fields may break abruptly, while important people and buildings retain semantic continuity.
 - Hidden ownership zones remain geometrically equal while visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight.
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains. The default soft transition band (`--feather`, ~2%) keeps boundaries gentle, but the four states remain readable at thumbnail size.
 - The final image is ONE continuous source-ratio canvas tiled by four adjacent regions that share edges; the scene appears exactly once.
-- Module boundaries are irregular and content-aware by default (contour mode follows strong edges and class boundaries — silhouettes, rooflines, horizon, road lines — and avoids people, architecture interiors, and faces; mask mode uses supplied content masks), not rigid strips — unless rect strips are deliberately chosen as the strongest design.
-- Contour semantic heuristics are sanity-checked: built-in sky/road/person masks are overridden by supplied `--class-masks-dir` masks or disabled with `--no-auto-semantic` whenever they misdetect a scene.
-- The four zone masks tile the canvas exactly with no gaps or overlaps; zone areas stay roughly balanced (the script warns when max/min exceeds 2.5).
-- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zone masks tile the canvas exactly, the Reality Anchor region equals the source inside its mask, and the head protection region equals the source (the primary face is never reconstructed, even when a face box straddles a zone boundary).
+- Module boundaries are torn-paper seams by default: three continuous
+  edge-to-edge irregular seams over four ordered sequential regions
+  (Torn-Strip Composition). Semantic Contour (`--boundary contour`) is the
+  optional family — silhouettes, rooflines, horizons, class boundaries — and
+  is NOT the default. Mask mode uses supplied content masks; rect strips are
+  a fallback.
+- At thumbnail size, the four states read as four broad sequential regions;
+  the three seams read as intentional torn-paper cuts that are irregular
+  without turning the regions into arbitrary blobs, stay approximately
+  aligned with the slicing direction, contain no islands/loops/U-shaped
+  wraps/excessive excursions, and leave the primary head untouched; the seam
+  feels like a physical editorial collage cut rather than semantic
+  segmentation.
+- Ordered Strip Topology holds in the default family: Zone 1 broadly
+  left-of/above Zone 2, Zone 2 left-of/above Zone 3, Zone 3 left-of/above
+  Zone 4; every internal boundary is one continuous edge-to-edge seam.
+- When Semantic Contour is chosen, its heuristics are sanity-checked:
+  built-in sky/road/person masks are overridden by supplied
+  `--class-masks-dir` masks or disabled with `--no-auto-semantic` whenever
+  they misdetect a scene.
+- The four zone masks tile the canvas exactly with no gaps or overlaps; zone
+  areas stay roughly balanced (the script warns when max/min exceeds 2.5).
+- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zone masks tile the canvas exactly, the Reality Anchor region equals the source inside its mask, the head protection region equals the source (the primary face is never reconstructed, even when a face box straddles a zone boundary), and torn topology checks pass (3 continuous ordered seams, no crossings, no islands/pockets).
 - Per-zone rendered crops were composed at fixed coordinates through their zone masks without scaling, gaps, or overlaps; no grid, strip, or contact-sheet layout was delivered.
 - Every slice clearly expresses Reality, 30%, 65%, or 90%; no global treatment dissolves them into one continuous illustration or abstraction gradient.
 - The poster maintains broad warm, nostalgic cinematic relationships while allowing clear, purposeful color differences among modules.

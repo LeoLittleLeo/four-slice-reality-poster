@@ -24,13 +24,67 @@ them into exact pixel regions.
 
 ## Boundary styles
 
-`--boundary` selects how the four regions are cut. All three styles tile the
-canvas exactly (no gaps, no overlaps) and keep the Reality Anchor protected.
+`--boundary` selects how the four regions are cut. All four styles tile the
+canvas exactly (no gaps, no overlaps) and keep the Reality Anchor and the
+primary head protected.
 
-### `contour` (default) — irregular, semantic + edge-aware boundaries
+### `torn` (default) — ordered torn-paper seams
 
-The script derives irregular boundaries automatically from the source, using
-both low-level edges and semantic importance:
+The default boundary language is an editorial torn-paper collage, not a
+semantic segmentation. Four broad sequential regions (each roughly 1/4 of the
+canvas) are separated by **three continuous edge-to-edge seams** that look
+like physical paper tears.
+
+The `torn` generator is algorithmically **completely different** from
+`contour`:
+
+```text
+torn DOES NOT optimize for FIND_EDGES.
+torn DOES NOT reward semantic object boundaries.
+torn DOES NOT follow buildings, silhouettes, roads, horizons or color-field
+boundaries.
+```
+
+Each seam is built from multi-scale variation:
+
+```text
+seam = nominal position (1/4, 1/2 or 3/4 logical boundary)
+     + broad low-frequency drift
+     + medium-frequency tear irregularity
+     + high-frequency micro jaggedness / paper fiber
+```
+
+and then:
+
+1. starts near its nominal logical boundary;
+2. runs continuously from one canvas edge to the opposite edge;
+3. preserves the ordering of all four zones (Zone k stays broadly
+   left-of/below Zone k+1);
+4. stays primarily inside a narrow deviation band (`--torn-band`, default
+   0.06 = ~6% of the slice axis; local tears may reach ~9%);
+5. uses multi-scale irregularity — never single-scale per-pixel
+   `random.randint` jitter, which produces ECG-style edges;
+6. may cross ordinary semantic objects (buildings, roads, vegetation, sky,
+   mountains, crowds and bodies) freely;
+7. moves away from protected primary-head regions with a short local push
+   and smooth reconnection (no large detours);
+8. never produces closed islands, pockets, loops or blob-shaped territories.
+
+It is fully deterministic: the same source, direction, seed and parameters
+produce identical seams (`--seed`, default 42).
+
+By default the seams are hard/near-hard cuts (`feather = 1` px anti-alias)
+and compose draws an optional physical **paper seam overlay**
+(`--seam-style paper`, default): a narrow warm ivory / aged-paper fiber edge
+with variable width (2..`--fiber-width` px) and a faint offset shadow. The
+overlay is visual only — the four zone masks underneath still tile the canvas
+exactly.
+
+### `contour` (optional) — Semantic Contour Boundary
+
+`contour` is the **optional** semantic boundary family, NOT the default. It
+derives irregular boundaries automatically from the source, using both
+low-level edges and semantic importance:
 
 1. Build an edge-energy image (`FIND_EDGES` + blur) and a face-penalty image
    from the supplied `--face-boxes`.
@@ -63,8 +117,9 @@ both low-level edges and semantic importance:
    0.15), so the four regions stay roughly balanced in area.
 5. A final pass snaps any boundary row that still cuts a face box off the face.
 
-This is the recommended default: fully automatic, deterministic, irregular,
-semantic-aware, and content-following.
+Semantic Contour is optional and is NOT the default boundary family. Choose
+it explicitly (`--boundary contour`) when the composition genuinely benefits
+from silhouette-, roofline-, architecture- or horizon-following boundaries.
 
 ### `mask` — supplied content-aware masks
 
@@ -121,10 +176,16 @@ modify more than one zone at a time.
 
 ```text
 # 1. Define the layout (deterministic)
-#    contour-aware irregular boundaries (default)
+#    ordered torn-paper seams (default)
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --direction vertical --boundary torn \
+    --anchor auto --face-boxes "100,60,180,150;330,120,410,210" \
+    --levels 65,90,30 --workdir work/
+
+#    optional semantic contour boundaries
 python scripts/slice_and_compose.py --mode prepare \
     --source photo.png --direction vertical --boundary contour \
-    --anchor auto --face-boxes "100,60,180,150;330,120,410,210" \
+    --anchor auto --face-boxes "100,60,180,150" \
     --levels 65,90,30 --workdir work/
 
 #    supplied content-aware masks
@@ -140,7 +201,7 @@ python scripts/slice_and_compose.py --mode prepare \
 # 2a. Render each non-anchor crop in work/crops/zone{i}.png with the
 #     per-zone render prompt block, save to work/rendered/zone{i}.png
 
-# 2b. Compose the poster
+# 2b. Compose the poster (torn: draws the paper seam overlay by default)
 python scripts/slice_and_compose.py --mode compose \
     --workdir work/ --output poster.png
 
@@ -156,7 +217,19 @@ python scripts/slice_and_compose.py --mode verify \
 Options:
 
 - `--direction vertical|horizontal` — slice direction.
-- `--boundary contour|mask|rect` — boundary style (default `contour`).
+- `--boundary torn|contour|mask|rect` — boundary style (default `torn`).
+- `--torn-band 0.06` — torn mode: typical global seam deviation as a fraction
+  of the slice axis (local tears reach ~`torn_band * 1.5`).
+- `--torn-roughness 1.0` — torn mode: multiplier for medium/high-frequency
+  tear amplitude (`0` = smoother).
+- `--torn-scale 1.0` — torn mode: multiplier for tear wavelength (larger =
+  longer, broader tears).
+- `--fiber-width 7` — torn mode: max paper-fiber seam width in px (variable
+  2..N).
+- `--seed 42` — deterministic seed for the torn generator (same inputs ->
+  same seams).
+- `--seam-style paper|none` — torn mode: overlay a warm torn-paper seam
+  (default `paper`) or leave hard cuts (`none`).
 - `--anchor auto|1|2|3|4` — `auto` uses the largest face overlap inside the
   zone masks; when no face boxes are given, it falls back to Logical Zone 2
   (second from left/top). `1..4` forces a zone (1-based, matching
@@ -187,10 +260,10 @@ Options:
   of the slice axis.
 - `--masks-dir DIR` — required for `--boundary mask`; four grayscale masks
   `zone0.png`..`zone3.png` (255 = region).
-- `--feather N` — soft transition width in px for zone boundaries. Defaults to
-  ~2% of the smaller image dimension (capped at 12.5%); `0` restores hard
-  edges. Wider values soften boundaries further but shrink the exact-source
-  core and can blur the four states together.
+- `--feather N` — soft transition width in px for zone boundaries. Per-mode
+  default: `torn` uses `1` px (hard physical tear, anti-aliased); `contour`,
+  `mask` and `rect` use ~2% of the smaller image dimension (capped at
+  12.5%). Explicit `0` restores fully hard edges.
 
 ## Verbatim prompt blocks
 
@@ -259,11 +332,20 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
   re-run with a wider `--band`, a forced anchor, or supplied masks.
 - Append the same global color-identity sentence to every zone prompt so the
   four rendered slices stay inside one Robot Dreams-inspired universe.
-- Soft transitions are the default: every zone (including the Reality Anchor
-  and the head) is composited through a softened mask, so boundaries blend
-  smoothly instead of cutting at one razor pixel. Pass `--feather 0` for hard
-  editorial edges, and avoid very wide feathers that blur the four states
-  together.
+- Soft transitions are the default for `contour`, `mask` and `rect`: every
+  zone (including the Reality Anchor and the head) is composited through a
+  softened mask, so boundaries blend smoothly. `torn` is the opposite — it
+  uses hard/near-hard cuts (`feather = 1`) and paints a physical torn-paper
+  seam overlay, because its look is a hard tear, not a soft blend. Pass an
+  explicit `--feather` to override either way, and avoid very wide feathers
+  that blur the four states together.
+- The torn paper-seam overlay is visual only: the four zone masks underneath
+  still tile the canvas exactly, and `--mode verify` exempts only the
+  intentional paper-fiber pixels (like the soft transition band) from the
+  exact source-equality check of the anchor/head core.
+- The `torn` and `contour` algorithms are fully isolated: `torn` never calls
+  `build_score()` or `optimize_boundary()` (those belong to `contour`), and
+  `contour` never uses the torn noise generator.
 - A one-shot full-poster generation must still pass `--mode verify`; any grid,
   strip, or contact-sheet output is rejected regardless of other qualities.
 
@@ -275,12 +357,20 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
 - the four zone masks do not tile the canvas exactly (any gap or overlap);
 - the Reality Anchor core or head core differs from the source (the
   fully-opaque interior of the softened mask must equal the source; the soft
-  transition band around it is intentionally blended and exempt); or
+  transition band and the intentional torn paper-fiber pixels around it are
+  exempt);
+- for `torn`: the three seams are missing, do not span the full canvas, cross
+  or collapse, or the zones contain islands/pockets/loops (ordered strip
+  topology broken); a seam deviating more than ~20% of the slice axis from
+  its nominal boundary is also rejected; or
 - the scene is structurally repeated (any layout where the full photograph
   appears more than once — grid, strip, contact sheet).
 
 It warns (does not fail) when:
 
-- the zone areas are unbalanced (max/min ratio above 2.5), or
-- a non-anchor zone is pixel-identical to its source slice, meaning no
-  abstraction was applied.
+- the zone areas are unbalanced (max/min ratio above 2.5),
+- a non-anchor zone is pixel-identical to its source slice (no abstraction
+  applied),
+- a torn seam deviates far from its nominal boundary (warns above ~12% of the
+  slice axis), or
+- a torn seam has a large local jump (may look jagged).

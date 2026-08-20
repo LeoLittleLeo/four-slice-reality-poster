@@ -4,7 +4,9 @@
 
 `four-slice-reality-poster` 是一个面向 Codex / Agent 图像工作流的 Skill。
 
-它不是把照片简单切成四条，再分别套上不同强度的滤镜，而是先建立四个等分的 **隐藏逻辑区（Logical Zones）**，再依据人物、建筑、树木、道路、阴影、色块和笔触等语义结构，将它们转化为四个面积大致均衡、边界可不规则的 **可见视觉模块（Visible Modules）**。
+它不是把照片简单切成四条，再分别套上不同强度的滤镜，而是先建立四个等分的 **隐藏逻辑区（Logical Zones）**，再按 **Torn-Strip Composition（默认）** 用三条连续的、多尺度的 **撕纸式接缝（torn-paper seams）** 把它们转化为四个有序的可见区域。边界是有意设计的"版面撕纸切口"，而不是语义分割轮廓——可以穿过建筑、道路、人物身体与天空，唯一强制保护的是主头部。
+
+可选边界家族：`contour`（语义轮廓，跟随剪影/屋顶线/地平线）、`mask`（自绘区域）、`rect`（等分直条）。
 
 最终目标：
 
@@ -16,14 +18,20 @@
 
 这个 Skill 首先保证四种视觉状态都可以被清晰感知，其次才追求整体融合。
 
-默认使用 **Hybrid Transition**：
+默认使用 **Torn-Strip Composition**：
 
-* 背景和大型色块可以在模块之间发生明显变化；
-* 人物、建筑等重要主体保持语义连续；
-* 模块边缘不需要是矩形；
-* 不要求所有边界完全无缝；
-* 四个模块在面积和视觉重量上保持大致均衡；
-* 最终结果必须像 **一张完整海报**，而不是四张独立图片的拼接。
+* 四个区域保持有序的 1/4、1/4、1/4、1/4 顺序结构（Ordered Strip Topology）；
+* 三条内部接缝贯穿画布一侧到另一侧，具有明显的撕纸式多尺度不规则；
+* 接缝默认不追踪人物/建筑/道路/天空的语义轮廓；
+* 接缝可以直接穿过建筑、道路、山体、树与人身体；
+* 唯一强制避让的是主脸 / 主头部；
+* 最终效果更接近 **editorial torn-paper collage**，而不是语义分割。
+
+核心原则：
+
+> **IRREGULAR EDGE ≠ IRREGULAR TERRITORY**
+>
+> Make the seams irregular. Keep the four regions topologically simple and sequential.
 
 ---
 
@@ -59,7 +67,15 @@ Horizontal division
 
 它们并不意味着最终必须出现四个矩形切片。
 
-最终可见边界可以沿着：
+默认（Torn-Strip）下，最终可见边界是三条贯穿画布的撕纸式接缝：
+
+* 多尺度不规则（低频漂移 + 中频撕裂 + 高频纤维毛边）；
+* 基本沿切片方向，但局部可蜿蜒；
+* 不跟随人物/建筑/道路/天空的轮廓；
+* 可以穿过建筑、道路、树、人群和身体；
+* 仅避开受保护的主头部。
+
+可选（Semantic Contour）时，边界可以沿着：
 
 * 人体轮廓；
 * 人群边缘；
@@ -71,11 +87,35 @@ Horizontal division
 * 大型色块；
 * 表现性笔触；
 
-形成更加自然、更加接近编辑设计与艺术拼贴的模块。
+形成语义分割式的模块。语义轮廓不是默认边界家族。
+
+## ✦ Boundary Families
+
+`--boundary` 决定四种可见区域如何切分，默认 `torn`：
+
+| 家族 | 视觉目标 | 说明 |
+|---|---|---|
+| `torn`（**默认**） | 四个有序区域 + 三条撕纸式接缝 | 多尺度不规则、贯穿画布、不跟随语义轮廓、可穿过任何普通主体、仅避让主头部；硬切口 + 可选暖色纸纤维边 |
+| `contour`（可选） | 语义轮廓边界 | 跟随剪影/人物轮廓/建筑边缘/屋顶线/天际线/道路/地平线/大色块；Semantic Contour 不是默认 |
+| `mask`（自定义） | 完全自由的形状 | 提供 4 张内容感知 mask，脚本归一化为精确平铺 |
+| `rect`（回退） | 等分直条 | 纯整数坐标的四条等宽/等高条 |
+
+确定性：`torn` 使用 `--seed`（默认 42），相同输入必定输出相同的接缝。
+
+```bash
+# 默认 torn（撕纸式）
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --direction vertical --boundary torn \
+    --anchor auto --face-boxes "100,60,180,150" \
+    --levels 65,90,30 --workdir work/
+
+# 可选语义轮廓
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --direction vertical --boundary contour \
+    --face-boxes "100,60,180,150" --levels 65,90,30 --workdir work/
+```
 
 ---
-
-## ✦ Reality Anchor
 
 四个逻辑区中只会选择一个 **Reality Anchor**，作为主要摄影现实状态。
 
@@ -298,33 +338,28 @@ Only keep B when visibly better
 
 ---
 
-## ✦ Human Continuity
+## ✦ Head Continuity
 
-人脸身份正确并不意味着人物处理完成。
+**只有主头部是硬锁定的**：人脸身份、头部轮廓、发际线与脸—颈连接必须连贯。
 
-最终还必须保证：
+身体其余部分不是硬要求——身体部位可以横跨模块、同时存在于不同抽象状态（和建筑一样），跨状态的可读碎片往往比完整连续的身体更有冲击力。
 
 ```text
 Face
  ↓
 Head contour
  ↓
-Jaw
- ↓
-Neck
- ↓
-Shoulders
- ↓
-Body
+Face-to-neck connection   （硬）
+──────────────
+Shoulders / Body          （软偏好，可跨状态）
 ```
 
-形成连续而自然的结构。
-
-模块边界可以穿过人物附近，但不能制造：
+模块边界可以穿过人物附近（默认 torn 接缝允许穿过身体），但不能制造：
 
 * 错位抠图；
-* 头身错位；
 * 双重轮廓；
+* 意外重复的肢体/双脸/鬼影；
+* 类似 Photoshop 抠图未对齐的残次效果。
 * 肩部断裂；
 * 重影；
 * 人物局部平移；
@@ -361,38 +396,27 @@ Reality
 
 ---
 
-## ✦ Irregular Visible Modules
+## ✦ Ordered Torn-Strip Modules
 
-虽然逻辑层严格维护四等分区域，但最终视觉层不需要表现成规则四切片。
-
-推荐从场景本身寻找边界：
+虽然逻辑层严格维护四等分区域，但最终视觉层默认不是规则四切片，而是四条有序区域的撕纸式接缝。
 
 ```text
 logical zones
        ↓
-semantic interpretation
+multi-scale torn-paper seams
        ↓
-irregular visible modules
+four ordered sequential regions
 ```
-
-例如：
-
-```text
-人物轮廓
-建筑屋顶
-树木边缘
-道路曲线
-阴影
-天空
-大型色块
-绘画笔触
-```
-
-都可以成为视觉模块的边界。
 
 核心原则：
 
+> **IRREGULAR EDGE ≠ IRREGULAR TERRITORY**
+
 > **Hidden ownership is mathematical. Visible boundaries are designed.**
+
+> **Torn boundaries are layout-defined seams, not semantic segmentation contours.**
+
+默认禁止把四个区域变成任意形状的 blob、孤岛、封闭口袋、U 形环绕或大幅半岛——不规则属于接缝几何，不属于整体模块拓扑。
 
 ---
 
@@ -478,10 +502,10 @@ ONE COHERENT BUT CLEARLY MODULAR POSTER
 当不同规则发生冲突时，按以下优先级处理：
 
 1. **Primary Face Identity & Natural Facial Coherence**
-2. **Head / Shoulder / Human Body Continuity**
+2. **Primary Head Identity & Continuity**（身体与建筑连续性为软偏好，可跨状态共存）
 3. **Reality Anchor Role & Local Source Preservation**
 4. **Architectural Identity**
-5. **Four-State Readability & Abstraction Assignment**
+5. **Four-State Readability & Abstraction Assignment & Ordered Strip Topology**
 6. **Robot Dreams-Inspired Color Identity**
 7. **Intentional Modular Boundary Design**
 8. **Artistic Experimentation**
@@ -500,7 +524,7 @@ ONE COHERENT BUT CLEARLY MODULAR POSTER
 正确的人脸身份
 ```
 
-同样：
+同样，默认 torn 家族下：
 
 ```text
 漂亮的不规则边界
@@ -509,7 +533,7 @@ ONE COHERENT BUT CLEARLY MODULAR POSTER
 不能优先于：
 
 ```text
-自然的人体连续性
+有序的四区域拓扑（IRREGULAR EDGE ≠ IRREGULAR TERRITORY）
 ```
 
 ---
@@ -576,8 +600,10 @@ git pull
 安装后，可以在支持 Skill 调用的环境中使用：
 
 ```text
-Use $four-slice-reality-poster to transform my photo into a readable
-four-state poster with irregular modules and identity-safe face handling.
+Use $four-slice-reality-poster to transform my photo into ONE continuous
+poster: four ordered regions separated by three irregular torn-paper seams
+(Reality / 30% / 65% / 90% abstraction). Never a 2x2 grid or four full-image
+versions.
 ```
 
 中文：
@@ -588,8 +614,8 @@ four-state poster with irregular modules and identity-safe face handling.
 保留一个摄影级 Reality 状态，并生成 30%、65%、90%
 三个结构上明显不同的抽象状态。
 
-保持四个区域清晰可读，允许不规则语义边界，
-并优先保护人物身份与自然的人体连续性。
+默认使用撕纸式接缝（torn）：四个有序区域 + 三条贯穿画布的
+不规则接缝，接缝可穿过建筑、道路和人物身体，但必须避开主头部。
 ```
 
 也可以追加自定义要求：
@@ -697,21 +723,25 @@ four-slice-reality-poster/
 │   ├── abstraction-language.md
 │   ├── cinematic-color-system.md
 │   ├── composition-and-anchor.md
+│   ├── deterministic-layout.md
 │   ├── intentional-modular-composition.md
 │   └── subjects-validation.md
 │
 └── scripts/
+    ├── slice_and_compose.py
     └── restore_protected_anchor.py
 ```
 
 | File                                 | Responsibility                 |
 | ------------------------------------ | ------------------------------ |
 | `SKILL.md`                           | Skill 主入口、视觉目标、完整工作流与决策优先级     |
-| `composition-and-anchor.md`          | 四逻辑区、Reality Anchor、状态分配与主体连续性 |
+| `composition-and-anchor.md`          | 四逻辑区、Ordered Strip Topology、Reality Anchor、状态分配 |
+| `deterministic-layout.md`            | 确定性切分/合成管线（torn/contour/mask/rect）、CLI 与 verify |
 | `abstraction-language.md`            | 抽象方法与 30 / 65 / 90% 等级校准       |
 | `cinematic-color-system.md`          | 默认电影配色系统与模块色彩关系                |
-| `intentional-modular-composition.md` | 不规则视觉模块、边界与视觉节奏                |
+| `intentional-modular-composition.md` | 边界家族（Torn-Strip 默认 / Semantic Contour 可选）、视觉节奏 |
 | `subjects-validation.md`             | 人物、建筑、硬约束与最终验收                 |
+| `slice_and_compose.py`               | 确定性切分、torn 接缝生成、合成与 verify   |
 | `restore_protected_anchor.py`        | 条件性源像素恢复候选生成                   |
 | `agents/openai.yaml`                 | Agent 展示信息与默认调用 Prompt         |
 
@@ -745,6 +775,16 @@ Keep hidden logical ownership mathematically equal.
 
 ```text
 Make visible module boundaries irregular, designed, and readable.
+```
+
+```text
+IRREGULAR EDGE ≠ IRREGULAR TERRITORY —
+keep the four modules topologically simple and sequential.
+```
+
+```text
+Torn boundaries are layout-defined seams,
+not semantic segmentation contours.
 ```
 
 ```text
