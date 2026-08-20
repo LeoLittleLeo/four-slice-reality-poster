@@ -299,13 +299,15 @@ you: do NOT reconstruct, complete, extrapolate, or invent content outside
 this crop, and do NOT show the full scene. The output must contain exactly
 the same slice, the same framing, the same camera angle, the same subject
 placement, and the same aspect ratio as the input crop — nothing new may
-enter the frame. Keep it as ONE continuous slice with no frames, borders,
-gutters, labels, dividers, or additional panels — never a grid, a contact
-sheet, or multiple versions of the scene. Do not crop, pad, or add margins
-of your own. Keep the warm, nostalgic, sunlit, slightly retro Robot
-Dreams-inspired palette. The slice must remain clearly traceable to this
-exact photograph while departing in structural information density as
-instructed.
+enter the frame. The output image must keep the SAME aspect ratio and
+orientation as the input crop: a portrait crop stays portrait, a landscape
+crop stays landscape — never rotate, never change the output format. Keep it
+as ONE continuous slice with no frames, borders, gutters, labels, dividers,
+or additional panels — never a grid, a contact sheet, or multiple versions
+of the scene. Do not crop, pad, or add margins of your own. Keep the warm,
+nostalgic, sunlit, slightly retro Robot Dreams-inspired palette. The slice
+must remain clearly traceable to this exact photograph while departing in
+structural information density as instructed.
 ```
 
 ### Scheme B inpaint block
@@ -348,6 +350,15 @@ slightly retro Robot Dreams-inspired palette.
   re-run with a wider `--band`, a forced anchor, or supplied masks.
 - Append the same global color-identity sentence to every zone prompt so the
   four rendered slices stay inside one Robot Dreams-inspired universe.
+- Compose sanity-checks every rendered zone before pasting and **refuses to
+  build the poster** when a render is unusable: an aspect/orientation
+  mismatch with its crop (a landscape full scene for a portrait strip) or a
+  near-copy of the full source scene (the model completed the photograph).
+  Re-render the offending zone with the strict per-zone render block.
+- A one-shot full-poster generation is a fallback only: it must keep the
+  source aspect ratio and orientation (portrait stays portrait), must still
+  pass `--mode verify`, and any grid, strip, contact sheet, or repeated-scene
+  output is rejected regardless of other qualities.
 - Soft transitions are the default for `contour`, `mask` and `rect`: every
   zone (including the Reality Anchor and the head) is composited through a
   softened mask, so boundaries blend smoothly. `torn` is the opposite — it
@@ -393,4 +404,8 @@ It warns (does not fail) when:
 - a rendered abstract zone resembles the FULL source scene instead of its own
   slice — the symptom of "four repeated images at different abstraction
   levels", caused by the image model completing the photograph inside a zone
-  render. Re-render that zone with the strict per-zone render block.
+  render.
+
+Compose and verify both fail when a rendered zone is a gross full-scene copy
+or has a wrong aspect/orientation; re-render that zone with the strict
+per-zone render block.

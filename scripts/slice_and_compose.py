@@ -1005,6 +1005,8 @@ def cmd_compose(args: argparse.Namespace) -> None:
         raise SystemExit("Source changed since prepare; re-run --mode prepare.")
 
     rendered_dir = Path(args.rendered_dir)
+    src_rgb = canvas.convert("RGB")
+    render_warnings: List[str] = []
     for z in manifest["zones"]:
         if z["level"] == "anchor":
             continue
@@ -1015,6 +1017,14 @@ def cmd_compose(args: argparse.Namespace) -> None:
             raise SystemExit(f"Missing rendered zone {z['index'] + 1}: {rendered_path}")
         with Image.open(rendered_path) as ri:
             rendered = ri.convert("RGBA")
+        crop_path = Path(z["crop"])
+        if crop_path.is_file():
+            with Image.open(crop_path) as ci:
+                crop = ci.convert("RGB")
+            reason, warns = rendered_zone_sanity(rendered, crop, src_rgb, z["index"])
+            if reason:
+                raise SystemExit(reason)
+            render_warnings.extend(warns)
         crop_box = tuple(z["crop_box"])
         box = tuple(z["box"])
         cw, ch = crop_box[2] - crop_box[0], crop_box[3] - crop_box[1]
@@ -1031,6 +1041,9 @@ def cmd_compose(args: argparse.Namespace) -> None:
         mask_region = soft_mask(mask_region, manifest.get("feather", 0))
         canvas.paste(region, (box[0], box[1]), mask_region)
         print(f"Pasted zone {z['index'] + 1} at {box[:2]} level={z['level']}")
+
+    for wmsg in render_warnings:
+        print(f"  warning: {wmsg}")
 
     canvas = enforce_anchor(canvas, source, manifest)
     if (manifest.get("boundary") == "torn"
@@ -1104,16 +1117,52 @@ def mean_abs_diff(a: Image.Image, b: Image.Image) -> float:
     return total / (3.0 * t * t * 255.0)
 
 
+def rendered_zone_sanity(rendered: Image.Image, crop: Image.Image,
+                         src_rgb: Image.Image, zone_index: int) -> Tuple[Optional[str], List[str]]:
+    """Sanity-check one rendered zone before it is allowed into the poster.
+
+    Returns `(fail_reason, warnings)`. A fail means the render is unusable and
+    the zone must be re-rendered:
+
+    - aspect mismatch: the model produced a different orientation/format than
+      the crop (e.g. a landscape full scene for a portrait strip) — pasting it
+      would show a stretched horizontal image inside a vertical zone;
+    - gross full-scene completion: the render matches the full source scene
+      squished into the crop aspect much better than it matches its own slice
+      (the symptom of "four repeated images at different abstraction levels").
+    """
+    warns: List[str] = []
+    cw, ch = crop.size
+    if cw <= 0 or ch <= 0:
+        return ("zone crop has zero size.", warns)
+    ar_r = rendered.width / max(1, rendered.height)
+    ar_c = cw / max(1, ch)
+    if max(ar_r, ar_c) > 0 and min(ar_r, ar_c) / max(ar_r, ar_c) < 0.8:
+        return (f"rendered zone {zone_index + 1} aspect {rendered.width}x{rendered.height} "
+                f"does not match its crop {cw}x{ch} — the model likely completed the "
+                "scene at a different orientation; re-render it with the strict per-zone "
+                "render block (keep the crop's aspect and orientation).", warns)
+    rend = rendered.convert("RGB").resize(crop.size)
+    own = mean_abs_diff(rend, crop.convert("RGB"))
+    full = mean_abs_diff(rend, src_rgb.resize(crop.size))
+    if own > 0.08:
+        if full < own * 0.4:
+            return (f"rendered zone {zone_index + 1} is a near-copy of the full source "
+                    "scene — the model completed the photograph instead of the slice; "
+                    "re-render it with the strict per-zone render block.", warns)
+        if full < own * 0.55:
+            warns.append(f"zone {zone_index + 1} render resembles the full source scene; "
+                         "double-check it shows only its own slice.")
+    return (None, warns)
+
+
 def check_zone_renders(manifest: dict, src: Image.Image, workdir: Path) -> None:
-    """Best-effort guard against the model completing the photograph.
+    """Guard against the model completing the photograph inside a zone render.
 
     A correct abstract-zone render shows only its own slice, so it differs
     strongly from the full source scene squished into the crop's aspect. When
-    the model instead re-rendered the FULL scene inside the zone (the symptom
-    of 'four repeated images, different abstraction levels'), the render
-    matches the squished full source much better than it matches its own
-    slice. Warn (never hard-fail — this is a heuristic) so the agent can
-    re-render with the strict slice prompt block.
+    the model instead re-rendered the FULL scene (or a wrong orientation),
+    the render is unusable: fail so the agent must re-render the zone.
     """
     src_rgb = src.convert("RGB")
     for z in manifest["zones"]:
@@ -1124,14 +1173,13 @@ def check_zone_renders(manifest: dict, src: Image.Image, workdir: Path) -> None:
         if not rendered.is_file() or not crop_path.is_file():
             continue
         with Image.open(rendered) as ri, Image.open(crop_path) as ci:
-            rend = ri.convert("RGB").resize(ci.size)
+            rend = ri.convert("RGB")
             crop = ci.convert("RGB")
-        own = mean_abs_diff(rend, crop)
-        full = mean_abs_diff(rend, src_rgb.resize(crop.size))
-        if own > 0.08 and full < own * 0.55:
-            print(f"  warning: zone {z['index'] + 1} render resembles the full source "
-                  "scene (the model likely completed the photograph instead of the "
-                  "slice); re-render it with the strict per-zone prompt block.")
+        reason, warns = rendered_zone_sanity(rend, crop, src_rgb, z["index"])
+        if reason:
+            raise SystemExit(reason)
+        for wmsg in warns:
+            print(f"  warning: {wmsg}")
 
 
 def check_torn_topology(manifest: dict, masks: List[Image.Image],
