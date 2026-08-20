@@ -27,25 +27,44 @@ them into exact pixel regions.
 `--boundary` selects how the four regions are cut. All three styles tile the
 canvas exactly (no gaps, no overlaps) and keep the Reality Anchor protected.
 
-### `contour` (default) — irregular, content-aware boundaries
+### `contour` (default) — irregular, semantic + edge-aware boundaries
 
-The script derives irregular boundaries automatically from the source:
+The script derives irregular boundaries automatically from the source, using
+both low-level edges and semantic importance:
 
 1. Build an edge-energy image (`FIND_EDGES` + blur) and a face-penalty image
    from the supplied `--face-boxes`.
-2. For each of the three internal boundaries, run a deterministic path search
-   (sliding-window dynamic programming) from one canvas edge to the other. The
-   path maximizes the edge strength it follows — so boundaries align with
-   building contours, rooflines, skylines, tree canopies, roads, shadows, and
-   other strong image edges — while a large penalty keeps it off faces.
-3. Each boundary is constrained to a balance band around its nominal equal
-   edge (`--band`, default 0.18 of the slice axis) and separated from its
-   neighbors by at least `--min-zone` (default 0.15), so the four regions stay
-   roughly balanced in area.
-4. A final pass snaps any boundary row that still cuts a face box off the face.
+2. Build semantic class masks (importance weights) for `person`,
+   `architecture`, `road`, and `sky`:
+   - built-in heuristics (on by default, `--no-auto-semantic` to disable):
+     `person` approximates silhouettes by extending each face box ~5 face
+     heights down and ~2.5 face widths wide; `sky` flood-fills a bright
+     blue-ish region from the top edge; `road` flood-fills a mid-tone
+     desaturated region from the bottom edge. Heuristics are approximate and
+     conservative; small misdetections are discarded by an area threshold.
+   - supplied masks override per class: `--class-masks-dir` with optional
+     `person.png`, `architecture.png`, `road.png`, `sky.png` (grayscale,
+     source size). `architecture` has no built-in heuristic and comes only
+     from supplied masks.
+3. Combine into one per-pixel boundary score:
+   `w_edge × FIND_EDGES + Σ w_class × class_boundary − inside_penalty(important) − edge_suppress × FIND_EDGES(low-importance) − BIG(face)`.
+   Class boundaries (silhouettes, rooflines, the horizon, road lines) get a
+   reward so boundaries align with them; important-class interiors (`person`,
+   `architecture`) get a penalty so boundaries do not cut through them;
+   low-importance interiors (`road`, `sky`) have their noise edges suppressed
+   so boundaries are not dragged by clouds, texture, or road markings. Weights
+   are soft preferences, tunable with `--class-weights`; faces keep their own
+   hard penalty.
+4. For each of the three internal boundaries, run a deterministic path search
+   (sliding-window dynamic programming) from one canvas edge to the other,
+   maximizing the combined score. Each boundary is constrained to a balance
+   band around its nominal equal edge (`--band`, default 0.18 of the slice
+   axis) and separated from its neighbors by at least `--min-zone` (default
+   0.15), so the four regions stay roughly balanced in area.
+5. A final pass snaps any boundary row that still cuts a face box off the face.
 
 This is the recommended default: fully automatic, deterministic, irregular,
-and content-following.
+semantic-aware, and content-following.
 
 ### `mask` — supplied content-aware masks
 
@@ -139,7 +158,15 @@ Options:
   (second from left/top). `1..4` forces a zone (1-based, matching
   `restore_protected_anchor.py`).
 - `--face-boxes "x0,y0,x1,y1;..."` — semicolon-separated face boxes used for
-  automatic anchor selection, contour face avoidance, and boundary snapping.
+  automatic anchor selection, contour face avoidance, boundary snapping, and
+  the built-in `person` silhouette heuristic.
+- `--auto-semantic` / `--no-auto-semantic` — built-in semantic heuristics for
+  `person`/`sky`/`road` in contour mode (on by default).
+- `--class-masks-dir DIR` — optional dir with `person.png`,
+  `architecture.png`, `road.png`, `sky.png` class masks (grayscale, source
+  size); a supplied mask replaces the built-in heuristic for that class.
+- `--class-weights person=200,architecture=120,road=80,sky=60` — optional
+  per-class boundary-reward weights in contour mode.
 - `--levels 30,65,90` — a permutation of the three abstraction levels,
   assigned in spatial order to the three non-anchor zones. Choose a
   non-mechanical permutation based on balance, meaning, rhythm, and color.
@@ -208,9 +235,13 @@ nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
 - The Reality Anchor is always composited from the source through its own zone
   mask; the anchor region never comes from the model in Scheme A, and is
   force-restored in Scheme B.
-- Contour boundaries follow strong edges and avoid face boxes; if a boundary
-  still cuts a face, the layout should be re-run with a wider `--band`, a
-  forced anchor, or supplied masks.
+- Contour boundaries are semantic + edge-aware: they follow strong edges and
+  class boundaries (silhouettes, rooflines, horizon, road lines), avoid
+  important interiors (people, architecture) and faces. Built-in `sky`/`road`
+  heuristics are approximate; when they misdetect a scene, supply
+  `sky.png`/`road.png`/`person.png`/`architecture.png` in `--class-masks-dir`
+  or disable them with `--no-auto-semantic`. If a boundary still cuts a face,
+  re-run with a wider `--band`, a forced anchor, or supplied masks.
 - Append the same global color-identity sentence to every zone prompt so the
   four rendered slices stay inside one Robot Dreams-inspired universe.
 - Do not feather boundaries by default; only a small optional `--feather` is

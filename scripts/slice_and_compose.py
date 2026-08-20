@@ -26,6 +26,7 @@ sheet) is geometrically impossible in the output of this script.
 from __future__ import annotations
 
 import argparse
+import array
 import json
 import sys
 from collections import deque
@@ -39,6 +40,17 @@ LEVELS = (30, 65, 90)
 BIG = 10 ** 6        # face penalty weight
 STEP = 6             # max column change per row in boundary path search
 BALANCE_RATIO = 2.5  # warn when max/min zone area ratio exceeds this
+
+# Semantic + edge-aware weights. Boundary score per pixel =
+#   w_edge * FIND_EDGES
+#   + sum( w_class * class_boundary )          (person/architecture/road/sky outlines)
+#   - inside_penalty(important classes)        (person, architecture)
+#   - edge_suppress * FIND_EDGES               (road/sky interiors: quiet noise edges)
+#   - BIG if inside a face box
+DEFAULT_CLASS_WEIGHTS = {"person": 200, "architecture": 120, "road": 80, "sky": 60}
+PERSON_PENALTY = 20_000
+ARCH_PENALTY = 10_000
+EDGE_SUPPRESS = 0.6
 
 
 def exact_edges(size: int, n: int = 4) -> List[int]:
@@ -97,10 +109,9 @@ def rect_masks(direction: str, width: int, height: int) -> List[Image.Image]:
     return masks
 
 
-def edge_and_face_images(source: Path, width: int, height: int,
+def edge_and_face_images(img: Image.Image, width: int, height: int,
                          face_boxes: List[Box]) -> Tuple[Image.Image, Image.Image]:
-    with Image.open(source) as im:
-        gray = im.convert("L")
+    gray = img.convert("L")
     edges = gray.filter(ImageFilter.FIND_EDGES).filter(ImageFilter.GaussianBlur(5))
     face = Image.new("L", (width, height), 0)
     draw = ImageDraw.Draw(face)
@@ -116,6 +127,187 @@ def edge_and_face_images(source: Path, width: int, height: int,
 def rotated_face_boxes(face_boxes: List[Box], width: int, height: int) -> List[Box]:
     """Rotate 90 degrees counterclockwise: (x, y) -> (y, width - 1 - x)."""
     return [(y0, width - 1 - x1, y1, width - 1 - x0) for (x0, y0, x1, y1) in face_boxes]
+
+
+# ---------------------------------------------------------------------------
+# Semantic classes (importance-aware contour weights)
+# ---------------------------------------------------------------------------
+
+def detect_region_from_edge(img: Image.Image, width: int, height: int, edge: str,
+                            seed_vmin: int, seed_vmax: int, seed_smax: int,
+                            grow_vmin: int, grow_vmax: int, grow_smax: int,
+                            hue_min: int = 0, hue_max: int = 255,
+                            min_area_frac: float = 0.0) -> Optional[Image.Image]:
+    """Flood-fill a region growing from the top or bottom edge.
+
+    Built-in approximation for sky (bright, blue-ish, from the top) and
+    ground/road (mid-tone desaturated, from the bottom). The optional hue
+    window constrains the class (e.g. blue sky), and `min_area_frac` discards
+    tiny misdetections. Returns None when nothing meaningful is found, so the
+    caller can fall back to edge-only behavior.
+    """
+    with img.convert("HSV") as hsv:
+        h_bytes = hsv.getchannel("H").tobytes()
+        s_bytes = hsv.getchannel("S").tobytes()
+        v_bytes = hsv.getchannel("V").tobytes()
+    owned = bytearray(width * height)
+    dq: deque = deque()
+
+    def seed_ok(i: int) -> bool:
+        return (seed_vmin <= v_bytes[i] <= seed_vmax and s_bytes[i] <= seed_smax
+                and (hue_min <= h_bytes[i] <= hue_max or hue_min == 0 and hue_max == 255))
+
+    def grow_ok(i: int) -> bool:
+        return (grow_vmin <= v_bytes[i] <= grow_vmax and s_bytes[i] <= grow_smax
+                and (hue_min <= h_bytes[i] <= hue_max or hue_min == 0 and hue_max == 255))
+
+    if edge == "top":
+        for x in range(width):
+            i = x
+            if seed_ok(i):
+                owned[i] = 255
+                dq.append(i)
+    else:
+        for x in range(width):
+            i = (height - 1) * width + x
+            if seed_ok(i):
+                owned[i] = 255
+                dq.append(i)
+    while dq:
+        i = dq.popleft()
+        y, x = divmod(i, width)
+        for nx, ny in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+            if 0 <= nx < width and 0 <= ny < height:
+                j = ny * width + nx
+                if owned[j] == 0 and grow_ok(j):
+                    owned[j] = 255
+                    dq.append(j)
+    mask = Image.frombytes("L", (width, height), bytes(owned))
+    count = mask.histogram()[255]
+    if count < min_area_frac * width * height:
+        return None
+    return mask
+
+
+def person_from_faces(face_boxes: List[Box], width: int, height: int) -> Image.Image:
+    """Approximate person silhouettes by extending each face box downward.
+
+    Faces are about 1/7 of a standing person's height and roughly half the
+    shoulder width, so the body box extends ~5 face heights down and widens to
+    ~2.5 face widths. Only a soft importance hint for the contour energy; the
+    visible modules are still defined by the zone masks, and faces keep their
+    own BIG penalty.
+    """
+    mask = Image.new("L", (width, height), 0)
+    draw = ImageDraw.Draw(mask)
+    for (x0, y0, x1, y1) in face_boxes:
+        fw, fh = x1 - x0, y1 - y0
+        body = (
+            max(0, int(x0 + fw / 2 - fw * 1.25)),
+            y1,
+            min(width, int(x0 + fw / 2 + fw * 1.25)),
+            min(height, y1 + int(fh * 5)),
+        )
+        draw.rectangle((body[0], body[1], body[2] - 1, body[3] - 1), fill=255)
+    return mask
+
+
+def load_class_mask(path: Path, width: int, height: int, name: str) -> Image.Image:
+    if not path.is_file():
+        raise SystemExit(f"Missing class mask: {path}")
+    with Image.open(path) as im:
+        mask = im.convert("L")
+    if mask.size != (width, height):
+        raise SystemExit(f"Class mask {path} size {mask.size} does not match source {(width, height)}.")
+    return mask
+
+
+def build_semantic_images(img: Image.Image, width: int, height: int,
+                          face_boxes: List[Box], auto_semantic: bool,
+                          class_masks_dir: Optional[Path]) -> Dict[str, Image.Image]:
+    """Built-in heuristics (person/sky/ground) overridden by supplied masks.
+
+    `person` and `architecture` are important classes (inside = penalty);
+    `road` and `sky` are low-importance classes (interior edges suppressed).
+    """
+    sem: Dict[str, Image.Image] = {}
+    if class_masks_dir is not None:
+        d = Path(class_masks_dir)
+        for name in ("person", "architecture", "road", "sky"):
+            p = d / f"{name}.png"
+            if p.is_file():
+                sem[name] = load_class_mask(p, width, height, name)
+    if auto_semantic:
+        if "person" not in sem and face_boxes:
+            sem["person"] = person_from_faces(face_boxes, width, height)
+        if "sky" not in sem:
+            sky = detect_region_from_edge(
+                img, width, height, "top",
+                seed_vmin=120, seed_vmax=255, seed_smax=160,
+                grow_vmin=100, grow_vmax=255, grow_smax=170,
+                hue_min=115, hue_max=190,   # blue range (170-260 deg in 0-255 scale)
+                min_area_frac=0.05,
+            )
+            if sky is not None:
+                sem["sky"] = sky
+        if "road" not in sem:
+            road = detect_region_from_edge(
+                img, width, height, "bottom",
+                seed_vmin=40, seed_vmax=235, seed_smax=100,
+                grow_vmin=30, grow_vmax=240, grow_smax=120,
+                min_area_frac=0.08,
+            )
+            if road is not None:
+                sem["road"] = road
+    return sem
+
+
+def build_score(edges: Image.Image, face: Image.Image,
+                sem: Dict[str, Image.Image],
+                weights: Dict[str, int]) -> array.array:
+    """Combine edge energy, class-boundary rewards, and inside penalties into
+    one int32 score field consumed by optimize_boundary."""
+    width, height = edges.size
+    n = width * height
+    edge_bytes = edges.tobytes()
+    face_bytes = face.tobytes()
+    prep: Dict[str, Tuple[bytes, bytes]] = {}
+    for name, mask in sem.items():
+        dilated = mask.filter(ImageFilter.MaxFilter(3))
+        boundary = ImageChops.subtract(dilated, mask).tobytes()
+        prep[name] = (mask.tobytes(), boundary)
+    scores = array.array("i", [0]) * n
+    for i in range(n):
+        e = edge_bytes[i]
+        v = e
+        if face_bytes[i]:
+            v -= BIG
+        if "person" in prep:
+            inside, bnd = prep["person"]
+            if inside[i]:
+                v -= PERSON_PENALTY
+            elif bnd[i]:
+                v += weights.get("person", DEFAULT_CLASS_WEIGHTS["person"])
+        if "architecture" in prep:
+            inside, bnd = prep["architecture"]
+            if inside[i]:
+                v -= ARCH_PENALTY
+            elif bnd[i]:
+                v += weights.get("architecture", DEFAULT_CLASS_WEIGHTS["architecture"])
+        if "road" in prep:
+            inside, bnd = prep["road"]
+            if inside[i]:
+                v -= int(EDGE_SUPPRESS * e)
+            elif bnd[i]:
+                v += weights.get("road", DEFAULT_CLASS_WEIGHTS["road"])
+        if "sky" in prep:
+            inside, bnd = prep["sky"]
+            if inside[i]:
+                v -= int(EDGE_SUPPRESS * e)
+            elif bnd[i]:
+                v += weights.get("sky", DEFAULT_CLASS_WEIGHTS["sky"])
+        scores[i] = v
+    return scores
 
 
 def sliding_max_arg(arr: List[float], step: int) -> List[int]:
@@ -148,28 +340,26 @@ def sliding_max_arg_rev(arr: List[float], step: int) -> List[int]:
     return out
 
 
-def optimize_boundary(edge_data: bytes, face_data: bytes, stride: int,
+def optimize_boundary(score_data: array.array, stride: int,
                       lo: int, hi: int, step: int,
                       lb: Optional[List[int]]) -> List[int]:
-    """Best top-to-bottom path within [lo, hi] maximizing edge strength.
+    """Best top-to-bottom path within [lo, hi] maximizing the combined score.
 
-    Penalizes passing through face pixels (BIG) and keeps a per-row lower
-    bound `lb` so consecutive boundaries cannot cross or collapse.
+    The score field already contains edge energy, semantic class-boundary
+    rewards, inside penalties, and the face penalty; `lb` keeps a per-row
+    lower bound so consecutive boundaries cannot cross or collapse.
     Returns one x value per row.
     """
-    height = len(edge_data) // stride
+    height = len(score_data) // stride
     ncols = hi - lo + 1
     NEG = float("-inf")
     prev = [NEG] * ncols
     back: List[List[int]] = [[0] * ncols for _ in range(height)]
-    first = edge_data[:stride]
-    first_face = face_data[:stride]
+    first = score_data[:stride]
     for c in range(ncols):
-        x = lo + c
-        prev[c] = first[x] - (BIG if first_face[x] else 0)
+        prev[c] = first[lo + c]
     for r in range(1, height):
-        e_row = edge_data[r * stride:(r + 1) * stride]
-        f_row = face_data[r * stride:(r + 1) * stride]
+        row = score_data[r * stride:(r + 1) * stride]
         fidx = sliding_max_arg(prev, step)
         bidx = sliding_max_arg_rev(prev, step)
         winidx = [fidx[i] if prev[fidx[i]] >= prev[bidx[i]] else bidx[i] for i in range(ncols)]
@@ -182,7 +372,7 @@ def optimize_boundary(edge_data: bytes, face_data: bytes, stride: int,
             x = lo + c
             if x < lb_r:
                 continue
-            cur[c] = winmax[c] + e_row[x] - (BIG if f_row[x] else 0)
+            cur[c] = winmax[c] + row[x]
             back[r][c] = winidx[c]
         prev = cur
     best_c = max(range(ncols), key=lambda c: prev[c])
@@ -215,17 +405,19 @@ def snap_off_faces(path: List[int], face_boxes: List[Box], lo: int, hi: int,
 
 def contour_masks(direction: str, width: int, height: int,
                   edges: Image.Image, face: Image.Image,
-                  face_boxes: List[Box], band: float, min_zone: float) -> List[Image.Image]:
-    """Compute 3 irregular boundaries via edge-following path search."""
+                  face_boxes: List[Box], band: float, min_zone: float,
+                  sem: Dict[str, Image.Image],
+                  weights: Dict[str, int]) -> List[Image.Image]:
+    """Compute 3 irregular boundaries via semantic + edge-aware path search."""
     orig_w, orig_h = width, height
     if direction == "horizontal":
         edges = edges.rotate(90, expand=True)
         face = face.rotate(90, expand=True)
         face_boxes = rotated_face_boxes(face_boxes, width, height)
+        sem = {name: m.rotate(90, expand=True) for name, m in sem.items()}
         width, height = height, width
+    score_data = build_score(edges, face, sem, weights)
     stride = width
-    edge_data = edges.tobytes()
-    face_data = face.tobytes()
     band_px = max(1, int(band * width))
     min_sep = max(1, int(min_zone * width))
     paths: List[List[int]] = []
@@ -243,7 +435,7 @@ def contour_masks(direction: str, width: int, height: int,
         lb = None
         if prev_path is not None:
             lb = [p + min_sep for p in prev_path]
-        path = optimize_boundary(edge_data, face_data, stride, lo, hi, STEP, lb)
+        path = optimize_boundary(score_data, stride, lo, hi, STEP, lb)
         path = snap_off_faces(path, face_boxes, lo, hi, lb)
         paths.append(path)
         prev_path = path
@@ -359,13 +551,17 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         raise SystemExit(f"Source not found: {source}")
     with Image.open(source) as im:
         width, height = im.size
+        img = im.convert("RGB")
 
     if args.boundary == "rect":
         masks = rect_masks(args.direction, width, height)
     elif args.boundary == "contour":
-        edges, face = edge_and_face_images(source, width, height, args.face_boxes)
+        edges, face = edge_and_face_images(img, width, height, args.face_boxes)
+        sem = build_semantic_images(img, width, height, args.face_boxes,
+                                    args.auto_semantic, args.class_masks_dir)
         masks = contour_masks(args.direction, width, height, edges, face,
-                              args.face_boxes, args.band, args.min_zone)
+                              args.face_boxes, args.band, args.min_zone,
+                              sem, args.class_weights)
     else:  # mask
         masks = load_masks_dir(args.masks_dir, width, height)
     check_tiling(masks, width, height)
@@ -387,30 +583,28 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         d.mkdir(parents=True, exist_ok=True)
 
     manifest_zones = []
-    with Image.open(source) as im:
-        img = im.convert("RGBA")
-        for i, mask in enumerate(masks):
-            bbox = mask.getbbox()
-            if bbox is None:
-                raise SystemExit(f"Zone mask {i + 1} is empty.")
-            box = tuple(bbox)
-            crop_box = crop_box_for(box, width, height, args.margin)
-            crop = img.crop(crop_box)
-            crop_path = crops_dir / f"zone{i}.png"
-            crop.save(crop_path)
-            mask_path = masks_dir / f"zone{i}.png"
-            mask.save(mask_path)
-            manifest_zones.append(
-                {
-                    "index": i,
-                    "box": list(box),
-                    "crop_box": list(crop_box),
-                    "crop": str(crop_path),
-                    "mask": str(mask_path),
-                    "level": "anchor" if i == anchor else level_map[i],
-                    "rendered": str(rendered_dir / f"zone{i}.png"),
-                }
-            )
+    for i, mask in enumerate(masks):
+        bbox = mask.getbbox()
+        if bbox is None:
+            raise SystemExit(f"Zone mask {i + 1} is empty.")
+        box = tuple(bbox)
+        crop_box = crop_box_for(box, width, height, args.margin)
+        crop = img.crop(crop_box)
+        crop_path = crops_dir / f"zone{i}.png"
+        crop.save(crop_path)
+        mask_path = masks_dir / f"zone{i}.png"
+        mask.save(mask_path)
+        manifest_zones.append(
+            {
+                "index": i,
+                "box": list(box),
+                "crop_box": list(crop_box),
+                "crop": str(crop_path),
+                "mask": str(mask_path),
+                "level": "anchor" if i == anchor else level_map[i],
+                "rendered": str(rendered_dir / f"zone{i}.png"),
+            }
+        )
 
     manifest = {
         "source": str(source),
@@ -629,6 +823,30 @@ def parse_args() -> argparse.Namespace:
         help="Directory with zone0.png..zone3.png grayscale masks (required for --boundary mask)",
     )
     parser.add_argument(
+        "--auto-semantic",
+        action="store_true",
+        default=True,
+        help="Use built-in semantic heuristics (person/sky/ground) in contour mode (default)",
+    )
+    parser.add_argument(
+        "--no-auto-semantic",
+        action="store_false",
+        dest="auto_semantic",
+        help="Disable built-in semantic heuristics in contour mode",
+    )
+    parser.add_argument(
+        "--class-masks-dir",
+        type=Path,
+        help="Optional dir with person.png/architecture.png/road.png/sky.png class masks; "
+             "supplied masks replace the built-in heuristic for that class in contour mode",
+    )
+    parser.add_argument(
+        "--class-weights",
+        default="",
+        help="Optional per-class boundary weights, e.g. person=300,architecture=120,road=80,sky=60 "
+             "(contour mode)",
+    )
+    parser.add_argument(
         "--rendered-dir",
         type=Path,
         help="Directory with rendered zone images (compose); defaults to workdir/rendered",
@@ -647,6 +865,24 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def parse_class_weights(raw: str) -> Dict[str, int]:
+    weights = dict(DEFAULT_CLASS_WEIGHTS)
+    if not raw:
+        return weights
+    for part in raw.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        if "=" not in part:
+            raise SystemExit(f"Invalid class weight {part!r}; expected name=value.")
+        name, value = part.split("=", 1)
+        name = name.strip()
+        if name not in weights:
+            raise SystemExit(f"Unknown class {name!r}; choose from {sorted(weights)}.")
+        weights[name] = int(value)
+    return weights
+
+
 def main() -> None:
     args = parse_args()
     if args.feather < 0:
@@ -658,6 +894,7 @@ def main() -> None:
             raise SystemExit("--source and --direction are required for --mode prepare.")
         args.face_boxes = parse_face_boxes(args.face_boxes)
         args.levels = [int(x) for x in args.levels.split(",")]
+        args.class_weights = parse_class_weights(args.class_weights)
         cmd_prepare(args)
     elif args.mode == "compose":
         if args.output is None:
