@@ -292,13 +292,19 @@ each containing the full scene, gutters, or panel gaps.
 Render `work/crops/zone{i}.png` with the assigned level filled into `{LEVEL}`:
 
 ```text
-Re-render ONLY this image at {LEVEL}% abstraction from the original
-photograph. Keep the exact same composition, framing, camera angle, subject
-placement, and aspect ratio as the input. Keep it as ONE continuous slice
-with no frames, borders, gutters, labels, or additional panels. Do not crop,
-pad, or add margins of your own. Keep the warm, nostalgic, sunlit, slightly
-retro Robot Dreams-inspired palette. The slice must remain clearly traceable
-to this exact photograph while departing in structural information density as
+This image is a CROP — a slice of a larger photograph, NOT the whole picture.
+Re-render ONLY the content visible inside this crop at {LEVEL}% abstraction
+from the original photograph. The rest of the photograph does not exist for
+you: do NOT reconstruct, complete, extrapolate, or invent content outside
+this crop, and do NOT show the full scene. The output must contain exactly
+the same slice, the same framing, the same camera angle, the same subject
+placement, and the same aspect ratio as the input crop — nothing new may
+enter the frame. Keep it as ONE continuous slice with no frames, borders,
+gutters, labels, dividers, or additional panels — never a grid, a contact
+sheet, or multiple versions of the scene. Do not crop, pad, or add margins
+of your own. Keep the warm, nostalgic, sunlit, slightly retro Robot
+Dreams-inspired palette. The slice must remain clearly traceable to this
+exact photograph while departing in structural information density as
 instructed.
 ```
 
@@ -306,10 +312,14 @@ instructed.
 
 ```text
 Re-render ONLY the masked region at {LEVEL}% abstraction from the original
-photograph. Keep every pixel outside the mask unchanged. Keep the masked
-region's composition, framing, and subject placement identical to the source.
-Do not add frames, borders, gutters, labels, or panels. Keep the warm,
-nostalgic, sunlit, slightly retro Robot Dreams-inspired palette.
+photograph. The mask marks the ONLY region you may change. Keep every pixel
+outside the mask EXACTLY unchanged — do not redraw, complete, reformat, or
+recompose content outside the mask. The output is the SAME single canvas at
+the SAME aspect ratio, never a new image, a grid, a contact sheet, or
+multiple versions of the scene. Keep the masked region's composition,
+framing, and subject placement identical to the source. Do not add frames,
+borders, gutters, labels, or panels. Keep the warm, nostalgic, sunlit,
+slightly retro Robot Dreams-inspired palette.
 ```
 
 ## Engineering rules
@@ -378,5 +388,9 @@ It warns (does not fail) when:
 - a non-anchor zone is pixel-identical to its source slice (no abstraction
   applied),
 - a torn seam deviates far from its nominal boundary (warns above ~12% of the
-  slice axis), or
-- a torn seam has a large local jump (may look jagged).
+  slice axis),
+- a torn seam has a large local jump (may look jagged), or
+- a rendered abstract zone resembles the FULL source scene instead of its own
+  slice — the symptom of "four repeated images at different abstraction
+  levels", caused by the image model completing the photograph inside a zone
+  render. Re-render that zone with the strict per-zone render block.

@@ -1092,6 +1092,48 @@ def paper_seam_mask(manifest: dict, width: int, height: int) -> Optional[Image.I
     return mask
 
 
+def mean_abs_diff(a: Image.Image, b: Image.Image) -> float:
+    """Mean per-channel absolute difference in 0..1 on a small thumbnail."""
+    t = 48
+    a = a.resize((t, t))
+    b = b.resize((t, t))
+    total = 0.0
+    for ch in ImageChops.difference(a.convert("RGB"), b.convert("RGB")).split():
+        hist = ch.histogram()  # clean 256-bin L histogram: count per value
+        total += sum(v * hist[v] for v in range(256))
+    return total / (3.0 * t * t * 255.0)
+
+
+def check_zone_renders(manifest: dict, src: Image.Image, workdir: Path) -> None:
+    """Best-effort guard against the model completing the photograph.
+
+    A correct abstract-zone render shows only its own slice, so it differs
+    strongly from the full source scene squished into the crop's aspect. When
+    the model instead re-rendered the FULL scene inside the zone (the symptom
+    of 'four repeated images, different abstraction levels'), the render
+    matches the squished full source much better than it matches its own
+    slice. Warn (never hard-fail — this is a heuristic) so the agent can
+    re-render with the strict slice prompt block.
+    """
+    src_rgb = src.convert("RGB")
+    for z in manifest["zones"]:
+        if z["level"] == "anchor":
+            continue
+        rendered = Path(z["rendered"])
+        crop_path = Path(z["crop"])
+        if not rendered.is_file() or not crop_path.is_file():
+            continue
+        with Image.open(rendered) as ri, Image.open(crop_path) as ci:
+            rend = ri.convert("RGB").resize(ci.size)
+            crop = ci.convert("RGB")
+        own = mean_abs_diff(rend, crop)
+        full = mean_abs_diff(rend, src_rgb.resize(crop.size))
+        if own > 0.08 and full < own * 0.55:
+            print(f"  warning: zone {z['index'] + 1} render resembles the full source "
+                  "scene (the model likely completed the photograph instead of the "
+                  "slice); re-render it with the strict per-zone prompt block.")
+
+
 def check_torn_topology(manifest: dict, masks: List[Image.Image],
                         width: int, height: int) -> None:
     """Torn-strip topology validation for --boundary torn.
@@ -1177,6 +1219,7 @@ def cmd_verify(args: argparse.Namespace) -> None:
 
     if manifest.get("boundary") == "torn":
         check_torn_topology(manifest, masks, width, height)
+    check_zone_renders(manifest, src, args.workdir)
 
     feather = manifest.get("feather", 0)
     seam_band = None

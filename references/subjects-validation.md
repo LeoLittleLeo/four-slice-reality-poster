@@ -95,6 +95,7 @@ Confirm before delivery:
 - Hidden ownership zones remain geometrically equal while visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight.
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains. The default soft transition band (`--feather`, ~2%) keeps boundaries gentle, but the four states remain readable at thumbnail size.
 - The final image is ONE continuous source-ratio canvas tiled by four adjacent regions that share edges; the scene appears exactly once.
+- The full photograph appears exactly once (the Reality module). Each abstract zone re-renders only its own slice — never a second, third or fourth full-image copy at different abstraction levels; `--mode verify` warns when a zone render resembles the full source scene.
 - Module boundaries are torn-paper seams by default: three continuous
   edge-to-edge irregular seams over four ordered sequential regions
   (Torn-Strip Composition). Semantic Contour (`--boundary contour`) is the
