@@ -41,7 +41,7 @@ OLD / torn-strip（legacy）           DEFAULT / collage
 * 所有纸片共享同一种编辑印刷/纸张材质语言（纸纹、印刷颗粒、暖色系、相似边缘处理）；
 * 抽象等级主要通过信息密度与结构简化区分（LEVEL ≠ MEDIUM），而不是三种互不相干的媒介；
 * 撕纸边缘是区域几何本身（deckled 纸纤维边 + 单侧纸影），不是描边线；
-* Reality 保持摄影质感（源图合成），在拼贴中清晰可读；
+* Reality 保持摄影质感（源图合成），并与抽象纸片共享同一微暖 Robot Dreams 调色（仅调色，不加纸纹、不改结构）；
 * 禁止 blob 分割、小碎片、孤岛、contact sheet、2×2、四张完整照片、gutters。
 
 核心原则：
@@ -131,7 +131,7 @@ Horizontal division
 
 | 家族 | 视觉目标 | 说明 |
 |---|---|---|
-| `collage`（**默认**） | 分层撕纸拼贴海报 | 四张构图驱动的分层纸片 + 独立撕纸轮廓 + z-order 单侧纸影 + 共享印刷/纸张材质语言；`--layout auto\|horizontal-layered\|side-weighted\|...` |
+| `collage`（**默认**） | 分层撕纸拼贴海报 | 四张构图驱动的分层纸片 + **角状 deckled 撕纸轮廓**（直线段+尖缺口，非波浪）+ z-order 单侧纸影 + 共享印刷/纸张材质 + 微暖 Robot Dreams 调色；`--layout auto\|horizontal-layered\|side-weighted\|...` |
 | `torn`（legacy） | 有序撕纸条带 | 四条有序区域 + 三条贯穿画布的波浪撕纸接缝（约 1/4、1/2、3/4） |
 | `contour`（可选） | 语义轮廓边界 | 跟随剪影/建筑边缘/屋顶线/天际线/道路/地平线；不是默认 |
 | `mask`（自定义） | 完全自由的形状 | 提供 4 张内容感知 mask，脚本归一化为精确平铺 |

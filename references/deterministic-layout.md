@@ -32,9 +32,10 @@ primary head protected.
 
 The default boundary family is a **layered torn-paper collage**: one designed
 editorial object, not four strips with lines between them. Four paper pieces
-are layered (z-ordered) with composition-driven sizes and independent torn
-silhouettes; the paper body, deckled fiber edges and one-sided shadows are
-**region geometry**, not a decorative line drawn on top.
+are layered (z-ordered) with composition-driven sizes and **angular deckled
+torn silhouettes** — straight-ish runs with sudden direction changes and sharp
+V-notches, NOT smooth sine waves. The paper body, deckled fiber edges and
+one-sided shadows are **region geometry**, not a decorative line drawn on top.
 
 ```text
 TORN EDGE IS REGION GEOMETRY,
@@ -178,10 +179,13 @@ when a simple straight layout is the strongest design choice.
 
 For collage the compose step adds the paper body:
 
-1. after pasting the abstract pieces, a subtle deterministic paper grain is
-   blended over them (`--paper-texture subtle`); the anchor and head are then
-   re-composited clean from the source, so Reality reads photographic while
-   the pieces read printed;
+1. after pasting the abstract pieces, a subtle warm Robot Dreams-inspired
+   cinematic grade and a subtle deterministic paper grain are blended over
+   them (`--paper-grade subtle`, `--paper-texture subtle`); the anchor and
+   head are then re-composited from the **graded source** — Reality and the
+   head receive the same warm grade (color only, no grain, no structure
+   change), so the whole poster shares one warm palette while Reality still
+   reads photographic;
 2. each piece receives a deckled exposed-paper fiber band along its torn edge
    (`--paper-edge-width`, adaptive warm ivory, broken micro sections);
 3. one-sided paper shadows fall only from higher-z pieces onto lower-z pieces
@@ -277,6 +281,9 @@ Options:
   (`0` disables).
 - `--paper-texture subtle|none` — collage: subtle deterministic paper grain
   (default `subtle`).
+- `--paper-grade subtle|none` — collage: subtle warm Robot Dreams-inspired
+  cinematic grade over the abstract pieces (default `subtle`; Reality and the
+  head stay untouched).
 - `--torn-band 0.06` — torn mode: typical global seam deviation as a fraction
   of the slice axis (local tears reach ~`torn_band * 1.5`).
 - `--torn-roughness 1.0` — torn mode: multiplier for medium/high-frequency
@@ -414,11 +421,13 @@ slightly retro Robot Dreams-inspired palette.
   gaps are filled, and every zone is non-empty. The script refuses to prepare
   or verify a layout that leaves gaps or overlaps.
 - The Reality Anchor is always composited from the source through its own zone
-  mask; the anchor region never comes from the model in Scheme A, and is
+  mask (from the GRADED source in collage mode, so Reality shares the warm
+  palette); the anchor region never comes from the model in Scheme A, and is
   force-restored in Scheme B.
 - The head protection mask is force-composited from the source on top of the
-  anchor, so the primary head is the original photograph even when a face box
-  straddles a zone boundary (e.g. in rect or mask mode, which have no
+  anchor (graded in collage mode — grading is color only, identity and pixels
+  are preserved), so the primary head is the original photograph even when a
+  face box straddles a zone boundary (e.g. in rect or mask mode, which have no
   automatic face avoidance). Give accurate `--face-boxes` or supply a
   `--head-mask` whenever a scene contains a primary person.
 - Contour boundaries are semantic + edge-aware: they follow strong edges and
@@ -469,10 +478,10 @@ slightly retro Robot Dreams-inspired palette.
 
 - the output size differs from the source;
 - the four zone masks do not tile the canvas exactly (any gap or overlap);
-- the Reality Anchor core or head core differs from the source (the
-  fully-opaque interior of the softened mask must equal the source; the soft
-  transition band, the torn paper-fiber pixels, and the collage paper
-  finish are exempt);
+- the Reality Anchor core or head core differs from the source (in collage
+  mode the source reference is the GRADED source; the fully-opaque interior
+  of the softened mask must equal it exactly, while the soft transition band,
+  the torn paper-fiber pixels, and the collage paper finish are exempt);
 - for `collage`: a paper piece is too small (< ~6% of the canvas), or a piece
   has disconnected islands; pieces may have very different areas — no
   quarter-based balance check is applied;

@@ -897,19 +897,8 @@ def collage_z_order(layout: str) -> List[int]:
 
 
 def _broad_curve(npos: int, kind: str, amplitude: float) -> List[float]:
-    """Deterministic broad curvature profile (shape signature per boundary)."""
-    out = [0.0] * npos
-    for i in range(npos):
-        t = i / max(1, npos - 1)
-        if kind == "arc-up":
-            out[i] = -amplitude * math.sin(math.pi * t)
-        elif kind == "arc-down":
-            out[i] = amplitude * math.sin(math.pi * t)
-        elif kind == "s":
-            out[i] = amplitude * math.sin(2.0 * math.pi * t)
-        elif kind == "lean":
-            out[i] = amplitude * (t - 0.5) * 2.0
-    return out
+    """Deprecated smooth-curve helper kept only for signature compatibility."""
+    return [0.0] * npos
 
 
 def collage_torn_path(npos: int, axis: int, nominal_frac: float, band_frac: float,
@@ -917,22 +906,41 @@ def collage_torn_path(npos: int, axis: int, nominal_frac: float, band_frac: floa
                       roughness: float, scale: float = 1.0) -> List[int]:
     """One torn paper boundary around a nominal profile.
 
-    Composed of a broad composition curve (its own shape signature), a medium
-    tear (smoothed noise) and a micro fiber jitter, clamped to a deviation
-    band. Boundaries generated with different curve kinds are independent —
-    never parallel copies of each other. Deterministic via `rng`.
+    Torn-paper edges are ANGULAR, not wavy: straight-ish runs with sudden
+    direction changes (piecewise-linear drift between random control points),
+    sharp V-notches, and a micro fiber jag, clamped to a deviation band.
+    Boundaries generated from different seeds are independent — never
+    parallel copies. Deterministic via `rng`.
     """
-    exc = max(2, int(axis * band_frac))
-    curve_amp = axis * band_frac * rng.uniform(0.35, 0.8)
-    broad = _broad_curve(npos, curve_kind, curve_amp)
-    window = max(3, int(npos * 0.04 / max(0.25, scale)))
-    amp_tear = axis * band_frac * 0.4 * max(0.0, roughness)
-    tear = filtered_noise(rng, npos, amp_tear, window)
-    micro = [rng.randint(-TORN_MICRO, TORN_MICRO) for _ in range(npos)]
+    band_px = max(2, int(axis * band_frac))
     nom = nominal_frac * axis
-    lo = max(0, int(nom - exc))
-    hi = min(axis - 1, int(nom + exc))
-    return [min(hi, max(lo, int(round(nom + broad[i] + tear[i] + micro[i])))) for i in range(npos)]
+    n_ctrl = max(4, min(48, npos // 24))
+    xs = [round(i * (npos - 1) / max(1, n_ctrl - 1)) for i in range(n_ctrl)]
+    ys = [nom + rng.uniform(-1.0, 1.0) * band_px * 0.7 for _ in range(n_ctrl)]
+    path = [0.0] * npos
+    for k in range(n_ctrl - 1):
+        x0, x1 = xs[k], xs[k + 1]
+        y0, y1 = ys[k], ys[k + 1]
+        span = max(1, x1 - x0)
+        for i in range(x0, x1 + 1):
+            t = (i - x0) / span
+            path[i] = y0 + (y1 - y0) * t
+    # sharp V-notches: localized torn jumps with a quadratic profile
+    n_notch = max(2, npos // 120)
+    for _ in range(n_notch):
+        pos = rng.randrange(0, npos)
+        width = rng.randint(3, 10)
+        depth = rng.uniform(0.5, 1.2) * band_px * 0.8 * max(0.5, roughness)
+        sign = 1.0 if rng.random() < 0.5 else -1.0
+        for i in range(max(0, pos - width), min(npos, pos + width + 1)):
+            t = 1.0 - abs(i - pos) / max(1, width)
+            path[i] += sign * depth * (t * t)
+    # micro fiber jag (local continuity via a single tiny smoothing pass)
+    path = [path[i] + rng.randint(-2, 2) for i in range(npos)]
+    path = moving_average(path, 3)
+    lo = max(0, int(nom - band_px))
+    hi = min(axis - 1, int(nom + band_px))
+    return [min(hi, max(lo, int(round(v)))) for v in path]
 
 
 def horizontal_layered_masks(width: int, height: int, protect_boxes: List[Box],
@@ -1154,6 +1162,23 @@ def paper_texture(canvas: Image.Image, seed: int, strength: int = 26) -> Image.I
     return canvas
 
 
+def robot_dreams_grade(canvas: Image.Image) -> Image.Image:
+    """Subtle warm, nostalgic, sunlit, slightly retro cinematic grade.
+
+    Lifts blacks (gentle fade), warms the midtones and rolls off highlights —
+    the deterministic counterpart of the Robot Dreams-inspired palette that
+    the per-zone render prompts request. Applied to the collage pieces; the
+    Reality anchor and head are re-composited clean from the source
+    afterwards, so they keep the untouched photograph.
+    """
+    rgb = canvas.convert("RGB")
+    r, g, b = rgb.split()
+    r = r.point(lambda v: min(255, max(0, int(v * 0.96) + 12)))
+    g = g.point(lambda v: min(255, max(0, int(v * 0.98) + 8)))
+    b = b.point(lambda v: min(255, max(0, int(v * 1.00) + 2)))
+    return Image.merge("RGB", (r, g, b)).convert("RGBA")
+
+
 # ---------------------------------------------------------------------------
 # Anchor and levels
 # ---------------------------------------------------------------------------
@@ -1345,6 +1370,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "paper_edge_width": args.paper_edge_width,
         "paper_shadow": args.paper_shadow,
         "paper_texture": args.paper_texture if args.boundary == "collage" else "none",
+        "paper_grade": args.paper_grade if args.boundary == "collage" else "none",
         "seed": args.seed,
         "head_mask": str(head_mask_path) if head_mask_path else None,
         "face_boxes": [list(b) for b in args.face_boxes],
@@ -1422,12 +1448,18 @@ def opaque_core(mask: Image.Image, feather: int) -> Image.Image:
 
 def enforce_anchor(canvas: Image.Image, source: Path, manifest: dict) -> Image.Image:
     feather = manifest.get("feather", 0)
+    grade_on = (manifest.get("boundary") == "collage"
+                and manifest.get("paper_grade", "subtle") != "none")
     anchor = manifest["anchor"] - 1
     zone = manifest["zones"][anchor]
     box = tuple(zone["box"])
     mask = Image.open(zone["mask"]).convert("L")
     with Image.open(source) as im:
         src = im.convert("RGBA")
+    if grade_on:
+        # Reality receives the SAME warm grade as the pieces (color only — no
+        # grain, no structure change), so the whole poster shares one palette.
+        src = robot_dreams_grade(src)
     if src.size != canvas.size:
         raise SystemExit("Source/canvas size mismatch in anchor enforcement.")
     canvas = Image.composite(src, canvas, soft_mask(mask, feather))
@@ -1498,9 +1530,11 @@ def cmd_compose(args: argparse.Namespace) -> None:
         print(f"  warning: {wmsg}")
 
     if manifest.get("boundary") == "collage":
-        # subtle shared paper grain over the abstract pieces; the anchor and
-        # head are re-composited clean from the source afterwards, so Reality
-        # reads photographic while the collage layers read printed paper.
+        # subtle Robot Dreams-inspired warm grade over the abstract pieces,
+        # then shared paper grain; the anchor and head are re-composited
+        # clean from the source afterwards, so Reality reads photographic.
+        if manifest.get("paper_grade", "subtle") != "none":
+            canvas = robot_dreams_grade(canvas)
         if manifest.get("paper_texture", "subtle") != "none":
             canvas = paper_texture(canvas, manifest.get("seed", DEFAULT_SEED))
         canvas = enforce_anchor(canvas, source, manifest)
@@ -1785,6 +1819,11 @@ def cmd_verify(args: argparse.Namespace) -> None:
         raise SystemExit(f"Size mismatch: output={out.size}, expected {(width, height)}")
     with Image.open(manifest["source"]) as im:
         src = im.convert("RGBA")
+    # collage with the warm grade: Reality/head are composited from the
+    # GRADED source, so the source-equality checks compare against it too.
+    if (manifest.get("boundary") == "collage"
+            and manifest.get("paper_grade", "subtle") != "none"):
+        src = robot_dreams_grade(src)
 
     zones = manifest["zones"]
     masks = [Image.open(z["mask"]).convert("L") for z in zones]
@@ -1972,6 +2011,13 @@ def parse_args() -> argparse.Namespace:
         choices=("subtle", "none"),
         default="subtle",
         help="collage mode: subtle deterministic paper grain overlay (default subtle)",
+    )
+    parser.add_argument(
+        "--paper-grade",
+        choices=("subtle", "none"),
+        default="subtle",
+        help="collage mode: subtle warm Robot Dreams-inspired cinematic grade "
+             "over the abstract pieces (default subtle; Reality stays untouched)",
     )
     parser.add_argument(
         "--torn-scale",
