@@ -34,6 +34,51 @@ A higher abstraction level does not grant permission to duplicate, restart, or r
 
 Abstraction must operate primarily on the source content owned by the current logical zone.
 
+## Shared Material Language Override
+
+When using Layered Collage Composition (`--boundary collage`), the three
+abstract states are allowed and encouraged to share **one dominant material /
+medium family**.
+
+Do NOT force method diversity when it damages poster coherence. In collage
+mode, distinguish abstraction levels primarily through:
+
+* structural information density;
+* component omission;
+* shape merging;
+* edge simplification;
+* surface-detail reduction;
+* spatial compression;
+* graphic massing;
+* representational distance.
+
+A 30%, 65%, and 90% region may all use a shared editorial print / paper
+collage language while remaining clearly different in abstraction level.
+
+```text
+LEVEL ≠ MEDIUM
+```
+
+For example:
+
+```text
+30% = detailed print-like reinterpretation
+65% = grouped shapes / reduced façade and foliage detail
+90% = large graphic blocks / sparse structural cues
+```
+
+Do not default to:
+
+```text
+30 pencil
+65 polygon
+90 watercolor
+```
+
+merely to prove the regions differ. The method library below remains
+available; it is simply not mandatory to diversify the medium in the default
+collage family.
+
 ## Method diversity and dominant language
 
 The three abstract modules must not only differ in abstraction level; they must also differ clearly in their dominant abstraction language.

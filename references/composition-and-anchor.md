@@ -20,20 +20,24 @@ Preserve the source image's aspect ratio and use its dimensions as the compositi
 Begin with exactly four geometrically equal hidden logical zones. Use either four equal vertical ownership zones or four equal horizontal ownership zones. Use them only for Reality Anchor selection, crowd and subject ownership, 30%/65%/90% assignment, and four-state validation. Do not move these hidden boundaries to protect content.
 
 Translate the hidden ownership system into four visible modules governed by
-the **Ordered Strip Topology** (see below). In the default torn family the
-modules are four sequential regions with irregular seam edges; in the optional
-contour family they may follow semantic contours. In every family the visible
-modules must not duplicate or transfer recognizable source content across
-logical owners, must tile the same continuous canvas at source scale, share
-edges, and the scene must appear exactly once. Never deliver a 2×2 grid,
-strip, or contact sheet of four full-image versions.
+the family-specific topology (see below). In the default collage family the
+modules are layered paper pieces with composition-driven sizes and torn
+silhouettes; in the legacy torn family they are four sequential regions with
+irregular seam edges; in the optional contour family they may follow semantic
+contours. In every family the visible modules must not duplicate or transfer
+recognizable source content across logical owners, must tile the same
+continuous canvas at source scale, share edges, and the scene must appear
+exactly once. Never deliver a 2×2 grid, strip, or contact sheet of four
+full-image versions.
 
 ## Ordered Strip Topology
 
-The default boundary family (torn) must preserve the sequential four-region
-order of the hidden logical zones. Visible boundaries may deviate locally, but
-every internal boundary must remain **one continuous edge-to-edge seam**, and
-the global module topology must stay simple and ordered.
+Applies to the **legacy torn** family and the `vertical-strip` /
+`horizontal-strip` collage layouts: the visible regions must preserve the
+sequential four-region order of the hidden logical zones. Visible boundaries
+may deviate locally, but every internal boundary must remain **one continuous
+edge-to-edge seam**, and the global module topology must stay simple and
+ordered.
 
 For horizontal slicing:
 
@@ -77,10 +81,30 @@ Principle:
 Irregularity belongs to the seam geometry, not to the global module topology.
 ```
 
-The script enforces this topology for `--boundary torn` (`--mode verify`
-checks seam continuity, ordering, separation, and the absence of
-islands/pockets), and `--boundary mask` may produce any topology the supplied
-masks define.
+The script enforces this topology for `--boundary torn` and for the strip
+collage layouts (`--mode verify` checks seam continuity, ordering, separation,
+and the absence of islands/pockets), and `--boundary mask` may produce any
+topology the supplied masks define.
+
+## Layered Collage Topology (default family)
+
+The default `collage` family is NOT bound to quarter-based strips. The four
+paper pieces may have different, composition-driven sizes and independent torn
+silhouettes, layered in z-order. The topology must still be controlled and
+readable:
+
+```text
+IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE, NOT JUST WAVY STRIPS.
+
+Allow broad layered paper shapes whose geometry is driven by composition,
+depth, visual rhythm, and major scene masses.
+
+Avoid arbitrary blob segmentation, islands, pockets, random fragments,
+contact sheets, 2x2 grids, and gutters.
+```
+
+`--mode verify` checks that each piece is substantial (>= ~6% of the canvas),
+connected (no islands), and that the four pieces tile exactly.
 
 ## Source ownership exclusivity
 
@@ -166,13 +190,25 @@ Base the decision primarily on semantic composition, subject distribution, visua
 
 ## Reality Anchor
 
-Use exactly one photographic Reality Anchor.
+Use exactly one photographic Reality Anchor. Reality may be a central band, a
+central street corridor, a mid-scene opening, or a broad middle paper layer —
+it does not have to be a rectangular strip. It must remain clearly visible and
+read as an intentional anchor.
 
-When a clear primary human subject exists:
+### What the script actually auto-selects
 
-1. Identify the primary subject using face size, foreground placement, focus, centrality, compositional dominance, and visual salience.
-2. Estimate the visible face area falling in each fixed slice.
-3. Use the logical zone containing the largest portion of that primary face as the anchor owner.
+`scripts/slice_and_compose.py --anchor auto` implements exactly this:
+
+```text
+1. primary face ownership  (largest face overlap inside the piece masks)
+2. side-weighted collage without a face -> the central Reality corridor
+3. Logical Zone 2 fallback (a middle layer)
+```
+
+The script does NOT auto-detect crowds or architecture. The following sections
+are **agent guidance for choosing an explicit `--anchor 1..4`** when the
+scene's main subject is a crowd or an important building; they are not
+promises of automatic behavior. Documentation matches implementation.
 
 If a face crosses hidden logical boundaries, keep them fixed and use largest-area ownership. The visible Reality module may expand around the protected face or follow its contour while logical ownership remains unchanged. For multiple people, use only the primary visual subject to determine the single anchor.
 
@@ -217,16 +253,23 @@ Across those modules, preserve silhouette, primary massing, perspective, landmar
 
 ## Default Anchor fallback
 
-Use Logical Zone 2—second from the left for vertical ownership or second from the top for horizontal ownership—only when no reliable primary face, crowd-dominant event, or important architectural subject determines ownership.
+The script's `--anchor auto` falls back to Logical Zone 2 — second from the
+left for vertical ownership or second from the top for horizontal ownership —
+only when no primary face determines ownership (and no side-weighted corridor
+applies).
 
-Required fallback order:
+For crowd-dominant or important-architecture scenes, the agent decides the
+anchor and passes it explicitly:
 
 ```text
-Primary face anchor
-→ crowd-dominant anchor
-→ important architecture anchor
-→ Logical Zone 2 fallback
+Primary face anchor (script auto)
+→ side-weighted central corridor (script auto, no face)
+→ agent-decided: crowd-dominant anchor / important-architecture anchor
+→ Logical Zone 2 fallback (script auto)
 ```
+
+When choosing an explicit anchor, use the guidance in the Crowd Anchor
+fallback and Architecture Anchor fallback sections above.
 
 For scenes without an important person, source-preserve the visible Reality module through an irregular source mask when useful. For important-person scenes, keep the coherent candidate final when the face already passes the Face Restoration Gate.
 
@@ -235,6 +278,8 @@ When restoration is genuinely needed, prefer `../scripts/restore_protected_ancho
 ## Abstraction assignment
 
 Assign exactly one 30%, one 65%, and one 90% abstraction treatment to the three non-anchor slices. Do not arrange the levels automatically as a gradient or make abstraction increase with distance from the anchor. Permutations such as `65 | Reality | 90 | 30` are valid. Choose by visual balance, semantic importance, subject placement, rhythm, palette, and contrast.
+
+Default suggestion (not a hard rule): the strongest abstraction often works well at an **outer paper layer** (top, bottom, or side), while Reality usually benefits from a central or compositionally important region.
 
 Interpret percentage as departure from photographic representation—not opacity, modified pixel count, blur, saturation, or filter strength.
 

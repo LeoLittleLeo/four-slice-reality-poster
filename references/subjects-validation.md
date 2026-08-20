@@ -58,7 +58,8 @@ Never:
 23. Treat 30%, 65%, and 90% as the same structural abstraction level with only palette, brush texture, rendering style, or medium changes.
 24. Output the four states as four full-image versions of the photograph — a 2×2 grid, a strip, a contact sheet, or any layout where the full scene appears more than once — instead of one continuous image tiled by four adjacent regions.
 25. Force the whole primary body or a whole building into exactly one abstraction state. Cross-state presence is allowed and encouraged when it strengthens the poster; only accidental duplication (clones, double faces, ghost edges) is forbidden.
-26. In the default torn family, create blob-shaped territories, isolated islands, enclosed pockets, contour loops, U-shaped wraps around subjects, large peninsulas or wedges that destroy the ordered four-region structure, or seams that repeatedly follow object contours. Torn seams are layout-defined cuts, not semantic segmentation contours; irregularity belongs to the seam geometry, not to the global module topology.
+26. In the legacy torn family, create blob-shaped territories, isolated islands, enclosed pockets, contour loops, U-shaped wraps around subjects, large peninsulas or wedges that destroy the ordered four-region structure, or seams that repeatedly follow object contours. Torn seams are layout-defined cuts, not semantic segmentation contours; irregularity belongs to the seam geometry, not to the global module topology.
+27. In the default collage family, produce arbitrary blob segmentation, tiny floating scraps, disconnected islands, contact-sheet layouts, or four regions that look like four unrelated artistic mediums. The four paper pieces must read as ONE editorial torn-paper collage with a shared material language; abstraction levels differ by information density (LEVEL ≠ MEDIUM).
 
 ## Validation checklist
 
@@ -96,22 +97,12 @@ Confirm before delivery:
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains. The default soft transition band (`--feather`, ~2%) keeps boundaries gentle, but the four states remain readable at thumbnail size.
 - The final image is ONE continuous source-ratio canvas tiled by four adjacent regions that share edges; the scene appears exactly once.
 - The full photograph appears exactly once (the Reality module). Each abstract zone re-renders only its own slice — never a second, third or fourth full-image copy at different abstraction levels; `--mode verify` warns when a zone render resembles the full source scene.
-- Module boundaries are torn-paper seams by default: three continuous
-  edge-to-edge irregular seams over four ordered sequential regions
-  (Torn-Strip Composition). Semantic Contour (`--boundary contour`) is the
-  optional family — silhouettes, rooflines, horizons, class boundaries — and
-  is NOT the default. Mask mode uses supplied content masks; rect strips are
-  a fallback.
-- At thumbnail size, the four states read as four broad sequential regions;
-  the three seams read as intentional torn-paper cuts that are irregular
-  without turning the regions into arbitrary blobs, stay approximately
-  aligned with the slicing direction, contain no islands/loops/U-shaped
-  wraps/excessive excursions, and leave the primary head untouched; the seam
-  feels like a physical editorial collage cut rather than semantic
-  segmentation.
-- Ordered Strip Topology holds in the default family: Zone 1 broadly
-  left-of/above Zone 2, Zone 2 left-of/above Zone 3, Zone 3 left-of/above
-  Zone 4; every internal boundary is one continuous edge-to-edge seam.
+- The default boundary family is **Layered Torn-Paper Collage** (`--boundary collage`): four composition-driven layered paper pieces with independent torn silhouettes, z-ordered, one-sided paper shadows, shared editorial print/paper material language. Legacy Torn-Strip (`--boundary torn`) is the ordered seam composition; Semantic Contour (`--boundary contour`) is optional and NOT the default; mask uses supplied masks; rect strips are a fallback.
+- At thumbnail size, the poster reads as one physical editorial collage object: layered paper pieces with torn silhouettes (deckled, uneven, fiber-like edges) and visual depth — not four wavy strips with decorative lines, not four unrelated medium filters, not arbitrary blob segmentation, not a uniform cream outline.
+- The four paper pieces are substantial and connected (each >= ~6% of the canvas, no islands/pockets/scattered fragments) and may have very different visible areas — no quarter-based balance requirement in the default collage family.
+- In the default collage family the three abstract states share one material language while remaining clearly different in abstraction level (LEVEL ≠ MEDIUM: differentiate by structural simplification, information density, shape merging, detail omission, graphic massing).
+- Reality Anchor: script `--anchor auto` implements face ownership -> side-weighted central corridor -> Logical Zone 2; crowd/architecture anchors are agent-chosen via `--anchor 1..4` (documentation matches implementation).
+- Legacy torn family: Ordered Strip Topology holds (Zone 1 broadly left-of/above Zone 2, etc.); every internal boundary is one continuous edge-to-edge seam.
 - When Semantic Contour is chosen, its heuristics are sanity-checked:
   built-in sky/road/person masks are overridden by supplied
   `--class-masks-dir` masks or disabled with `--no-auto-semantic` whenever

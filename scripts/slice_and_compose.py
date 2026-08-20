@@ -82,16 +82,8 @@ def zones_for(direction: str, width: int, height: int) -> List[Box]:
     return [(0, ys[i], width, ys[i + 1]) for i in range(4)]
 
 
-def suggest_direction(img: Image.Image, width: int, height: int) -> str:
-    """Deterministic slicing-direction hint for `--direction auto`.
-
-    Measures row-to-row vs column-to-column luminance change on a small
-    thumbnail: strong horizontal banding (sky/ground layering) suggests
-    horizontal slices; strong vertical structure (wide flow, columns) suggests
-    vertical slices. When neither dominates, the aspect ratio breaks the tie
-    (portrait/tall -> horizontal, wide -> vertical). The agent may still
-    override with an explicit direction based on semantic flow.
-    """
+def _luminance_diffs(img: Image.Image) -> Tuple[float, float]:
+    """Row-to-row and column-to-column mean luminance change on a thumbnail."""
     t = 96
     gray = img.convert("L").resize((t, t))
     data = list(gray.getdata())
@@ -108,13 +100,37 @@ def suggest_direction(img: Image.Image, width: int, height: int) -> str:
         for x in range(1, t):
             col_diff += abs(data[base + x] - data[base + x - 1])
     col_diff /= max(1, t * (t - 1))
+    return row_diff, col_diff
+
+
+def suggest_direction(img: Image.Image, width: int, height: int) -> str:
+    """Deterministic slicing-direction hint for `--direction auto`.
+
+    Measures row-to-row vs column-to-column luminance change on a small
+    thumbnail: strong horizontal banding (sky/ground layering) suggests
+    horizontal slices; strong vertical structure (wide flow, columns) suggests
+    vertical slices. When neither dominates, the aspect ratio breaks the tie
+    (portrait/tall -> horizontal, wide -> vertical). The agent may still
+    override with an explicit direction based on semantic flow.
+    """
+    row_diff, col_diff = _luminance_diffs(img)
     if row_diff > col_diff * 1.15:
         return "horizontal"
     if col_diff > row_diff * 1.15:
         return "vertical"
-    # neutral: portrait/tall scenes layer vertically -> horizontal slices;
-    # wide scenes develop across width -> vertical slices
     return "horizontal" if height > width else "vertical"
+
+
+def suggest_layout(img: Image.Image, width: int, height: int) -> str:
+    """`--layout auto`: horizontal-layered is the collage default priority;
+    portrait scenes with strong vertical structure (alleys, narrow streets,
+    tall-building corridors) resolve to side-weighted."""
+    if width >= height:
+        return "horizontal-layered"
+    row_diff, col_diff = _luminance_diffs(img)
+    if col_diff > row_diff * 1.25:
+        return "side-weighted"
+    return "horizontal-layered"
 
 
 def parse_face_boxes(raw: Optional[str]) -> List[Box]:
@@ -713,7 +729,8 @@ def seam_paper_geometry(seams: List[List[int]], direction: str, fiber_width: int
             dx, dy = x1 - x0, y1 - y0
             length = math.hypot(dx, dy) or 1.0
             perps.append((-dy / length, dx / length))
-        widths = [rng.randint(2, fiber_width) for _ in range(n)]
+        hi_w = max(2, fiber_width)  # guard: randint(2, 1) would raise
+        widths = [rng.randint(2, hi_w) for _ in range(n)]
         jitter = [rng.randint(-2, 2) for _ in range(n)]
         fibers = [rng.randint(2, fiber_width + 2) for _ in range(n)]
         core_jit = [rng.randint(-1, 1) for _ in range(n)]
@@ -864,6 +881,280 @@ def check_tiling(masks: List[Image.Image], width: int, height: int) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Collage: Layered Torn-Paper Collage (DEFAULT)
+#
+# TORN EDGE IS REGION GEOMETRY, NOT A DECORATIVE LINE DRAWN ON TOP.
+# Pieces are layered paper shapes (not 1/4-based strips) that tile exactly
+# underneath; the paper body / deckled fiber edge / one-sided shadow are the
+# compositing finish of those pieces.
+# ---------------------------------------------------------------------------
+
+def collage_z_order(layout: str) -> List[int]:
+    """Piece z-order, low -> high. Shadows fall only from higher onto lower."""
+    if layout == "side-weighted":
+        return [2, 0, 1, 3]   # right field, left field, Reality corridor, top band
+    return [0, 1, 2, 3]       # horizontal-layered: bottom layer -> top layer
+
+
+def _broad_curve(npos: int, kind: str, amplitude: float) -> List[float]:
+    """Deterministic broad curvature profile (shape signature per boundary)."""
+    out = [0.0] * npos
+    for i in range(npos):
+        t = i / max(1, npos - 1)
+        if kind == "arc-up":
+            out[i] = -amplitude * math.sin(math.pi * t)
+        elif kind == "arc-down":
+            out[i] = amplitude * math.sin(math.pi * t)
+        elif kind == "s":
+            out[i] = amplitude * math.sin(2.0 * math.pi * t)
+        elif kind == "lean":
+            out[i] = amplitude * (t - 0.5) * 2.0
+    return out
+
+
+def collage_torn_path(npos: int, axis: int, nominal_frac: float, band_frac: float,
+                      curve_kind: str, rng: random.Random,
+                      roughness: float, scale: float = 1.0) -> List[int]:
+    """One torn paper boundary around a nominal profile.
+
+    Composed of a broad composition curve (its own shape signature), a medium
+    tear (smoothed noise) and a micro fiber jitter, clamped to a deviation
+    band. Boundaries generated with different curve kinds are independent —
+    never parallel copies of each other. Deterministic via `rng`.
+    """
+    exc = max(2, int(axis * band_frac))
+    curve_amp = axis * band_frac * rng.uniform(0.35, 0.8)
+    broad = _broad_curve(npos, curve_kind, curve_amp)
+    window = max(3, int(npos * 0.04 / max(0.25, scale)))
+    amp_tear = axis * band_frac * 0.4 * max(0.0, roughness)
+    tear = filtered_noise(rng, npos, amp_tear, window)
+    micro = [rng.randint(-TORN_MICRO, TORN_MICRO) for _ in range(npos)]
+    nom = nominal_frac * axis
+    lo = max(0, int(nom - exc))
+    hi = min(axis - 1, int(nom + exc))
+    return [min(hi, max(lo, int(round(nom + broad[i] + tear[i] + micro[i])))) for i in range(npos)]
+
+
+def horizontal_layered_masks(width: int, height: int, protect_boxes: List[Box],
+                             band: float, roughness: float,
+                             seed: int) -> Tuple[List[Image.Image], List[List[int]]]:
+    """Four broad layered paper pieces (portrait default template).
+
+    Layers stack vertically but are NOT quarter-strips: a middle-heavy,
+    composition-driven nominal profile (about 20/24/28/28) and each boundary
+    gets its OWN independent torn silhouette (different broad curvature +
+    medium tear + micro fiber), so neighbouring edges are not parallel copies.
+    """
+    npos = width
+    axis = height
+    rng = random.Random(seed + 500)
+    nominals = [0.20, 0.44, 0.72]          # middle-heavy, not 0.25/0.5/0.75
+    kinds = ["arc-up", "arc-down", "s"]    # independent global shapes
+    min_sep = max(4, int(axis * 0.08))
+    paths: List[List[int]] = []
+    prev = None
+    for nom, kind in zip(nominals, kinds):
+        path = collage_torn_path(npos, axis, nom, band, kind, rng, roughness)
+        if prev is not None:
+            path = [max(path[i], prev[i] + min_sep) for i in range(npos)]
+        path = avoid_head_boxes(path, protect_boxes, 0, axis - 1, "horizontal")
+        if prev is not None:
+            path = [max(path[i], prev[i] + min_sep) for i in range(npos)]
+        smooth_w = max(3, int(npos * 0.02))
+        path = [int(round(v)) for v in moving_average([float(v) for v in path], smooth_w)]
+        if prev is not None:
+            path = [max(path[i], prev[i] + min_sep) for i in range(npos)]
+        paths.append(path)
+        prev = path
+    paths = [[min(axis - 1, max(0, v)) for v in p] for p in paths]
+    return masks_from_paths("horizontal", width, height, paths), paths
+
+
+def side_weighted_masks(width: int, height: int, protect_boxes: List[Box],
+                        band: float, roughness: float,
+                        seed: int) -> Tuple[List[Image.Image], dict]:
+    """Alley / central-perspective template.
+
+    piece 4 = a top paper band; below it, piece 2 = a central Reality
+    corridor (variable width), piece 1 = broad left field, piece 3 = broad
+    right field. NOT four vertical bands: the corridor is central and the
+    side fields are wide paper masses.
+    """
+    rng = random.Random(seed + 700)
+    t4 = collage_torn_path(width, height, 0.18, band, "arc-down", rng, roughness)      # top band bottom edge y(x)
+    c_left = collage_torn_path(height, width, 0.34, band, "s", rng, roughness)         # corridor left x(y)
+    c_right = collage_torn_path(height, width, 0.66, band, "arc-up", rng, roughness)   # corridor right x(y)
+    min_sep = max(6, int(width * 0.12))
+
+    def clamp_corridor():
+        nonlocal_none = None
+        for y in range(height):
+            if c_right[y] < c_left[y] + min_sep:
+                c_right[y] = min(width - 1, c_left[y] + min_sep)
+            c_right[y] = min(width - 1, max(0, c_right[y]))
+            c_left[y] = min(width - 1, max(0, c_left[y]))
+
+    clamp_corridor()
+    c_left = avoid_head_boxes(c_left, protect_boxes, 0, width - 1, "vertical")
+    c_right = avoid_head_boxes(c_right, protect_boxes, 0, width - 1, "vertical")
+    t4 = avoid_head_boxes(t4, protect_boxes, 0, height - 1, "horizontal")
+    # smooth reconnection of head pushes
+    sw = max(3, int(width * 0.02))
+    t4 = [int(round(v)) for v in moving_average([float(v) for v in t4], sw)]
+    sw2 = max(3, int(height * 0.02))
+    c_left = [int(round(v)) for v in moving_average([float(v) for v in c_left], sw2)]
+    c_right = [int(round(v)) for v in moving_average([float(v) for v in c_right], sw2)]
+    t4 = [min(height - 1, max(0, v)) for v in t4]
+    clamp_corridor()
+
+    masks = [Image.new("L", (width, height), 0) for _ in range(4)]
+    for y in range(height):
+        cl = min(width - 1, max(0, c_left[y]))
+        cr = min(width - 1, max(0, c_right[y]))
+        x = 0
+        while x < width:
+            if t4[x] > y:
+                x0 = x
+                while x < width and t4[x] > y:
+                    x += 1
+                ImageDraw.Draw(masks[3]).line((x0, y, x - 1, y), fill=255)
+            else:
+                x0 = x
+                while x < width and t4[x] <= y:
+                    x += 1
+                a, b = x0, x - 1
+                if a <= min(b, cl - 1):
+                    ImageDraw.Draw(masks[0]).line((a, y, min(b, cl - 1), y), fill=255)
+                if max(a, cl) <= min(b, cr - 1):
+                    ImageDraw.Draw(masks[1]).line((max(a, cl), y, min(b, cr - 1), y), fill=255)
+                if max(a, cr) <= b:
+                    ImageDraw.Draw(masks[2]).line((max(a, cr), y, b, y), fill=255)
+    return masks, {"top": t4, "left": c_left, "right": c_right}
+
+
+def collage_masks(layout: str, width: int, height: int, protect_boxes: List[Box],
+                  band: float, roughness: float,
+                  seed: int) -> Tuple[List[Image.Image], dict]:
+    """Generate four layered paper piece masks for the given collage layout.
+
+    `vertical-strip` / `horizontal-strip` reuse the legacy torn logic.
+    Returns `(masks, geometry)`.
+    """
+    if layout in ("vertical-strip", "horizontal-strip"):
+        direction = "vertical" if layout == "vertical-strip" else "horizontal"
+        paths = torn_paths(direction, width, height, protect_boxes,
+                           TORN_BAND_DEFAULT, roughness, 1.0, seed)
+        return masks_from_paths(direction, width, height, paths), {"paths": paths}
+    if layout == "side-weighted":
+        return side_weighted_masks(width, height, protect_boxes, band, roughness, seed)
+    return horizontal_layered_masks(width, height, protect_boxes, band, roughness, seed)
+
+
+def collage_fiber_masks(masks: List[Image.Image], width: int, height: int,
+                        edge_width: int, seed: int) -> List[Image.Image]:
+    """Deckled exposed-paper fiber band per piece (a broken, uneven ring just
+    inside each piece's torn edge). Deterministic via `seed`."""
+    edge_width = max(1, edge_width)
+    rng = random.Random(seed + 800)
+    bands: List[Image.Image] = []
+    for mask in masks:
+        eroded = mask.filter(ImageFilter.MinFilter(2 * edge_width + 1))
+        band = ImageChops.subtract(mask, eroded).point(lambda v: 255 if v else 0)
+        bdata = band.tobytes()
+        n = len(bdata)
+        keep = bytearray(n)
+        for i in range(n):
+            if bdata[i] and rng.random() < 0.72:   # broken micro sections
+                keep[i] = 255
+        bands.append(Image.frombytes("L", (width, height), bytes(keep)))
+    return bands
+
+
+def collage_shadow_mask(masks: List[Image.Image], z_order: List[int],
+                        width: int, height: int, offset: int) -> Image.Image:
+    """One-sided paper shadows.
+
+    Each piece (except the z-lowest) casts a faint shadow ring only onto the
+    pieces BELOW it in z-order — an upper paper covers lower papers, so the
+    shadow never appears on both sides of an edge like a stroke.
+    """
+    offset = max(1, offset)
+    shadow = Image.new("L", (width, height), 0)
+    lower_union = Image.new("L", (width, height), 0)
+    for idx in z_order:  # low -> high z
+        mask = masks[idx]
+        dilated = mask.filter(ImageFilter.MaxFilter(2 * offset + 1))
+        ring = ImageChops.subtract(dilated, mask)
+        ring = ImageChops.multiply(ring, lower_union)
+        shadow = ImageChops.lighter(shadow, ring)
+        lower_union = ImageChops.lighter(lower_union, mask)
+    return shadow
+
+
+def draw_collage_paper(canvas: Image.Image, masks: List[Image.Image],
+                       z_order: List[int], width: int, height: int,
+                       edge_width: int, shadow_alpha: int, shadow_offset: int,
+                       seed: int) -> Image.Image:
+    """Paper body finish for collage: deckled fiber bands + one-sided shadows.
+
+    Visual only — the four piece masks still tile the canvas exactly, and the
+    verify exemption mask uses the same deterministic fiber/shadow masks.
+    """
+    canvas_rgb = canvas.convert("RGB")
+    overlay = Image.new("RGBA", (width, height), (0, 0, 0, 0))
+    ov = overlay.load()
+    bright_ivory = (243, 237, 219)
+    aged_ivory = (198, 184, 152)
+    bands = collage_fiber_masks(masks, width, height, edge_width, seed)
+    for idx, band in enumerate(bands):
+        bp = band.load()
+        pts = []
+        for y in range(0, height, max(1, height // 40)):
+            for x in range(width):
+                if bp[x, y]:
+                    pts.append((x, y))
+        lum = 0.0
+        for (x, y) in pts:
+            r, g, b = canvas_rgb.getpixel((x, y))
+            lum += (r + g + b) / 3.0
+        lum = (lum / max(1, len(pts))) / 255.0
+        blend = lum * 0.45
+        base = tuple(int(bright_ivory[c] * (1.0 - blend) + aged_ivory[c] * blend) for c in range(3))
+        rng = random.Random(seed + 811 + idx)
+        for y in range(height):
+            for x in range(width):
+                if bp[x, y]:
+                    v = rng.randint(-7, 7)
+                    ov[x, y] = (max(0, min(255, base[0] + v)),
+                                max(0, min(255, base[1] + v)),
+                                max(0, min(255, base[2] + v)), 255)
+    if shadow_alpha > 0:
+        shadow = collage_shadow_mask(masks, z_order, width, height, shadow_offset)
+        sp = shadow.load()
+        for y in range(height):
+            for x in range(width):
+                if sp[x, y] and ov[x, y][3] == 0:
+                    ov[x, y] = (30, 24, 14, shadow_alpha)
+    canvas.alpha_composite(overlay)
+    return canvas
+
+
+def paper_texture(canvas: Image.Image, seed: int, strength: int = 26) -> Image.Image:
+    """Subtle deterministic paper grain (image-first, not a vintage filter)."""
+    if strength <= 0:
+        return canvas
+    w, h = canvas.size
+    rng = random.Random(seed + 909)
+    data = bytearray(w * h)
+    for i in range(w * h):
+        data[i] = rng.getrandbits(8)
+    grain = Image.frombytes("L", (w, h), bytes(data)).point(lambda v: int(v * 0.4) + 60)
+    overlay = Image.merge("RGBA", (grain, grain, grain, Image.new("L", (w, h), strength)))
+    canvas.alpha_composite(overlay)
+    return canvas
+
+
+# ---------------------------------------------------------------------------
 # Anchor and levels
 # ---------------------------------------------------------------------------
 
@@ -927,13 +1218,33 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         if hb is not None:
             avoid_boxes = [tuple(hb)]
 
-    seams = None
-    if args.direction == "auto":
-        direction = suggest_direction(img, width, height)
-        print(f"Auto direction -> {direction}")
+    # Layout / direction resolution. Collage layouts define their own structure;
+    # --direction only drives legacy torn and the strip layouts.
+    layout = args.layout
+    if args.boundary == "collage":
+        if layout == "auto":
+            layout = suggest_layout(img, width, height)
+            print(f"Auto layout -> {layout}")
+        if layout in ("vertical-strip", "horizontal-strip"):
+            direction = "vertical" if layout == "vertical-strip" else "horizontal"
+        elif layout == "side-weighted":
+            direction = "vertical"
+        else:
+            direction = "horizontal"
     else:
-        direction = args.direction
-    if args.boundary == "rect":
+        if args.direction == "auto":
+            direction = suggest_direction(img, width, height)
+            print(f"Auto direction -> {direction}")
+        else:
+            direction = args.direction
+
+    seams = None
+    collage_geom = None
+    if args.boundary == "collage":
+        masks, collage_geom = collage_masks(layout, width, height, avoid_boxes,
+                                            args.collage_band, args.collage_roughness,
+                                            args.seed)
+    elif args.boundary == "rect":
         masks = rect_masks(direction, width, height)
     elif args.boundary == "torn":
         seams = torn_paths(direction, width, height, avoid_boxes,
@@ -953,6 +1264,10 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
     if args.anchor == "auto":
         anchor = pick_anchor(masks, head_boxes)
+        # no face boxes: side-weighted collage prefers the central Reality
+        # corridor; otherwise fall back to Logical Zone 2 (a middle layer)
+        if not head_boxes and args.boundary == "collage" and layout == "side-weighted":
+            anchor = 1  # central corridor piece
     else:
         anchor = int(args.anchor) - 1  # CLI is 1-based like restore_protected_anchor.py
 
@@ -996,11 +1311,11 @@ def cmd_prepare(args: argparse.Namespace) -> None:
             }
         )
 
-    # Per-mode feather strategy: torn is a hard physical tear (1px anti-alias),
-    # the other modes keep the broad soft transition.
+    # Per-mode feather strategy: collage and torn are hard paper cuts (1px
+    # anti-alias), the other modes keep the broad soft transition.
     if args.feather is not None:
         feather = args.feather
-    elif args.boundary == "torn":
+    elif args.boundary in ("collage", "torn"):
         feather = 1
     else:
         feather = max(4, int(0.02 * min(width, height)))
@@ -1010,6 +1325,8 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "source": str(source),
         "direction": direction,
         "boundary": args.boundary,
+        "layout": layout if args.boundary == "collage" else "horizontal-layered",
+        "z_order": collage_z_order(layout) if args.boundary == "collage" else None,
         "size": [width, height],
         "anchor": anchor + 1,
         "margin": args.margin,
@@ -1022,6 +1339,12 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "torn_band": args.torn_band,
         "torn_roughness": args.torn_roughness,
         "torn_scale": args.torn_scale,
+        "collage_band": args.collage_band,
+        "collage_roughness": args.collage_roughness,
+        "collage_overlap": args.collage_overlap,
+        "paper_edge_width": args.paper_edge_width,
+        "paper_shadow": args.paper_shadow,
+        "paper_texture": args.paper_texture if args.boundary == "collage" else "none",
         "seed": args.seed,
         "head_mask": str(head_mask_path) if head_mask_path else None,
         "face_boxes": [list(b) for b in args.face_boxes],
@@ -1033,6 +1356,11 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     print(f"Prepared deterministic four-zone layout -> {manifest_path}")
     print(f"Direction={direction}  boundary={args.boundary}  "
           f"size={width}x{height}  anchor=Logical Zone {anchor + 1}")
+    if args.boundary == "collage":
+        print(f"Collage: layout={layout} band={args.collage_band} "
+              f"roughness={args.collage_roughness} overlap={args.collage_overlap} "
+              f"paper_edge={args.paper_edge_width} paper_shadow={args.paper_shadow} "
+              f"texture={args.paper_texture} seed={args.seed}")
     if args.boundary == "torn":
         print(f"Torn: band={args.torn_band} roughness={args.torn_roughness} "
               f"scale={args.torn_scale} seed={args.seed} seam_style={args.seam_style}")
@@ -1126,6 +1454,7 @@ def cmd_compose(args: argparse.Namespace) -> None:
         canvas = im.convert("RGBA")
     if canvas.size != tuple(manifest["size"]):
         raise SystemExit("Source changed since prepare; re-run --mode prepare.")
+    width, height = canvas.size
 
     rendered_dir = Path(args.rendered_dir)
     src_rgb = canvas.convert("RGB")
@@ -1168,15 +1497,30 @@ def cmd_compose(args: argparse.Namespace) -> None:
     for wmsg in render_warnings:
         print(f"  warning: {wmsg}")
 
-    canvas = enforce_anchor(canvas, source, manifest)
-    if (manifest.get("boundary") == "torn"
-            and manifest.get("seam_style") == "paper"
-            and manifest.get("seams")):
-        canvas = draw_paper_seams(canvas, manifest["seams"], manifest["direction"],
-                                  manifest.get("fiber_width", 7),
-                                  manifest.get("seed", DEFAULT_SEED),
-                                  manifest.get("seam_shadow", 26),
-                                  manifest.get("seam_offset", 3))
+    if manifest.get("boundary") == "collage":
+        # subtle shared paper grain over the abstract pieces; the anchor and
+        # head are re-composited clean from the source afterwards, so Reality
+        # reads photographic while the collage layers read printed paper.
+        if manifest.get("paper_texture", "subtle") != "none":
+            canvas = paper_texture(canvas, manifest.get("seed", DEFAULT_SEED))
+        canvas = enforce_anchor(canvas, source, manifest)
+        masks = [Image.open(z["mask"]).convert("L") for z in manifest["zones"]]
+        z_order = manifest.get("z_order") or collage_z_order(manifest.get("layout", "horizontal-layered"))
+        canvas = draw_collage_paper(canvas, masks, z_order, width, height,
+                                    manifest.get("paper_edge_width", 9),
+                                    manifest.get("paper_shadow", 20),
+                                    manifest.get("collage_overlap", 5),
+                                    manifest.get("seed", DEFAULT_SEED))
+    else:
+        canvas = enforce_anchor(canvas, source, manifest)
+        if (manifest.get("boundary") == "torn"
+                and manifest.get("seam_style") == "paper"
+                and manifest.get("seams")):
+            canvas = draw_paper_seams(canvas, manifest["seams"], manifest["direction"],
+                                      manifest.get("fiber_width", 7),
+                                      manifest.get("seed", DEFAULT_SEED),
+                                      manifest.get("seam_shadow", 26),
+                                      manifest.get("seam_offset", 3))
     save_output(canvas, Path(args.output))
     print(f"Composed one continuous poster -> {args.output}")
 
@@ -1298,6 +1642,71 @@ def check_zone_renders(manifest: dict, src: Image.Image, workdir: Path) -> None:
             print(f"  warning: {wmsg}")
 
 
+def count_components(mask: Image.Image, width: int, height: int) -> int:
+    """Number of 4-connected components in a binary mask."""
+    px = mask.load()
+    seen = bytearray(width * height)
+    comps = 0
+    dq: deque = deque()
+    for y in range(height):
+        for x in range(width):
+            i = y * width + x
+            if px[x, y] > 127 and not seen[i]:
+                comps += 1
+                seen[i] = 1
+                dq.append((x, y))
+                while dq:
+                    cx, cy = dq.popleft()
+                    for nx, ny in ((cx + 1, cy), (cx - 1, cy), (cx, cy + 1), (cx, cy - 1)):
+                        if 0 <= nx < width and 0 <= ny < height:
+                            j = ny * width + nx
+                            if px[nx, ny] > 127 and not seen[j]:
+                                seen[j] = 1
+                                dq.append((nx, ny))
+    return comps
+
+
+def check_collage_regions(masks: List[Image.Image], width: int, height: int) -> None:
+    """Collage region sanity: every paper piece is substantial (no tiny
+    scraps), connected (no islands), and exactly four owners tile the canvas.
+    Visible areas are deliberately allowed to differ — no quarter-based
+    balance requirement."""
+    total = width * height
+    for i, m in enumerate(masks):
+        count = m.histogram()[255]
+        frac = count / total
+        if frac < 0.06:
+            raise SystemExit(f"collage region {i + 1} is too small "
+                             f"({frac * 100:.1f}% of canvas).")
+        if frac < 0.10:
+            print(f"  warning: collage region {i + 1} is small ({frac * 100:.1f}% of canvas).")
+        comps = count_components(m, width, height)
+        if comps != 1:
+            raise SystemExit(f"collage region {i + 1} has {comps} disconnected "
+                             "pieces (islands); collage topology broken.")
+
+
+def collage_overlay_mask(manifest: dict, masks: List[Image.Image],
+                         width: int, height: int) -> Optional[Image.Image]:
+    """Union of every pixel the collage paper finish paints (deckled fiber
+    bands + one-sided shadows). Used to exempt the intentional paper body from
+    the anchor/head source-equality core, exactly like torn's paper seam."""
+    if manifest.get("boundary") != "collage":
+        return None
+    seed = int(manifest.get("seed", DEFAULT_SEED))
+    bands = collage_fiber_masks(masks, width, height,
+                                manifest.get("paper_edge_width", 9), seed)
+    union = bands[0].copy()
+    for b in bands[1:]:
+        union = ImageChops.lighter(union, b)
+    if int(manifest.get("paper_shadow", 20)) > 0:
+        z_order = manifest.get("z_order") or collage_z_order(manifest.get("layout", "horizontal-layered"))
+        shadow = collage_shadow_mask(masks, z_order, width, height,
+                                     manifest.get("collage_overlap", 5))
+        union = ImageChops.lighter(union, shadow)
+    return union
+
+
 def check_torn_topology(manifest: dict, masks: List[Image.Image],
                         width: int, height: int) -> None:
     """Torn-strip topology validation for --boundary torn.
@@ -1383,11 +1792,15 @@ def cmd_verify(args: argparse.Namespace) -> None:
 
     if manifest.get("boundary") == "torn":
         check_torn_topology(manifest, masks, width, height)
+    elif manifest.get("boundary") == "collage":
+        check_collage_regions(masks, width, height)
     check_zone_renders(manifest, src, args.workdir)
 
     feather = manifest.get("feather", 0)
     seam_band = None
-    if (manifest.get("boundary") == "torn"
+    if manifest.get("boundary") == "collage":
+        seam_band = collage_overlay_mask(manifest, masks, width, height)
+    elif (manifest.get("boundary") == "torn"
             and manifest.get("seam_style") == "paper"
             and manifest.get("seams")):
         seam_band = paper_seam_mask(manifest, width, height)
@@ -1418,10 +1831,11 @@ def cmd_verify(args: argparse.Namespace) -> None:
                   "the head mask still protects identity, but a boundary cuts the head region.")
 
     counts = [m.histogram()[255] for m in masks]
-    ratio = max(counts) / max(1, min(counts))
-    if ratio > BALANCE_RATIO:
-        print(f"  warning: zone areas are unbalanced (max/min = {ratio:.1f}); "
-              "keep the four regions roughly balanced.")
+    if manifest.get("boundary") != "collage":
+        ratio = max(counts) / max(1, min(counts))
+        if ratio > BALANCE_RATIO:
+            print(f"  warning: zone areas are unbalanced (max/min = {ratio:.1f}); "
+                  "keep the four regions roughly balanced.")
 
     for z in zones:
         if z["level"] == "anchor":
@@ -1461,11 +1875,20 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--boundary",
-        choices=("torn", "contour", "mask", "rect"),
-        default="torn",
-        help="Boundary style: torn (default) ordered torn-paper seams, contour "
-             "(optional) semantic + edge-aware contours, mask supplied masks, "
-             "rect equal strips",
+        choices=("collage", "torn", "contour", "mask", "rect"),
+        default="collage",
+        help="Boundary family: collage (default) Layered Torn-Paper Collage, "
+             "torn legacy ordered torn-strip composition, contour optional "
+             "semantic contours, mask supplied masks, rect equal strips",
+    )
+    parser.add_argument(
+        "--layout",
+        choices=("auto", "horizontal-layered", "side-weighted", "vertical-strip", "horizontal-strip"),
+        default="auto",
+        help="collage mode layout: auto (default) derives it from the image, "
+             "horizontal-layered layered paper layers, side-weighted central "
+             "corridor with broad side fields, vertical/horizontal-strip reuse "
+             "the legacy torn logic",
     )
     parser.add_argument(
         "--anchor",
@@ -1512,6 +1935,43 @@ def parse_args() -> argparse.Namespace:
         type=float,
         default=1.0,
         help="torn mode: multiplier for medium/high-frequency tear amplitude (0 = smoother)",
+    )
+    parser.add_argument(
+        "--collage-band",
+        type=float,
+        default=0.12,
+        help="collage mode: max paper-boundary deviation from its nominal profile, "
+             "as a fraction of the slice axis",
+    )
+    parser.add_argument(
+        "--collage-roughness",
+        type=float,
+        default=1.0,
+        help="collage mode: multiplier for the medium tear irregularity (0 = smoother)",
+    )
+    parser.add_argument(
+        "--collage-overlap",
+        type=int,
+        default=5,
+        help="collage mode: visual paper-overlap / one-sided shadow offset in px",
+    )
+    parser.add_argument(
+        "--paper-edge-width",
+        type=int,
+        default=9,
+        help="collage mode: exposed deckled paper-fiber band width in px",
+    )
+    parser.add_argument(
+        "--paper-shadow",
+        type=int,
+        default=20,
+        help="collage mode: one-sided paper shadow opacity 0..255 (0 disables)",
+    )
+    parser.add_argument(
+        "--paper-texture",
+        choices=("subtle", "none"),
+        default="subtle",
+        help="collage mode: subtle deterministic paper grain overlay (default subtle)",
     )
     parser.add_argument(
         "--torn-scale",
@@ -1630,12 +2090,18 @@ def main() -> None:
         raise SystemExit("--band and --min-zone must be positive.")
     if args.torn_band <= 0 or args.torn_roughness < 0 or args.torn_scale <= 0:
         raise SystemExit("--torn-band/--torn-roughness/--torn-scale must be positive.")
-    if args.fiber_width < 1:
-        raise SystemExit("--fiber-width must be >= 1.")
+    if args.collage_band <= 0 or args.collage_roughness < 0:
+        raise SystemExit("--collage-band/--collage-roughness must be positive.")
+    if args.collage_overlap < 0 or args.paper_edge_width < 1:
+        raise SystemExit("--collage-overlap must be >= 0 and --paper-edge-width >= 1.")
+    if not 0 <= args.paper_shadow <= 255:
+        raise SystemExit("--paper-shadow must be in 0..255.")
     if not 0 <= args.seam_shadow <= 255:
         raise SystemExit("--seam-shadow must be in 0..255.")
     if args.seam_offset < 0:
         raise SystemExit("--seam-offset must be non-negative.")
+    if args.fiber_width < 1:
+        raise SystemExit("--fiber-width must be >= 1.")
     if args.mode == "prepare":
         if args.source is None or args.direction is None:
             raise SystemExit("--source and --direction are required for --mode prepare.")

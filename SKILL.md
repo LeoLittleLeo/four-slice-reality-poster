@@ -1,50 +1,51 @@
 ---
 name: four-slice-reality-poster
-description: "Transform a user-supplied photograph into one readable four-state editorial poster built from four equal hidden logical zones and four roughly equal sequential visible regions separated by three irregular torn-paper seams (default Torn-Strip Composition): one Reality state and 30%, 65%, and 90% source-derived abstraction states. The seams are layout-defined cuts, not semantic segmentation contours; only the primary head is hard-protected. Optional Semantic Contour, Mask, and Rect boundary families are also available. Accept a visually coherent generated face when identity and anatomy are already sound; use source-face restoration only as a gated fallback that demonstrably improves the result."
+description: "Transform a user-supplied photograph into ONE designed editorial Layered Torn-Paper Collage poster: four composition-driven layered paper pieces (Reality + 30%, 65%, 90% source-derived abstraction states) sharing one editorial print/paper material language, with torn-paper geometry as region shape rather than a decorative line. The scene appears exactly once; only the primary head is hard-protected. Legacy Torn-Strip, optional Semantic Contour, Mask, and Rect boundary families are also available. Accept a visually coherent generated face when identity and anatomy are already sound; use source-face restoration only as a gated fallback that demonstrably improves the result."
 ---
 
 # Four-Slice Reality / Abstraction Poster
 
-Create one editorial poster that juxtaposes four roughly equal sequential source-derived regions governed by four equal hidden logical zones: one photographic Reality state and three clearly distinct, non-linear abstraction states. By default the regions are separated by three irregular torn-paper seams (Torn-Strip Composition).
+Create one editorial poster composed of four layered paper pieces (Reality + 30%, 65%, 90% source-derived abstraction states) sharing a single editorial print / paper material language. By default this is a **Layered Torn-Paper Collage** — torn-paper geometry is the region shape itself, not a line drawn on top.
 
 ## Default visual objective
 
-**Readable four-state poster first; ordered torn-paper composition by default.**
+**Readable four-state editorial collage first; Layered Torn-Paper Collage by default.**
 
-Create one editorial poster composed of four sequential source-derived regions separated by three irregular physical-looking seams.
+The final image should feel designed as **one physical editorial object**, not assembled from four unrelated rendering styles. Reality, 30%, 65% and 90% belong to the same visual system: shared editorial print / aged paper / torn paper / screen-print texture / paper grain / restrained distressed texture, inside the Robot Dreams-inspired warm cinematic palette.
 
-By default, use **Torn-Strip Composition**:
+Core principle:
 
-- the four visible states retain the ordered topology of the four equal hidden logical zones;
-- the three internal boundaries become continuous torn-paper-like seams extending from one side of the canvas to the opposite side;
-- the regions may have irregular edges, but they must not become arbitrary blob-shaped territories.
+```text
+IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE,
+NOT JUST WAVY STRIPS.
+
+Keep the four-state composition controlled and readable.
+Avoid arbitrary blob segmentation, islands, pockets, and random fragments.
+
+However, do not force the visible regions to remain near-equal strips.
+Allow broad layered paper shapes whose geometry is driven by composition,
+depth, visual rhythm, and major scene masses.
+```
 
 Prefer:
 
 ```text
-four broad ordered regions
+ONE COHERENT EDITORIAL POSTER
 +
-three continuous irregular seams
+FOUR READABLE ABSTRACTION STATES
++
+ONE SHARED MATERIAL LANGUAGE
++
+COMPOSITION-DRIVEN LAYERED REGIONS
 ```
 
 over:
 
 ```text
-four independent contour-shaped patches.
+four independent filter/medium patches.
 ```
 
-Core principle:
-
-```text
-IRREGULAR EDGE ≠ IRREGULAR TERRITORY
-
-Make the seams irregular.
-Keep the four regions topologically simple and sequential.
-
-Torn boundaries are layout-defined seams, not semantic segmentation contours.
-```
-
-Make the four states immediately legible as intentional visual fragments while keeping them inside one poster system. Do not require visible rectangular bands. Keep the four visible regions roughly balanced in area and visual importance; do not reduce them to one dominant image plus three scraps.
+The four states must be immediately legible while keeping the poster system coherent. Do not require visible rectangular bands. Keep the four paper pieces roughly substantial; do not reduce them to one dominant image plus three scraps.
 
 Default to **Hybrid Transition**: allow backgrounds and large color fields to change abruptly, preserve semantic continuity for important people and buildings, and never force every boundary to be fully seamless. Keep all four states clearly readable; make boundaries visibly present whenever that strengthens modularity or poster design.
 
@@ -135,6 +136,10 @@ Before producing the artwork, read:
 
 Preserve primary-face identity without assuming that pixel restoration is always necessary. Keep the strongest visually coherent candidate eligible for final delivery.
 
+In the **deterministic pipeline** the primary head is source-protected, geometrically, by construction: the script derives a head protection mask and always force-composites it from the source after the anchor, and `--mode verify` rejects any output where the head region differs from the source. No Face Restoration Gate runs on this path.
+
+The **Face Restoration Gate** below applies ONLY to one-shot / non-deterministic fallback cases where exact source-head compositing was not available. On that fallback path a generated face may be kept if identity and anatomy are already sound; the gate exists to decide when to attempt source restoration. There is no logical conflict: deterministic path = source head; fallback path = gate decides.
+
 **Only the primary head is hard-locked to the Reality state.** Everything else — the rest of the person's body, buildings, crowds, and all other subjects — may deliberately exist across multiple abstraction states at the same time. A building whose roof stays photographic while its façade lives at 65% and its silhouette at 90% is a feature, not an error. Cross-state coexistence of body parts and architecture is allowed and encouraged when it strengthens the poster; the only hard invariances are head identity/continuity and the absence of accidental duplication (clones, double faces, ghost edges).
 
 In the deterministic pipeline the head lock is geometric, not just a prompt instruction: the script derives a head protection mask (generous expansion of `--face-boxes`, or a supplied `--head-mask`) and always force-composites it from the source after the anchor — so the primary face is the original photograph even when a face box straddles a zone boundary, and `--mode verify` rejects any output where the head region differs from the source.
@@ -210,16 +215,16 @@ final candidate = restoration with a facial patch, geometry mismatch, or broken 
 ## Workflow
 
 1. Inspect the supplied photograph. Identify dimensions, orientation, semantic flow, primary people and faces, architecture, landmarks, important objects, dominant shapes, and palette.
-2. Choose the slicing direction. Use the script's deterministic `--direction auto` (default: horizontal slices when the scene layers top-to-bottom or the image is portrait/neutral, vertical slices when the scene develops across width or has strong vertical structure), and override with an explicit `vertical` or `horizontal` only when the semantic composition clearly favors it. Preserve the source aspect ratio and overall rectangular canvas. Never move the hidden ownership boundaries afterward; do not require visible module edges to follow them.
+2. Choose the collage layout (and slicing direction for non-collage modes). Use the script's deterministic `--layout auto` (default): wide or horizontally-layered scenes -> `horizontal-layered`; portrait alleys / central-perspective streets -> `side-weighted`; strip modes only when a modular strip layout is wanted. Override only when the semantic composition clearly favors another layout. Preserve the source aspect ratio and overall rectangular canvas.
 3. Define the slicing deterministically with the script — never by the image model:
-   `python scripts/slice_and_compose.py --mode prepare --source <photo> --direction <vertical|horizontal> --boundary <torn|contour|mask|rect> [--face-boxes "<x0,y0,x1,y1;...>"] --levels <permutation> --workdir work/ [--masks-dir <dir>]`.
-   Boundary family: `torn` (default) generates three continuous multi-scale torn-paper seams over four ordered regions — it does not follow semantic contours and may cut across buildings, roads, bodies, and sky; only the protected head is avoided. `contour` (optional) derives semantic + edge-aware contours that follow silhouettes, rooflines, horizons, and class boundaries. `mask` accepts four supplied content-aware masks normalized to exact tiling; `rect` falls back to equal strips. The script writes the four exact pixel regions (masks), the manifest (including the torn seam paths), per-zone context crops, and the zone masks. Follow [deterministic-layout.md](references/deterministic-layout.md).
-4. Select exactly one Reality Anchor ownership zone through the script's `--anchor auto` hierarchy (primary-face ownership first; crowd-dominant semantic ownership second; important-architecture ownership third; Logical Zone 2 fallback only when none of those subjects determines ownership) or force a specific zone with `--anchor 1..4`. Keep the hidden boundaries fixed.
+   `python scripts/slice_and_compose.py --mode prepare --source <photo> --boundary <collage|torn|contour|mask|rect> [--layout <auto|horizontal-layered|side-weighted|vertical-strip|horizontal-strip>] [--direction <auto|vertical|horizontal>] [--face-boxes "<x0,y0,x1,y1;...>"] --levels <permutation> --workdir work/ [--masks-dir <dir>]`.
+   Boundary family: `collage` (default) builds **Layered Torn-Paper Collage** — four composition-driven layered paper pieces with independent torn silhouettes, z-ordered, one shared material language; the torn edge is region geometry, not a drawn line. `torn` (legacy) keeps ordered torn-strip composition. `contour` (optional) derives semantic + edge-aware contours. `mask` accepts four supplied masks normalized to exact tiling; `rect` falls back to equal strips. The script writes the four exact pixel regions (masks), the manifest, per-zone context crops, and the zone masks. Follow [deterministic-layout.md](references/deterministic-layout.md).
+4. Select exactly one Reality Anchor. The script's `--anchor auto` implements: 1) primary-face ownership (largest face overlap inside the piece masks); 2) for `side-weighted` collage without a face, the central Reality corridor; 3) Logical Zone 2 fallback. Architecture/crowd anchors are NOT auto-detected by the script — choose them explicitly with `--anchor 1..4` when the scene's main subject is a building or crowd. Keep the hidden ownership boundaries fixed.
 5. Identify the primary face and surrounding head/body continuity context before generation; do not pre-commit to source-pixel restoration. Pass accurate `--face-boxes` (or a `--head-mask`) so the script derives a generous head protection region covering hair and jaw/neck — the head is force-composited from the source regardless of which zone it falls in.
-6. Assign 30%, 65%, and 90% abstraction exactly once to the remaining logical zones via `--levels`. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
+6. Assign 30%, 65%, and 90% abstraction exactly once to the remaining paper pieces via `--levels`. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor. As a default suggestion (not a hard rule), the strongest abstraction often works well at an outer paper layer (top, bottom, or side), while Reality benefits from a central or compositionally important region.
 7. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract modules distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
-8. Render each abstract zone **separately** (primary path). Select source-derived abstraction methods appropriate to each zone's level. Treat abstraction as structural reinterpretation, never filter intensity. Enforce perceptual separation across 30%, 65%, and 90% through structural information density—not merely rendering style, palette, brush texture, or medium. Reduce, merge, group, or omit non-essential repeated components when this improves clarity, but preserve the primary person, identity-critical face, dominant crowd event, landmark architecture, and major scene-defining masses. Render each non-anchor context crop (`work/crops/zone{i}.png`) with the per-zone render prompt block from [deterministic-layout.md](references/deterministic-layout.md); the model never decides the poster layout and never receives a whole-poster slicing instruction. **Each zone render must show ONLY its own slice of the photograph, at the same aspect ratio and orientation as its crop — the model must never complete, reconstruct, or re-invent the rest of the scene inside a zone render.** Compose refuses to build the poster when a zone render has the wrong aspect (e.g. a landscape full scene for a portrait strip) or is a near-copy of the full scene; if either happens, reject it and re-render with the strict slice prompt block.
-9. Compose deterministically: `python scripts/slice_and_compose.py --mode compose --workdir work/ --output <final>.png`. The script pastes the rendered zones back at fixed coordinates through their zone masks, always keeps the Reality Anchor composited from the source, and force-composites the head protection mask from the source on top — the primary face is the original photograph even when a face box straddles a zone boundary. For `torn` the cuts are hard/near-hard (`feather = 1`) and a warm torn-paper seam overlay is drawn by default (`--seam-style paper`); `contour`/`mask`/`rect` use a soft transition band. For Scheme B, inpaint the full canvas with `work/masks/zone{i}.png` and run `--mode enforce-anchor` instead. The four visible modules are the torn ordered regions (default), contour regions, supplied masks, or rect strips; they tile the canvas exactly with no gaps or overlaps. Keep them roughly balanced and readable, and preserve the Skill's modular color and palette rules.
+8. Render each abstract zone **separately** (primary path). Select source-derived abstraction methods appropriate to each zone's level — in collage mode, share one editorial print / paper material language across the states and differentiate primarily by structural information density, component omission, shape merging, edge simplification, surface-detail reduction, spatial compression, and graphic massing; do NOT force three unrelated mediums just to prove the regions differ. Treat abstraction as structural reinterpretation, never filter intensity. Reduce, merge, group, or omit non-essential repeated components when this improves clarity, but preserve the primary person, identity-critical face, dominant crowd event, landmark architecture, and major scene-defining masses. Render each non-anchor context crop (`work/crops/zone{i}.png`) with the per-zone render prompt block from [deterministic-layout.md](references/deterministic-layout.md) (use the collage block when `--boundary collage`); the model never decides the poster layout and never receives a whole-poster slicing instruction. **Each zone render must show ONLY its own slice of the photograph, at the same aspect ratio and orientation as its crop — the model must never complete, reconstruct, or re-invent the rest of the scene inside a zone render.** Compose refuses to build the poster when a zone render has the wrong aspect (e.g. a landscape full scene for a portrait strip) or is a near-copy of the full scene; if either happens, reject it and re-render with the strict slice prompt block.
+9. Compose deterministically: `python scripts/slice_and_compose.py --mode compose --workdir work/ --output <final>.png`. The script pastes the rendered zones back at fixed coordinates through their zone masks, always keeps the Reality Anchor composited from the source, and force-composites the head protection mask from the source on top — the primary face is the original photograph even when a face box straddles a zone boundary. For `collage` a subtle paper grain is blended over the pieces (Reality re-composited clean), each piece gets a deckled fiber edge along its torn silhouette, and one-sided paper shadows fall only from higher-z pieces onto lower ones (`--paper-*`, `--collage-overlap`). For `torn` the cuts are hard (`feather = 1`) with the torn-paper seam overlay (`--seam-style paper`); `contour`/`mask`/`rect` use a soft transition band. For Scheme B, inpaint the full canvas with `work/masks/zone{i}.png` and run `--mode enforce-anchor` instead. The four visible modules are the collage paper pieces (default), torn ordered regions, contour regions, supplied masks, or rect strips; they tile the canvas exactly with no gaps or overlaps. Keep them substantial and readable, and preserve the Skill's modular color and palette rules.
 10. One-shot full-poster generation is a fallback only: if used, the model prompt MUST contain the Final Output Layout hard-constraint block verbatim, MUST keep the source aspect ratio and orientation (portrait stays portrait), and the result must pass `--mode verify`. Reject any grid, strip, contact sheet, or repeated-scene output.
 11. Run the Face Restoration Gate on the final poster. If Candidate A is acceptable, skip restoration and retain A for the remaining poster-level workflow. Otherwise attempt a geometrically verified irregular-mask or aligned restoration to create Candidate B.
 12. Let Candidate B replace Candidate A only when identity improves without unnatural anatomy, patch appearance, skin mismatch, or broken head/jaw/neck/body continuity.
@@ -234,12 +239,12 @@ Resolve conflicts in this order:
 2. Primary Head Identity and Continuity. (Body and building continuity are soft preferences; cross-state presence is allowed and encouraged.)
 3. Reality Anchor Role and Local Source Preservation.
 4. Architectural Identity.
-5. Four-State Readability, Logical-Zone Ownership, Abstraction Assignment, and Ordered Strip Topology (default torn family: irregular seams, ordered sequential regions — never blob-shaped territories).
-6. Robot Dreams-Inspired Color Identity.
+5. Four-State Readability, Logical-Zone Ownership, Abstraction Assignment, and Composition Topology. In the default collage family: layered paper pieces, composition-driven sizes, no arbitrary blobs/islands/pockets; in the legacy torn family: ordered sequential regions.
+6. Robot Dreams-Inspired Color Identity (combined with the shared editorial print/paper material language in collage mode).
 7. Intentional Modular Boundary Design.
 8. Artistic Experimentation.
 
-The Final Output Layout hard constraint (one continuous image, four adjacent regions, scene appears exactly once) outranks every rule in this list: reject any grid, strip, or contact-sheet output no matter how well it satisfies lower-priority goals. In the default torn family, Ordered Strip Topology outranks artistic boundary play: seams may be irregular, but the four regions must stay sequential and topological simple. Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal hidden logical zones while allowing irregular visible modules. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity outrank minor boundary smoothing and general artistic experimentation.
+The Final Output Layout hard constraint (one continuous image, four adjacent regions, scene appears exactly once) outranks every rule in this list: reject any grid, strip, or contact-sheet output no matter how well it satisfies lower-priority goals. In the legacy torn family, Ordered Strip Topology outranks artistic boundary play: seams may be irregular, but the four regions must stay sequential and topologically simple. In the default collage family, layered paper-piece topology outranks artistic boundary play: pieces may be large and layered, but never arbitrary blobs, islands, or fragments. Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal hidden logical zones while allowing irregular visible modules. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity and the shared paper material language outrank minor boundary smoothing and general artistic experimentation.
 
 ## Core principles
 
@@ -252,7 +257,8 @@ The Final Output Layout hard constraint (one continuous image, four adjacent reg
 - Make abstraction a structural transformation, not a filter.
 - Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this shared emotional color universe while allowing strong, intentional slice-to-slice dominant color differences.
 - Keep hidden logical ownership mathematically equal; make visible module edges irregular, designed, and readable.
-- IRREGULAR EDGE ≠ IRREGULAR TERRITORY: keep the four modules topologically simple and sequential; make the seams irregular, not the entire region layout.
-- Torn boundaries are layout-defined seams, not semantic segmentation contours: by default they may cut across buildings, roads, bodies, and sky; only the primary head is hard-avoided.
+- IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE, NOT JUST WAVY STRIPS: keep the four-state composition controlled and readable; avoid arbitrary blobs, islands, pockets and random fragments; but do not force the visible regions to remain near-equal strips — allow broad layered paper shapes driven by composition, depth, rhythm and scene masses.
+- In the default collage family the four states share ONE editorial print / paper material language — LEVEL ≠ MEDIUM: differentiate abstraction by information density and structural reduction, not by forcing three unrelated mediums.
+- Torn-paper geometry in collage is region shape (layered paper pieces with deckled edges and one-sided shadows), not a decorative line drawn on top.
 - The four states are four adjacent regions of ONE continuous image; the scene appears exactly once — never four full-image versions, grids, strips, or contact sheets.
 - Deliver one coherent poster, never four independent images.

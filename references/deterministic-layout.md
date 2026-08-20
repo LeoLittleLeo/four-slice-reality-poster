@@ -22,68 +22,75 @@ The four states remain the four hidden logical zones of
 [composition-and-anchor.md](composition-and-anchor.md); the script simply turns
 them into exact pixel regions.
 
-## Boundary styles
+## Boundary families
 
-`--boundary` selects how the four regions are cut. All four styles tile the
+`--boundary` selects how the four regions are cut. All five families tile the
 canvas exactly (no gaps, no overlaps) and keep the Reality Anchor and the
 primary head protected.
 
-### `torn` (default) — ordered torn-paper seams
+### `collage` (DEFAULT) — Layered Torn-Paper Collage
 
-The default boundary language is an editorial torn-paper collage, not a
-semantic segmentation. Four broad sequential regions (each roughly 1/4 of the
-canvas) are separated by **three continuous edge-to-edge seams** that look
-like physical paper tears.
-
-The `torn` generator is algorithmically **completely different** from
-`contour`:
+The default boundary family is a **layered torn-paper collage**: one designed
+editorial object, not four strips with lines between them. Four paper pieces
+are layered (z-ordered) with composition-driven sizes and independent torn
+silhouettes; the paper body, deckled fiber edges and one-sided shadows are
+**region geometry**, not a decorative line drawn on top.
 
 ```text
-torn DOES NOT optimize for FIND_EDGES.
-torn DOES NOT reward semantic object boundaries.
-torn DOES NOT follow buildings, silhouettes, roads, horizons or color-field
-boundaries.
+TORN EDGE IS REGION GEOMETRY,
+NOT A DECORATIVE LINE DRAWN ON TOP.
 ```
 
-Each seam is built from multi-scale variation:
+Allowed: layered stacking, local side insets, larger paper pieces,
+irregular torn silhouettes, paper overlap and visual depth.
+Forbidden: arbitrary blob segmentation, scattered fragments, floating
+islands, contact sheets, 2×2 grids, gutters, or four full-photo copies.
+The scene still appears exactly once.
+
+The layout is selected by `--layout` (default `auto`):
+
+- `horizontal-layered` — broad layered paper bands with independent torn
+  silhouettes (middle-heavy nominal profile, NOT quarter-based). Default
+  priority template.
+- `side-weighted` — a central Reality corridor flanked by broad left/right
+  paper fields plus a top (or bottom) supplementary layer; for alleys and
+  central-perspective streets.
+- `vertical-strip` / `horizontal-strip` — strip modes reusing the legacy torn
+  logic, only when a modular strip layout is wanted.
+- `auto` — derives the layout deterministically: wide scenes and
+  horizontal-banded scenes -> `horizontal-layered`; portrait scenes with
+  strong vertical structure (alleys, narrow streets) -> `side-weighted`.
+
+Collage parameters (all deterministic via `--seed`):
+
+- `--collage-band 0.12` — max paper-boundary deviation from its nominal
+  profile (fraction of the slice axis).
+- `--collage-roughness 1.0` — medium tear amplitude multiplier.
+- `--collage-overlap 5` — visual paper-overlap / one-sided shadow offset (px).
+- `--paper-edge-width 9` — exposed deckled paper-fiber band width (px).
+- `--paper-shadow 20` — one-sided paper shadow opacity (0..255, 0 disables).
+- `--paper-texture subtle|none` — subtle deterministic paper grain overlay
+  (default `subtle`; Reality is re-composited clean, so it reads
+  photographic while the paper pieces read printed).
+
+### `torn` (legacy) — ordered torn-strip composition
+
+Kept intact as the legacy / optional ordered layout:
 
 ```text
-seam = nominal position (1/4, 1/2 or 3/4 logical boundary)
-     + broad low-frequency drift
-     + medium-frequency tear irregularity
-     + high-frequency micro jaggedness / paper fiber
+four sequential strip-like states
++
+three continuous irregular seams around 1/4, 1/2, 3/4
 ```
 
-and then:
+Each seam is multi-scale (`nominal + broad low-frequency drift + medium tear
++ micro fiber`), continuous edge-to-edge, ordered, separated, head-avoiding,
+and deterministic via `--seed`. It does NOT follow semantic contours and may
+cross buildings, roads, bodies and sky.
 
-1. starts near its nominal logical boundary;
-2. runs continuously from one canvas edge to the opposite edge;
-3. preserves the ordering of all four zones (Zone k stays broadly
-   left-of/below Zone k+1);
-4. stays primarily inside a narrow deviation band (`--torn-band`, default
-   0.06 = ~6% of the slice axis; local tears may reach ~9%);
-5. uses multi-scale irregularity — never single-scale per-pixel
-   `random.randint` jitter, which produces ECG-style edges;
-6. may cross ordinary semantic objects (buildings, roads, vegetation, sky,
-   mountains, crowds and bodies) freely;
-7. moves away from protected primary-head regions with a short local push
-   and smooth reconnection (no large detours);
-8. never produces closed islands, pockets, loops or blob-shaped territories.
-
-It is fully deterministic: the same source, direction, seed and parameters
-produce identical seams (`--seed`, default 42).
-
-By default the seams are hard/near-hard cuts (`feather = 1` px anti-alias)
-and compose draws an optional physical **torn-paper seam overlay**
-(`--seam-style paper`, default): a jagged warm-ivory paper ribbon along each
-seam built from per-point random width and perpendicular jitter, plus
-perpendicular **fiber strands**, a dark aged **cut line**, and a faint offset
-shadow (`--seam-shadow`, `--seam-offset`). The ivory is **adaptive**: on
-bright local backgrounds it blends toward a darker aged-beige tone so the
-paper edge stays visible on both light and dark photographs. The overlay is
-visual only — the four zone masks underneath still tile the canvas exactly,
-and the verify exemption mask uses the exact same deterministic geometry as
-the overlay.
+Uses `--torn-band`, `--torn-roughness`, `--torn-scale`, `--seed`,
+`--seam-style`, `--seam-shadow`, `--seam-offset`, and draws the torn-paper
+seam overlay via `draw_paper_seams`. Do not break its compatibility.
 
 ### `contour` (optional) — Semantic Contour Boundary
 
@@ -151,11 +158,12 @@ when a simple straight layout is the strongest design choice.
 
 ### Scheme A — per-zone crop re-render (default)
 
-1. `--mode prepare` defines the four regions, selects the anchor, assigns
-   30%/65%/90%, writes one context crop per zone (region bounding box plus a
-   small margin so the model can see its neighbors), and derives a **head
-   protection mask** — a generous expansion of the `--face-boxes` covering
-   hair and jaw/neck (or a supplied `--head-mask`).
+1. `--mode prepare` defines the four regions (collage paper pieces, torn
+   seams, contour boundaries, supplied masks or strips), selects the anchor,
+   assigns 30%/65%/90%, writes one context crop per zone (region bounding box
+   plus a small margin so the model can see its neighbors), and derives a
+   **head protection mask** — a generous expansion of the `--face-boxes`
+   covering hair and jaw/neck (or a supplied `--head-mask`).
 2. The image model re-renders each **non-anchor** crop at its assigned level,
    using the per-zone render prompt block below. The model never sees a
    "four-slice poster" instruction; it only re-renders one slice.
@@ -165,6 +173,23 @@ when a simple straight layout is the strongest design choice.
    through its own zone mask, and the **head protection mask is then
    force-composited from the source on top** — so the primary head is the
    original photograph even when a face box straddles a zone boundary.
+
+### Collage paper finish (compose, `--boundary collage`)
+
+For collage the compose step adds the paper body:
+
+1. after pasting the abstract pieces, a subtle deterministic paper grain is
+   blended over them (`--paper-texture subtle`); the anchor and head are then
+   re-composited clean from the source, so Reality reads photographic while
+   the pieces read printed;
+2. each piece receives a deckled exposed-paper fiber band along its torn edge
+   (`--paper-edge-width`, adaptive warm ivory, broken micro sections);
+3. one-sided paper shadows fall only from higher-z pieces onto lower-z pieces
+   (`--paper-shadow`, `--collage-overlap`), never on both sides of an edge.
+
+All of it is visual only — the piece masks tile exactly underneath, and
+`--mode verify` exempts only the intentional paper pixels from the
+anchor/head source-equality core.
 
 ### Scheme B — full-canvas mask inpaint
 
@@ -181,32 +206,44 @@ modify more than one zone at a time.
 
 ```text
 # 1. Define the layout (deterministic)
-#    ordered torn-paper seams (default); direction auto-derives
+#    Layered Torn-Paper Collage (default); layout auto-derives
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction auto --boundary torn \
+    --source photo.png --boundary collage --layout auto \
     --anchor auto --face-boxes "100,60,180,150;330,120,410,210" \
+    --levels 65,90,30 --workdir work/
+
+#    explicit side-weighted collage (alley / central corridor)
+python scripts/slice_and_compose.py --mode prepare \
+    --source alley.png --boundary collage --layout side-weighted \
+    --anchor auto --face-boxes "300,120,380,210" \
+    --levels 65,90,30 --workdir work/
+
+#    legacy ordered torn-strip composition
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --boundary torn --direction vertical \
+    --anchor auto --face-boxes "100,60,180,150" \
     --levels 65,90,30 --workdir work/
 
 #    optional semantic contour boundaries
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction vertical --boundary contour \
+    --source photo.png --boundary contour --direction vertical \
     --anchor auto --face-boxes "100,60,180,150" \
     --levels 65,90,30 --workdir work/
 
 #    supplied content-aware masks
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction vertical --boundary mask \
+    --source photo.png --boundary mask \
     --masks-dir my_masks/ --anchor auto --levels 65,90,30 --workdir work/
 
 #    equal strips (fallback)
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction vertical --boundary rect \
+    --source photo.png --boundary rect --direction vertical \
     --anchor auto --levels 65,90,30 --workdir work/
 
 # 2a. Render each non-anchor crop in work/crops/zone{i}.png with the
 #     per-zone render prompt block, save to work/rendered/zone{i}.png
 
-# 2b. Compose the poster (torn: draws the paper seam overlay by default)
+# 2b. Compose the poster (collage: paper grain + fiber edges + shadows)
 python scripts/slice_and_compose.py --mode compose \
     --workdir work/ --output poster.png
 
@@ -221,13 +258,25 @@ python scripts/slice_and_compose.py --mode verify \
 
 Options:
 
-- `--direction auto|vertical|horizontal` — slice direction. `auto` (default)
-  derives it deterministically from the image: strong horizontal banding
-  (sky/ground layering) -> horizontal slices; strong vertical structure or
-  wide flow -> vertical slices; neutral images break the tie by aspect
-  (portrait -> horizontal, wide -> vertical). The agent may still override
-  based on semantic flow.
-- `--boundary torn|contour|mask|rect` — boundary style (default `torn`).
+- `--direction auto|vertical|horizontal` — slice direction for legacy torn /
+  contour / rect (collage layouts define their own orientation). `auto`
+  (default) derives it deterministically from image structure and aspect.
+- `--boundary collage|torn|contour|mask|rect` — boundary family (default
+  `collage`).
+- `--layout auto|horizontal-layered|side-weighted|vertical-strip|horizontal-strip`
+  — collage layout (default `auto`). `vertical-strip`/`horizontal-strip`
+  reuse the legacy torn logic.
+- `--collage-band 0.12` — collage: max paper-boundary deviation from its
+  nominal profile (fraction of the slice axis).
+- `--collage-roughness 1.0` — collage: medium tear amplitude multiplier.
+- `--collage-overlap 5` — collage: visual paper-overlap / one-sided shadow
+  offset in px.
+- `--paper-edge-width 9` — collage: exposed deckled paper-fiber band width in
+  px.
+- `--paper-shadow 20` — collage: one-sided paper shadow opacity 0..255
+  (`0` disables).
+- `--paper-texture subtle|none` — collage: subtle deterministic paper grain
+  (default `subtle`).
 - `--torn-band 0.06` — torn mode: typical global seam deviation as a fraction
   of the slice axis (local tears reach ~`torn_band * 1.5`).
 - `--torn-roughness 1.0` — torn mode: multiplier for medium/high-frequency
@@ -275,9 +324,9 @@ Options:
 - `--masks-dir DIR` — required for `--boundary mask`; four grayscale masks
   `zone0.png`..`zone3.png` (255 = region).
 - `--feather N` — soft transition width in px for zone boundaries. Per-mode
-  default: `torn` uses `1` px (hard physical tear, anti-aliased); `contour`,
-  `mask` and `rect` use ~2% of the smaller image dimension (capped at
-  12.5%). Explicit `0` restores fully hard edges.
+  default: `collage` and `torn` use `1` px (hard paper cut, anti-aliased);
+  `contour`, `mask` and `rect` use ~2% of the smaller image dimension (capped
+  at 12.5%). Explicit `0` restores fully hard edges.
 
 ## Verbatim prompt blocks
 
@@ -316,6 +365,29 @@ of the scene. Do not crop, pad, or add margins of your own. Keep the warm,
 nostalgic, sunlit, slightly retro Robot Dreams-inspired palette. The slice
 must remain clearly traceable to this exact photograph while departing in
 structural information density as instructed.
+```
+
+### Collage per-zone render block (`--boundary collage`)
+
+Use instead of the generic block when the boundary family is collage:
+
+```text
+This crop belongs to ONE Layered Torn-Paper Collage poster.
+
+Keep the same editorial print / paper material language as the other zones.
+Do not invent an unrelated artistic medium just to make this region different.
+
+Differentiate this abstraction level primarily by:
+- structural simplification,
+- information density,
+- shape merging,
+- detail omission,
+- graphic massing.
+
+Preserve scene identity and major spatial relationships.
+
+Do not output a self-contained poster or a full-image reinterpretation.
+Render only this source-derived crop.
 ```
 
 ### Scheme B inpaint block
@@ -378,9 +450,16 @@ slightly retro Robot Dreams-inspired palette.
   still tile the canvas exactly, and `--mode verify` exempts only the
   intentional paper-fiber pixels (like the soft transition band) from the
   exact source-equality check of the anchor/head core.
-- The `torn` and `contour` algorithms are fully isolated: `torn` never calls
-  `build_score()` or `optimize_boundary()` (those belong to `contour`), and
-  `contour` never uses the torn noise generator.
+- The `collage` and `torn` algorithms are fully isolated: `collage` never
+  calls `build_score()`/`optimize_boundary()` (those belong to `contour`),
+  and `contour` never uses the torn/collage noise generators.
+- Collage paper finish is z-ordered: each piece casts a one-sided shadow only
+  onto the pieces below it (an upper paper covers lower papers), and the
+  deckled fiber bands follow each piece's own torn silhouette — never a
+  continuous ivory tube or a white stroke along a straight seam.
+- Old manifests (e.g. torn manifests without `layout` / collage fields) keep
+  working: compose/verify read every new field through `manifest.get(...)`
+  defaults, and the collage finish only applies when `boundary == "collage"`.
 - A one-shot full-poster generation must still pass `--mode verify`; any grid,
   strip, or contact-sheet output is rejected regardless of other qualities.
 
@@ -392,8 +471,11 @@ slightly retro Robot Dreams-inspired palette.
 - the four zone masks do not tile the canvas exactly (any gap or overlap);
 - the Reality Anchor core or head core differs from the source (the
   fully-opaque interior of the softened mask must equal the source; the soft
-  transition band and the intentional torn paper-fiber pixels around it are
-  exempt);
+  transition band, the torn paper-fiber pixels, and the collage paper
+  finish are exempt);
+- for `collage`: a paper piece is too small (< ~6% of the canvas), or a piece
+  has disconnected islands; pieces may have very different areas — no
+  quarter-based balance check is applied;
 - for `torn`: the three seams are missing, do not span the full canvas, cross
   or collapse, or the zones contain islands/pockets/loops (ordered strip
   topology broken); a seam deviating more than ~20% of the slice axis from
@@ -403,12 +485,11 @@ slightly retro Robot Dreams-inspired palette.
 
 It warns (does not fail) when:
 
-- the zone areas are unbalanced (max/min ratio above 2.5),
 - a non-anchor zone is pixel-identical to its source slice (no abstraction
   applied),
+- a collage piece is small (< ~10% of the canvas),
 - a torn seam deviates far from its nominal boundary (warns above ~12% of the
-  slice axis),
-- a torn seam has a large local jump (may look jagged), or
+  slice axis) or has a large local jump, or
 - a rendered abstract zone resembles the FULL source scene instead of its own
   slice — the symptom of "four repeated images at different abstraction
   levels", caused by the image model completing the photograph inside a zone

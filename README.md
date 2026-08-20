@@ -4,9 +4,26 @@
 
 `four-slice-reality-poster` 是一个面向 Codex / Agent 图像工作流的 Skill。
 
-它不是把照片简单切成四条，再分别套上不同强度的滤镜，而是先建立四个等分的 **隐藏逻辑区（Logical Zones）**，再按 **Torn-Strip Composition（默认）** 用三条连续的、多尺度的 **撕纸式接缝（torn-paper seams）** 把它们转化为四个有序的可见区域。边界是有意设计的"版面撕纸切口"，而不是语义分割轮廓——可以穿过建筑、道路、人物身体与天空，唯一强制保护的是主头部。
+它不是把照片简单切成四条，再分别套上不同强度的滤镜，而是把一张照片构造成 **一张设计完整的 Layered Torn-Paper Collage（分层撕纸拼贴海报）**：四个构图驱动的分层纸片（Reality + 30% / 65% / 90% 抽象）共享同一种编辑印刷/纸张材质语言，撕纸边界是区域本身的形状，而不是画在上面的线。
 
-可选边界家族：`contour`（语义轮廓，跟随剪影/屋顶线/地平线）、`mask`（自绘区域）、`rect`（等分直条）。
+场景只出现一次；唯一强制保护的是主头部。
+
+可选边界家族：`torn`（legacy 有序撕纸条带）、`contour`（语义轮廓）、`mask`（自绘区域）、`rect`（等分直条）。
+
+```text
+OLD / torn-strip（legacy）           DEFAULT / collage
+
+|~~~~|~~~~|~~~~|~~~~|              ~~~~~~~~~~~~~~~~~~~~
+                                    顶层纸片（抽象）
+                                   ~~~~~~~\_____/~~~~~~~
+        四根波浪条 + 三根米白线
+                                          Reality
+                                          （主场景）
+                                     ____________________
+                                         下层拼贴
+                                     ~~~~~\________/~~~~~~
+        四块 + 四根线                    四张纸片，有层次
+```
 
 最终目标：
 
@@ -18,20 +35,39 @@
 
 这个 Skill 首先保证四种视觉状态都可以被清晰感知，其次才追求整体融合。
 
-默认使用 **Torn-Strip Composition**：
+默认使用 **Layered Torn-Paper Collage**：
 
-* 四个区域保持有序的 1/4、1/4、1/4、1/4 顺序结构（Ordered Strip Topology）；
-* 三条内部接缝贯穿画布一侧到另一侧，具有明显的撕纸式多尺度不规则；
-* 接缝默认不追踪人物/建筑/道路/天空的语义轮廓；
-* 接缝可以直接穿过建筑、道路、山体、树与人身体；
-* 唯一强制避让的是主脸 / 主头部；
-* 最终效果更接近 **editorial torn-paper collage**，而不是语义分割。
+* 四张构图驱动的分层纸片，独立撕纸轮廓，z-order 层叠；
+* 所有纸片共享同一种编辑印刷/纸张材质语言（纸纹、印刷颗粒、暖色系、相似边缘处理）；
+* 抽象等级主要通过信息密度与结构简化区分（LEVEL ≠ MEDIUM），而不是三种互不相干的媒介；
+* 撕纸边缘是区域几何本身（deckled 纸纤维边 + 单侧纸影），不是描边线；
+* Reality 保持摄影质感（源图合成），在拼贴中清晰可读；
+* 禁止 blob 分割、小碎片、孤岛、contact sheet、2×2、四张完整照片、gutters。
 
 核心原则：
 
-> **IRREGULAR EDGE ≠ IRREGULAR TERRITORY**
->
-> Make the seams irregular. Keep the four regions topologically simple and sequential.
+> **TORN EDGE IS REGION GEOMETRY, NOT A DECORATIVE LINE DRAWN ON TOP.**
+
+> **IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE, NOT JUST WAVY STRIPS.**
+
+BAD（反例）：
+
+```text
+四根窄竖波浪条
+每区用完全不相关的媒介（彩铅 + 低多边形 + 水彩 + 照片）
+细米白线假装撕纸
+最终构图还能看出数学四等分
+```
+
+GOOD（正例）：
+
+```text
+一种统一的编辑印刷语言
+宽大的撕纸纸片层
+中央 Reality 被更抽象的外围纸片包围
+不同抽象等级通过信息缩减表达
+可见的纸身体与 deckled 撕边
+```
 
 ---
 
@@ -91,27 +127,28 @@ Horizontal division
 
 ## ✦ Boundary Families
 
-`--boundary` 决定四种可见区域如何切分，默认 `torn`：
+`--boundary` 决定四种可见区域如何切分，默认 `collage`：
 
 | 家族 | 视觉目标 | 说明 |
 |---|---|---|
-| `torn`（**默认**） | 四个有序区域 + 三条撕纸式接缝 | 多尺度不规则、贯穿画布、不跟随语义轮廓、可穿过任何普通主体、仅避让主头部；硬切口 + 锯齿纸带（纤维短须/深色切痕/偏移阴影、自适应亮度） |
-| `contour`（可选） | 语义轮廓边界 | 跟随剪影/人物轮廓/建筑边缘/屋顶线/天际线/道路/地平线/大色块；Semantic Contour 不是默认 |
+| `collage`（**默认**） | 分层撕纸拼贴海报 | 四张构图驱动的分层纸片 + 独立撕纸轮廓 + z-order 单侧纸影 + 共享印刷/纸张材质语言；`--layout auto\|horizontal-layered\|side-weighted\|...` |
+| `torn`（legacy） | 有序撕纸条带 | 四条有序区域 + 三条贯穿画布的波浪撕纸接缝（约 1/4、1/2、3/4） |
+| `contour`（可选） | 语义轮廓边界 | 跟随剪影/建筑边缘/屋顶线/天际线/道路/地平线；不是默认 |
 | `mask`（自定义） | 完全自由的形状 | 提供 4 张内容感知 mask，脚本归一化为精确平铺 |
 | `rect`（回退） | 等分直条 | 纯整数坐标的四条等宽/等高条 |
 
-确定性：`torn` 使用 `--seed`（默认 42），相同输入必定输出相同的接缝。
+确定性：`collage` 与 `torn` 都使用 `--seed`（默认 42），相同输入必定输出相同的纸片/接缝。
 
 ```bash
-# 默认 torn（撕纸式）
+# 默认 collage（分层撕纸拼贴，layout 自动推导）
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction vertical --boundary torn \
+    --source photo.png --boundary collage --layout auto \
     --anchor auto --face-boxes "100,60,180,150" \
     --levels 65,90,30 --workdir work/
 
-# 可选语义轮廓
+# legacy 有序撕纸条带
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction vertical --boundary contour \
+    --source photo.png --boundary torn --direction vertical \
     --face-boxes "100,60,180,150" --levels 65,90,30 --workdir work/
 ```
 
@@ -600,10 +637,10 @@ git pull
 安装后，可以在支持 Skill 调用的环境中使用：
 
 ```text
-Use $four-slice-reality-poster to transform my photo into ONE continuous
-poster: four ordered regions separated by three irregular torn-paper seams
-(Reality / 30% / 65% / 90% abstraction). Never a 2x2 grid or four full-image
-versions.
+Use $four-slice-reality-poster to transform my photo into ONE designed
+Layered Torn-Paper Collage poster: four layered paper pieces (Reality /
+30% / 65% / 90% abstraction) sharing one editorial print/paper material
+language. Never a 2x2 grid or four full-image versions.
 ```
 
 中文：
@@ -611,11 +648,8 @@ versions.
 ```text
 使用 $four-slice-reality-poster 处理这张照片。
 
-保留一个摄影级 Reality 状态，并生成 30%、65%、90%
-三个结构上明显不同的抽象状态。
-
-默认使用撕纸式接缝（torn）：四个有序区域 + 三条贯穿画布的
-不规则接缝，接缝可穿过建筑、道路和人物身体，但必须避开主头部。
+做成一张完整的分层撕纸拼贴海报：四个分层纸片（Reality + 30%/65%/90%
+抽象）共享同一种印刷/纸张材质语言，撕纸边界是纸片本身的形状。
 ```
 
 也可以追加自定义要求：
@@ -778,13 +812,21 @@ Make visible module boundaries irregular, designed, and readable.
 ```
 
 ```text
-IRREGULAR EDGE ≠ IRREGULAR TERRITORY —
-keep the four modules topologically simple and sequential.
+IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE,
+NOT JUST WAVY STRIPS —
+keep the four-state composition controlled and readable,
+but allow broad layered paper shapes.
 ```
 
 ```text
-Torn boundaries are layout-defined seams,
-not semantic segmentation contours.
+Torn edges are region geometry,
+not decorative lines drawn on top.
+```
+
+```text
+LEVEL ≠ MEDIUM —
+one shared material language,
+different abstraction through information reduction.
 ```
 
 ```text

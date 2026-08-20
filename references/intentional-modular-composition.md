@@ -25,43 +25,52 @@ four-state readability
 
 ## Boundary families
 
-Boundary language is split into two families. **Torn-Strip is the DEFAULT**;
-**Semantic Contour is optional** and must be chosen explicitly.
+Boundary language is split into families. **Layered Torn-Paper Collage is the
+DEFAULT**; Torn-Strip is legacy; Semantic Contour is optional and must be
+chosen explicitly.
 
 The governing principle for the default family:
 
 ```text
-IRREGULAR EDGE ≠ IRREGULAR TERRITORY
+IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE,
+NOT JUST WAVY STRIPS.
 
-Make the seams irregular.
-Keep the four regions topologically simple and sequential.
+Keep the four-state composition controlled and readable.
+Avoid arbitrary blob segmentation, islands, pockets, and random fragments.
 
-Torn boundaries are layout-defined seams, not semantic segmentation contours.
+However, do not force the visible regions to remain near-equal strips.
+Allow broad layered paper shapes whose geometry is driven by composition,
+depth, visual rhythm, and major scene masses.
 ```
 
-### A. Torn-Strip Boundary — DEFAULT
+### A. Layered Torn-Paper Collage — DEFAULT (`--boundary collage`)
 
-- three continuous edge-to-edge seams;
-- approximately follows the logical slice direction;
-- irregular but not strongly meandering;
-- independent from most semantic object contours;
-- may cut across buildings, roads, vegetation, sky, mountains, crowds and
-  bodies;
-- must avoid the protected primary head;
-- retains ordered strip topology;
-- uses hard or near-hard cuts (script `feather = 1`);
-- may expose a narrow warm paper-fiber seam (`--seam-style paper`);
-- must not use broad feathering.
+Four layered paper pieces in z-order, each with its own torn silhouette and
+composition-driven size, sharing ONE editorial print / paper material
+language:
 
-Keep hidden logical boundaries exact. The three internal seams start near the
-nominal 1/4, 1/2 and 3/4 boundaries, run edge-to-edge, and stay inside a
-narrow deviation band (`--torn-band`, ~6%). Irregularity belongs to the seam
-geometry, not to the global module topology.
+- TORN EDGE IS REGION GEOMETRY, NOT A DECORATIVE LINE DRAWN ON TOP;
+- layered stacking, local side insets, larger paper pieces, irregular torn
+  silhouettes, paper overlap and visual depth;
+- each piece casts a one-sided paper shadow only onto the pieces below it in
+  z-order;
+- paper grain, deckled fiber edges and warm ivory are shared across all four
+  states;
+- Reality is photographic (source-composited clean); 30/65/90 differ by
+  structural information density, not by unrelated mediums;
+- no blob segmentation, islands, pockets, contact sheets, 2×2 grids or
+  gutters;
+- the scene appears exactly once.
 
-### B. Semantic Contour Boundary — OPTIONAL
+### B. Torn-Strip — LEGACY (`--boundary torn`)
 
-The optional family (`--boundary contour`) derives boundaries from semantic
-structure:
+Kept intact: four sequential strip-like states with three continuous
+irregular seams around 1/4, 1/2, 3/4; irregular but ordered; head-avoiding;
+hard cuts with the optional torn-paper seam overlay.
+
+### C. Semantic Contour Boundary — OPTIONAL (`--boundary contour`)
+
+The optional family derives boundaries from semantic structure:
 
 - silhouette;
 - person contour;
@@ -150,17 +159,20 @@ abstraction gradient or one common painterly surface.
 
 Inspect the poster at thumbnail size and ask:
 
-- Are four roughly balanced sequential regions immediately readable?
+- Are four readable states present inside ONE designed editorial collage?
 - Is the output one continuous image tiled by four adjacent regions, or four full-image versions in a grid/strip/contact sheet? Reject any layout where the scene is repeated.
-- Do the four states still read as four broad sequential regions?
-- Do the three seams read as intentional torn-paper cuts?
-- Are the seams irregular without turning the regions into arbitrary blobs?
-- Do the seams remain approximately aligned with the chosen slicing direction?
+- Does it feel like one physical editorial object (shared paper/print material language) rather than four unrelated medium filters?
+- Do the four states read as layered paper pieces with torn silhouettes and visual depth, not four wavy strips with lines between them?
+- Are the pieces substantial and connected (no tiny scraps, islands, pockets or scattered fragments)?
+- Does the seam/edge feel like torn paper (deckled fibers, uneven width) rather than a uniform white/cream stroke?
+- In the default collage family: are the torn edges region geometry, not a drawn-on line? Is the paper shadow one-sided (upper piece onto lower) rather than a double-sided outline?
+- In the legacy torn family: do the four states still read as four broad sequential regions with three intentional torn-paper cuts?
+- Do the seams/pieces remain approximately aligned with the intended slicing direction?
 - Are there any islands, loops, U-shaped wraps or excessive excursions?
 - Does the primary head remain untouched?
-- Does the seam feel like a physical editorial collage cut rather than semantic segmentation?
 - Can Reality, 30%, 65%, and 90% be distinguished without explanation?
 - Do 30%, 65%, and 90% differ in structural information density across detail, component density, spatial fidelity, shape fidelity, and photographic surface retention?
+- In the default collage family: do the three abstract states share one material language while differing by information reduction (LEVEL ≠ MEDIUM)?
 - Do visible boundaries use meaningful contours, structures, fields, or strokes rather than default rectangular rigidity?
 - Do at least two visual signals differentiate neighboring modules?
 - Does the Reality Anchor remain the clearly photographic reality state without requiring unsafe full-block restoration?
@@ -171,4 +183,4 @@ Inspect the poster at thumbnail size and ask:
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?
 
-Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. In the default torn family, also reject if the torn boundary repeatedly follows object contours, wraps around an entire person or building, creates blob-shaped territories, or destroys the ordered four-region structure. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
+Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. In the default collage family, also reject if the regions read as four unrelated medium patches, as four wavy strips with decorative lines, as arbitrary blob segmentation, or if a "torn edge" is a uniform cream outline rather than paper body geometry. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.

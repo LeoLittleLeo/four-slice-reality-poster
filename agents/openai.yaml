@@ -1,4 +1,4 @@
 interface:
   display_name: "Four-Slice Reality Poster"
-  short_description: "Create four-state torn-paper editorial photo posters"
-  default_prompt: "Use $four-slice-reality-poster to transform my photo into ONE continuous poster: four ordered regions separated by three irregular torn-paper seams (Reality / 30% / 65% / 90% abstraction). Never output a 2x2 grid or four full-image versions."
+  short_description: "Create four-state Layered Torn-Paper Collage photo posters"
+  default_prompt: "Use $four-slice-reality-poster to transform my photo into ONE designed Layered Torn-Paper Collage poster: four layered paper pieces (Reality / 30% / 65% / 90% abstraction) sharing one editorial print/paper material language. Never output a 2x2 grid or four full-image versions."
