@@ -15,6 +15,24 @@ Make the four states immediately legible as intentional visual fragments while k
 
 Default to **Hybrid Transition**: allow backgrounds and large color fields to change abruptly, preserve semantic continuity for important people and buildings, and never force every boundary to be fully seamless. Keep all four states clearly readable; make boundaries visibly present whenever that strengthens modularity or poster design.
 
+## Final Output Layout — Hard Constraint
+
+The deliverable is **one continuous image at the source aspect ratio**. The four states (Reality, 30%, 65%, 90%) are four **adjacent regions** of that one canvas: they tile the entire canvas, share edges with each other, and each region shows a different **slice** of the original photograph. The scene appears **exactly once**. Never deliver a 2×2 grid, a contact sheet, a strip of four full-image versions, four panels each containing the full scene, gutters, or panel gaps.
+
+Prefer the deterministic path: define the four zones, render each abstract zone separately, and compose with `scripts/slice_and_compose.py` — the image model never decides the slicing. See [deterministic-layout.md](references/deterministic-layout.md) for the pipeline, CLI usage, and the verbatim prompt blocks.
+
+When the image model receives a full-poster prompt, include this block **verbatim**:
+
+```text
+ONE single continuous image at the source aspect ratio. The four states
+Reality, 30%, 65%, and 90% abstraction occupy four ADJACENT REGIONS of that
+one canvas. The regions tile the entire canvas and share edges with each
+other. Each region shows a different SLICE (part) of the original photograph,
+never the whole photograph. The scene appears exactly once. NEVER output a
+2x2 grid, a contact sheet, a strip of four full-image versions, four panels
+each containing the full scene, gutters, or panel gaps.
+```
+
 ## Default Color Identity — Robot Dreams-Inspired
 
 Treat the Robot Dreams-inspired cinematic palette as a **default visual identity of this Skill**, not merely an optional grading suggestion.
@@ -78,6 +96,7 @@ Before producing the artwork, read:
 - [cinematic-color-system.md](references/cinematic-color-system.md) for the default warm, nostalgic, Robot Dreams-inspired shared palette and level-specific color compression.
 - [intentional-modular-composition.md](references/intentional-modular-composition.md) for readable module boundaries, controlled contrast, and optional secondary transitions.
 - [subjects-validation.md](references/subjects-validation.md) for people, architecture, hard constraints, and final validation.
+- [deterministic-layout.md](references/deterministic-layout.md) for the deterministic slicing/compositing pipeline, CLI usage, and the verbatim render prompt blocks.
 
 ## Face Identity Lock & Protected Source Region
 
@@ -153,17 +172,20 @@ final candidate = restoration with a facial patch, geometry mismatch, or broken 
 
 1. Inspect the supplied photograph. Identify dimensions, orientation, semantic flow, primary people and faces, architecture, landmarks, important objects, dominant shapes, and palette.
 2. Choose one semantic logical-division direction: four equal hidden vertical zones or four equal hidden horizontal zones. Preserve the source aspect ratio and overall rectangular canvas. Never move these ownership boundaries afterward; do not require visible module edges to follow them.
-3. Establish four equal hidden logical zones and select exactly one Reality Anchor ownership zone using this hierarchy: primary-face ownership first; crowd-dominant semantic ownership second; important-architecture ownership third; Logical Zone 2 only when none of those subjects determines ownership.
-4. Identify the primary face and surrounding head/body continuity context before generation; do not pre-commit to source-pixel restoration.
-5. Assign 30%, 65%, and 90% abstraction exactly once to the remaining logical zones. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
-6. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract modules distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
-7. Select source-derived abstraction methods appropriate to each abstract module. Treat abstraction as structural reinterpretation, never filter intensity. Enforce perceptual separation across 30%, 65%, and 90% through structural information density—not merely rendering style, palette, brush texture, or medium. Reduce, merge, group, or omit non-essential repeated components when this improves clarity, but preserve the primary person, identity-critical face, dominant crowd event, landmark architecture, and major scene-defining masses.
-8. Generate the modular composition and retain the strongest visually coherent candidate before restoration. Permit reconstruction in abstract modules while retaining source DNA and human semantic continuity.
-9. Convert the hidden four-zone ownership into four roughly balanced irregular visible modules. Derive visible edges from people, crowds, architecture, skylines, trees, roads, shadows, large color fields, or expressive strokes. Allow modules to expand or contract around protected content without changing logical ownership. When important architecture owns the Anchor, keep its identity-critical portion photographic while allowing the same building to continue through neighboring abstraction states when this strengthens contrast.
-10. Run the Face Restoration Gate. If Candidate A is acceptable, skip restoration and retain A for the remaining poster-level workflow. Otherwise attempt a geometrically verified irregular-mask or aligned restoration to create Candidate B.
-11. Let Candidate B replace Candidate A only when identity improves without unnatural anatomy, patch appearance, skin mismatch, or broken head/jaw/neck/body continuity.
-12. Art-direct the poster using shared motifs, rhythm, limited palette relationships, or structural echoes without weakening face identity or human continuity.
-13. Inspect face identity, head/body continuity, four-state readability, intentional boundary design, and poster-level coherence, then validate every required condition in [subjects-validation.md](references/subjects-validation.md) before delivery.
+3. Define the slicing deterministically with the script — never by the image model:
+   `python scripts/slice_and_compose.py --mode prepare --source <photo> --direction <vertical|horizontal> --anchor <auto|1|2|3|4> [--face-boxes "<x0,y0,x1,y1;...>"] --levels <permutation> --workdir work/ [--masks]`.
+   The script writes the four exact integer zones, the manifest, per-zone context crops, and optional inpaint masks. Follow [deterministic-layout.md](references/deterministic-layout.md).
+4. Select exactly one Reality Anchor ownership zone through the script's `--anchor auto` hierarchy (primary-face ownership first; crowd-dominant semantic ownership second; important-architecture ownership third; Logical Zone 2 fallback only when none of those subjects determines ownership) or force a specific zone with `--anchor 1..4`. Keep the hidden boundaries fixed.
+5. Identify the primary face and surrounding head/body continuity context before generation; do not pre-commit to source-pixel restoration.
+6. Assign 30%, 65%, and 90% abstraction exactly once to the remaining logical zones via `--levels`. Choose a non-mechanical permutation based on balance, meaning, rhythm, and color—not distance from the anchor.
+7. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract modules distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
+8. Render each abstract zone **separately** (primary path). Select source-derived abstraction methods appropriate to each zone's level. Treat abstraction as structural reinterpretation, never filter intensity. Enforce perceptual separation across 30%, 65%, and 90% through structural information density—not merely rendering style, palette, brush texture, or medium. Reduce, merge, group, or omit non-essential repeated components when this improves clarity, but preserve the primary person, identity-critical face, dominant crowd event, landmark architecture, and major scene-defining masses. Render each non-anchor context crop (`work/crops/zone{i}.png`) with the per-zone render prompt block from [deterministic-layout.md](references/deterministic-layout.md); the model never decides the poster layout and never receives a whole-poster slicing instruction.
+9. Compose deterministically: `python scripts/slice_and_compose.py --mode compose --workdir work/ --output <final>.png`. The script pastes the rendered zones back at fixed integer coordinates and always keeps the Reality Anchor pasted from the source. For Scheme B, inpaint the full canvas with `work/masks/mask_zone{i}.png` and run `--mode enforce-anchor` instead. The four visible modules default to the exact integer zone boundaries; keep them roughly balanced and readable, and preserve the Skill's modular color and palette rules.
+10. One-shot full-poster generation is a fallback only: if used, the model prompt MUST contain the Final Output Layout hard-constraint block verbatim, and the result must pass `--mode verify`. Reject any grid, strip, or contact sheet.
+11. Run the Face Restoration Gate on the final poster. If Candidate A is acceptable, skip restoration and retain A for the remaining poster-level workflow. Otherwise attempt a geometrically verified irregular-mask or aligned restoration to create Candidate B.
+12. Let Candidate B replace Candidate A only when identity improves without unnatural anatomy, patch appearance, skin mismatch, or broken head/jaw/neck/body continuity.
+13. Art-direct the poster using shared motifs, rhythm, limited palette relationships, or structural echoes without weakening face identity or human continuity.
+14. Run `python scripts/slice_and_compose.py --mode verify --workdir work/ --output <final>.png`, then inspect face identity, head/body continuity, four-state readability, intentional boundary design, and poster-level coherence, and validate every required condition in [subjects-validation.md](references/subjects-validation.md) before delivery. Reject any output that repeats the scene (2×2 grid, strip, contact sheet) regardless of other qualities.
 
 ## Decision priority
 
@@ -178,7 +200,7 @@ Resolve conflicts in this order:
 7. Intentional Modular Boundary Design.
 8. Artistic Experimentation.
 
-Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal hidden logical zones while allowing irregular visible modules. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity outrank minor boundary smoothing and general artistic experimentation.
+The Final Output Layout hard constraint (one continuous image, four adjacent regions, scene appears exactly once) outranks every rule in this list: reject any grid, strip, or contact-sheet output no matter how well it satisfies lower-priority goals. Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal hidden logical zones while allowing irregular visible modules. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity outrank minor boundary smoothing and general artistic experimentation.
 
 ## Core principles
 
@@ -190,4 +212,5 @@ Never let a lower-priority rule modify a higher-priority protected region. Maint
 - Make abstraction a structural transformation, not a filter.
 - Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this shared emotional color universe while allowing strong, intentional slice-to-slice dominant color differences.
 - Keep hidden logical ownership mathematically equal; make visible module edges irregular, designed, and readable.
+- The four states are four adjacent regions of ONE continuous image; the scene appears exactly once — never four full-image versions, grids, strips, or contact sheets.
 - Deliver one coherent poster, never four independent images.

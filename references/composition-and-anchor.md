@@ -18,7 +18,7 @@ Preserve the source image's aspect ratio and use its dimensions as the compositi
 
 Begin with exactly four geometrically equal hidden logical zones. Use either four equal vertical ownership zones or four equal horizontal ownership zones. Use them only for Reality Anchor selection, crowd and subject ownership, 30%/65%/90% assignment, and four-state validation. Do not move these hidden boundaries to protect content.
 
-Translate the hidden ownership system into four visible modules that may be irregular, contour-aware, and non-rectangular. Visible modules may overlap slightly in treatment or boundary influence, but they must not duplicate or transfer recognizable source content across logical owners. Keep the four modules roughly balanced in area and visual importance. Recombine them into the same overall rectangle and output one poster, not four independent images.
+Translate the hidden ownership system into four visible modules that may be irregular, contour-aware, and non-rectangular. Visible modules may overlap slightly in treatment or boundary influence, but they must not duplicate or transfer recognizable source content across logical owners. Keep the four modules roughly balanced in area and visual importance. Recombine them into the same overall rectangle and output one poster, not four independent images: the four visible modules tile the same continuous canvas at source scale, share edges, and the scene appears exactly once. Never deliver a 2×2 grid, strip, or contact sheet of four full-image versions.
 
 ## Source ownership exclusivity
 
@@ -94,6 +94,7 @@ Visible-boundary flexibility may change which treatment visually occupies a smal
 Use boundary overlap only as a narrow transition device, not as permission to repeat source content.
 
 When a visible module crosses a hidden ownership boundary for contour-aware design, treat the crossing as a local rendering transition only. Do not use it to introduce a second copy of content whose source provenance belongs elsewhere.
+
 
 ## Direction selection
 

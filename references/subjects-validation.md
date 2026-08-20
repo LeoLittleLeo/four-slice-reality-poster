@@ -54,6 +54,7 @@ Never:
 21. Move hidden logical boundaries to contain an important building, or force the entire building into one photographic module when a coherent cross-state treatment would strengthen the composition.
 22. Trigger architecture-anchor selection from an ordinary background building, generic streetscape façade, distant structure, incidental urban fabric, or visible area alone.
 23. Treat 30%, 65%, and 90% as the same structural abstraction level with only palette, brush texture, rendering style, or medium changes.
+24. Output the four states as four full-image versions of the photograph — a 2×2 grid, a strip, a contact sheet, or any layout where the full scene appears more than once — instead of one continuous image tiled by four adjacent regions.
 
 ## Validation checklist
 
@@ -89,6 +90,9 @@ Confirm before delivery:
 - Hybrid Transition is applied: backgrounds and large color fields may break abruptly, while important people and buildings retain semantic continuity.
 - Hidden ownership zones remain geometrically equal while visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight.
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains.
+- The final image is ONE continuous source-ratio canvas tiled by four adjacent regions that share edges; the scene appears exactly once.
+- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zones tile the canvas exactly, and the Reality Anchor region equals the source.
+- Per-zone rendered crops were composed at fixed integer coordinates without scaling, gaps, or overlaps; no grid, strip, or contact-sheet layout was delivered.
 - Every slice clearly expresses Reality, 30%, 65%, or 90%; no global treatment dissolves them into one continuous illustration or abstraction gradient.
 - The poster maintains broad warm, nostalgic cinematic relationships while allowing clear, purposeful color differences among modules.
 - The 30% slice remains closest to local photographic color, the 65% slice uses stronger grouping, and the 90% slice is most interpretive while retaining shared color DNA.

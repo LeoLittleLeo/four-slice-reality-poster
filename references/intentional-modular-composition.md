@@ -93,6 +93,7 @@ Do not create broad 3%–8% feathered zones by default. Do not migrate texture c
 Inspect the poster at thumbnail size and ask:
 
 - Are four roughly balanced irregular modules immediately readable?
+- Is the output one continuous image tiled by four adjacent regions, or four full-image versions in a grid/strip/contact sheet? Reject any layout where the scene is repeated.
 - Can Reality, 30%, 65%, and 90% be distinguished without explanation?
 - Do 30%, 65%, and 90% differ in structural information density across detail, component density, spatial fidelity, shape fidelity, and photographic surface retention?
 - Do visible boundaries use meaningful contours, structures, fields, or strokes rather than default rectangular rigidity?
