@@ -74,13 +74,16 @@ It is fully deterministic: the same source, direction, seed and parameters
 produce identical seams (`--seed`, default 42).
 
 By default the seams are hard/near-hard cuts (`feather = 1` px anti-alias)
-and compose draws an optional physical **paper seam overlay**
-(`--seam-style paper`, default): a narrow warm ivory / aged-paper fiber edge
-with variable width (2..`--fiber-width` px) and a faint offset shadow
-(`--seam-shadow`, `--seam-offset`). The ivory is **adaptive**: on bright local
-backgrounds it blends toward a darker aged-beige tone so the paper edge stays
-visible on both light and dark photographs. The overlay is visual only — the
-four zone masks underneath still tile the canvas exactly.
+and compose draws an optional physical **torn-paper seam overlay**
+(`--seam-style paper`, default): a jagged warm-ivory paper ribbon along each
+seam built from per-point random width and perpendicular jitter, plus
+perpendicular **fiber strands**, a dark aged **cut line**, and a faint offset
+shadow (`--seam-shadow`, `--seam-offset`). The ivory is **adaptive**: on
+bright local backgrounds it blends toward a darker aged-beige tone so the
+paper edge stays visible on both light and dark photographs. The overlay is
+visual only — the four zone masks underneath still tile the canvas exactly,
+and the verify exemption mask uses the exact same deterministic geometry as
+the overlay.
 
 ### `contour` (optional) — Semantic Contour Boundary
 
@@ -178,9 +181,9 @@ modify more than one zone at a time.
 
 ```text
 # 1. Define the layout (deterministic)
-#    ordered torn-paper seams (default)
+#    ordered torn-paper seams (default); direction auto-derives
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --direction vertical --boundary torn \
+    --source photo.png --direction auto --boundary torn \
     --anchor auto --face-boxes "100,60,180,150;330,120,410,210" \
     --levels 65,90,30 --workdir work/
 
@@ -218,7 +221,12 @@ python scripts/slice_and_compose.py --mode verify \
 
 Options:
 
-- `--direction vertical|horizontal` — slice direction.
+- `--direction auto|vertical|horizontal` — slice direction. `auto` (default)
+  derives it deterministically from the image: strong horizontal banding
+  (sky/ground layering) -> horizontal slices; strong vertical structure or
+  wide flow -> vertical slices; neutral images break the tie by aspect
+  (portrait -> horizontal, wide -> vertical). The agent may still override
+  based on semantic flow.
 - `--boundary torn|contour|mask|rect` — boundary style (default `torn`).
 - `--torn-band 0.06` — torn mode: typical global seam deviation as a fraction
   of the slice axis (local tears reach ~`torn_band * 1.5`).

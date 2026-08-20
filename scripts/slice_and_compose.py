@@ -82,6 +82,41 @@ def zones_for(direction: str, width: int, height: int) -> List[Box]:
     return [(0, ys[i], width, ys[i + 1]) for i in range(4)]
 
 
+def suggest_direction(img: Image.Image, width: int, height: int) -> str:
+    """Deterministic slicing-direction hint for `--direction auto`.
+
+    Measures row-to-row vs column-to-column luminance change on a small
+    thumbnail: strong horizontal banding (sky/ground layering) suggests
+    horizontal slices; strong vertical structure (wide flow, columns) suggests
+    vertical slices. When neither dominates, the aspect ratio breaks the tie
+    (portrait/tall -> horizontal, wide -> vertical). The agent may still
+    override with an explicit direction based on semantic flow.
+    """
+    t = 96
+    gray = img.convert("L").resize((t, t))
+    data = list(gray.getdata())
+    row_diff = 0.0
+    for y in range(1, t):
+        base = y * t
+        prev = (y - 1) * t
+        for x in range(t):
+            row_diff += abs(data[base + x] - data[prev + x])
+    row_diff /= max(1, t * (t - 1))
+    col_diff = 0.0
+    for y in range(t):
+        base = y * t
+        for x in range(1, t):
+            col_diff += abs(data[base + x] - data[base + x - 1])
+    col_diff /= max(1, t * (t - 1))
+    if row_diff > col_diff * 1.15:
+        return "horizontal"
+    if col_diff > row_diff * 1.15:
+        return "vertical"
+    # neutral: portrait/tall scenes layer vertically -> horizontal slices;
+    # wide scenes develop across width -> vertical slices
+    return "horizontal" if height > width else "vertical"
+
+
 def parse_face_boxes(raw: Optional[str]) -> List[Box]:
     if not raw:
         return []
@@ -651,53 +686,136 @@ def torn_paths(direction: str, width: int, height: int,
     return paths
 
 
-def draw_paper_seams(canvas: Image.Image, seams: List[List[int]], direction: str,
-                     fiber_width: int, seed: int,
-                     shadow_alpha: int = 26, shadow_offset: int = 3) -> Image.Image:
-    """Overlay variable-width warm paper-fiber seams (visual only).
+def seam_paper_geometry(seams: List[List[int]], direction: str, fiber_width: int,
+                        seed: int) -> List[dict]:
+    """Deterministic per-seam geometry for the torn-paper overlay.
 
-    The four zone masks keep exact tiling underneath; this only paints a
-    narrow warm ivory / aged-paper edge along each seam with a faint offset
-    shadow, so the poster reads as a physical editorial torn-paper collage.
-    The ivory is **adaptive**: on bright local backgrounds it blends toward a
-    darker aged-beige tone so the paper edge stays visible on both light and
-    dark photographs (no hard-coded pure white). Deterministic via `seed`.
+    ALL randomness is consumed here, so the colored overlay and the verify
+    exemption mask always describe the exact same pixels. Returns per-seam
+    dicts with points, perpendiculars, ribbon widths, jaggedness, fiber
+    lengths and core-line jitter.
     """
-    fiber_width = max(1, fiber_width)
     rng = random.Random(seed + 777)
-    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
-    od = ImageDraw.Draw(overlay)
-    bright_ivory = (243, 237, 219)     # warm off-white / aged cream beige
-    aged_ivory = (198, 184, 152)       # darker aged-paper beige for bright backgrounds
-    shadow = (30, 24, 14, max(0, min(255, shadow_alpha)))
-    shadow_offset = max(0, shadow_offset)
-    canvas_rgb = canvas.convert("RGB")
+    fiber_width = max(1, fiber_width)
+    geom: List[dict] = []
     for path in seams:
         if direction == "vertical":
             pts = [(path[r], r) for r in range(len(path))]
         else:
             pts = [(c, path[c]) for c in range(len(path))]
-        if not pts:
+        n = len(pts)
+        if n < 2:
             continue
-        widths = [rng.randint(2, fiber_width) for _ in pts]  # 2..N px variable width
-        # adaptive ivory: bright local background -> blend toward aged beige
-        ivories = []
-        for (x, y) in pts:
-            r, g, b = canvas_rgb.getpixel((x, y))
-            lum = (r + g + b) / 3.0 / 255.0
-            blend = lum * 0.45  # 0 on black bg, up to 45% toward aged on white bg
-            ivories.append(tuple(int(bright_ivory[c] * (1.0 - blend) + aged_ivory[c] * blend)
-                                 for c in range(3)) + (255,))
-        # faint shadow first (offset perpendicular to the seam), then ivory tube
-        for (x, y), w in zip(pts, widths):
-            r = w + 1
-            if direction == "vertical":
-                od.ellipse((x + shadow_offset - r, y - r, x + shadow_offset + r, y + r), fill=shadow)
+        perps = []
+        for i in range(n):
+            x0, y0 = pts[max(0, i - 1)]
+            x1, y1 = pts[min(n - 1, i + 1)]
+            dx, dy = x1 - x0, y1 - y0
+            length = math.hypot(dx, dy) or 1.0
+            perps.append((-dy / length, dx / length))
+        widths = [rng.randint(2, fiber_width) for _ in range(n)]
+        jitter = [rng.randint(-2, 2) for _ in range(n)]
+        fibers = [rng.randint(2, fiber_width + 2) for _ in range(n)]
+        core_jit = [rng.randint(-1, 1) for _ in range(n)]
+        geom.append({"pts": pts, "perps": perps, "widths": widths,
+                     "jitter": jitter, "fibers": fibers, "core_jit": core_jit})
+    return geom
+
+
+def paper_shapes(g: dict, shadow_offset: int, with_shadow: bool) -> List[Tuple[str, object]]:
+    """Deterministic shape list for one seam, in paint order.
+
+    (kind, coords): "poly" = filled polygon, "line" = stroked polyline/segment.
+    Both the colored overlay and the exemption mask iterate the SAME shapes,
+    so the verify exemption always covers exactly what was painted.
+    """
+    pts = g["pts"]
+    perps = g["perps"]
+    widths = g["widths"]
+    jit = g["jitter"]
+    fibers = g["fibers"]
+    cj = g["core_jit"]
+    n = len(pts)
+    shapes: List[Tuple[str, object]] = []
+    if with_shadow:
+        sh_top = [(pts[i][0] + perps[i][0] * (shadow_offset + widths[i] * 0.9),
+                   pts[i][1] + perps[i][1] * (shadow_offset + widths[i] * 0.9)) for i in range(n)]
+        sh_bot = [(pts[i][0] - perps[i][0] * (shadow_offset + widths[i] * 0.9),
+                   pts[i][1] - perps[i][1] * (shadow_offset + widths[i] * 0.9)) for i in range(n)]
+        shapes.append(("poly", sh_top + sh_bot[::-1]))
+    # fiber strands: short perpendicular strokes across the cut, variable length
+    for i in range(n):
+        px, py = pts[i]
+        ux, uy = perps[i]
+        w = widths[i] + jit[i]
+        fl = fibers[i]
+        shapes.append(("line", (px - ux * (w + fl), py - uy * (w + fl),
+                                px + ux * (w + fl), py + uy * (w + fl))))
+    # jagged ivory ribbon: per-point random half-width and perpendicular jitter
+    top = [(pts[i][0] + perps[i][0] * (widths[i] + jit[i]) * 0.7,
+            pts[i][1] + perps[i][1] * (widths[i] + jit[i]) * 0.7) for i in range(n)]
+    bot = [(pts[i][0] - perps[i][0] * (widths[i] + jit[i]) * 0.7,
+            pts[i][1] - perps[i][1] * (widths[i] + jit[i]) * 0.7) for i in range(n)]
+    shapes.append(("poly", top + bot[::-1]))
+    # jagged aged core line: the actual torn cut
+    core = [(pts[i][0] + perps[i][0] * cj[i], pts[i][1] + perps[i][1] * cj[i]) for i in range(n)]
+    shapes.append(("line", core))
+    return shapes
+
+
+def paper_seam_color(canvas_rgb: Image.Image, pts: List[Tuple[int, int]],
+                     bright_ivory: Tuple[int, int, int],
+                     aged_ivory: Tuple[int, int, int]) -> Tuple[int, int, int, int]:
+    """Adaptive warm ivory for a seam: brighter local background -> aged beige."""
+    n = max(1, len(pts))
+    lum = 0.0
+    step = max(1, n // 24)
+    count = 0
+    for i in range(0, n, step):
+        x, y = pts[i]
+        r, g, b = canvas_rgb.getpixel((x, y))
+        lum += (r + g + b) / 3.0
+        count += 1
+    lum = (lum / count) / 255.0 if count else 0.0
+    blend = lum * 0.45
+    return tuple(int(bright_ivory[c] * (1.0 - blend) + aged_ivory[c] * blend)
+                 for c in range(3)) + (255,)
+
+
+def draw_paper_seams(canvas: Image.Image, seams: List[List[int]], direction: str,
+                     fiber_width: int, seed: int,
+                     shadow_alpha: int = 26, shadow_offset: int = 3) -> Image.Image:
+    """Overlay torn-paper seams (visual only).
+
+    Paints a jagged warm-ivory paper ribbon along each seam with perpendicular
+    fiber strands, a dark aged cut line, and a faint offset shadow. The ivory
+    adapts to the local background brightness. The four zone masks keep exact
+    tiling underneath; the overlay is purely cosmetic. Deterministic via
+    `seed` (geometry shared with `paper_seam_mask`).
+    """
+    geom = seam_paper_geometry(seams, direction, fiber_width, seed)
+    overlay = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    od = ImageDraw.Draw(overlay)
+    canvas_rgb = canvas.convert("RGB")
+    bright_ivory = (243, 237, 219)
+    aged_ivory = (198, 184, 152)
+    shadow_alpha = max(0, min(255, shadow_alpha))
+    shadow_offset = max(0, shadow_offset)
+    for g in geom:
+        shapes = paper_shapes(g, shadow_offset, with_shadow=shadow_alpha > 0)
+        col = paper_seam_color(canvas_rgb, g["pts"], bright_ivory, aged_ivory)
+        idx = 0
+        if shadow_alpha > 0:
+            od.polygon(shapes[0][1], fill=(30, 24, 14, shadow_alpha))
+            idx = 1
+        for kind, coords in shapes[idx:]:
+            if kind == "poly":
+                od.polygon(coords, fill=col)
             else:
-                od.ellipse((x - r, y + shadow_offset - r, x + r, y + shadow_offset + r), fill=shadow)
-        for (x, y), w, col in zip(pts, widths, ivories):
-            r = w
-            od.ellipse((x - r, y - r, x + r, y + r), fill=col)
+                od.line(coords, fill=col, width=1)
+        # dark aged cut line on top (slightly varied per seam, deterministic)
+        core = shapes[-1][1]
+        od.line(core, fill=(140, 122, 96, 200), width=1)
     canvas.alpha_composite(overlay)
     return canvas
 
@@ -810,18 +928,23 @@ def cmd_prepare(args: argparse.Namespace) -> None:
             avoid_boxes = [tuple(hb)]
 
     seams = None
+    if args.direction == "auto":
+        direction = suggest_direction(img, width, height)
+        print(f"Auto direction -> {direction}")
+    else:
+        direction = args.direction
     if args.boundary == "rect":
-        masks = rect_masks(args.direction, width, height)
+        masks = rect_masks(direction, width, height)
     elif args.boundary == "torn":
-        seams = torn_paths(args.direction, width, height, avoid_boxes,
+        seams = torn_paths(direction, width, height, avoid_boxes,
                            args.torn_band, args.torn_roughness, args.torn_scale,
                            args.seed)
-        masks = masks_from_paths(args.direction, width, height, seams)
+        masks = masks_from_paths(direction, width, height, seams)
     elif args.boundary == "contour":
         edges, face = edge_and_face_images(img, width, height, head_boxes)
         sem = build_semantic_images(img, width, height, args.face_boxes,
                                     args.auto_semantic, args.class_masks_dir)
-        masks = contour_masks(args.direction, width, height, edges, face,
+        masks = contour_masks(direction, width, height, edges, face,
                               head_boxes, args.band, args.min_zone,
                               sem, args.class_weights)
     else:  # mask
@@ -885,7 +1008,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
     manifest = {
         "source": str(source),
-        "direction": args.direction,
+        "direction": direction,
         "boundary": args.boundary,
         "size": [width, height],
         "anchor": anchor + 1,
@@ -908,7 +1031,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     manifest_path.write_text(json.dumps(manifest, indent=2))
 
     print(f"Prepared deterministic four-zone layout -> {manifest_path}")
-    print(f"Direction={args.direction}  boundary={args.boundary}  "
+    print(f"Direction={direction}  boundary={args.boundary}  "
           f"size={width}x{height}  anchor=Logical Zone {anchor + 1}")
     if args.boundary == "torn":
         print(f"Torn: band={args.torn_band} roughness={args.torn_roughness} "
@@ -1072,36 +1195,29 @@ def cmd_enforce_anchor(args: argparse.Namespace) -> None:
 def paper_seam_mask(manifest: dict, width: int, height: int) -> Optional[Image.Image]:
     """Binary mask of every pixel the torn paper-seam overlay paints.
 
-    Uses the same seeded width sequence as `draw_paper_seams` (shadow reach
-    included), so verify can exclude the intentional paper fiber from the
-    exact source-equality core — the fiber is a visual overlay, like the soft
-    transition band, and must not break the anchor/head guarantee.
+    Uses the SAME `seam_paper_geometry` + `paper_shapes` as `draw_paper_seams`
+    (same seed, same shadow switch), so verify can exempt the intentional
+    paper fiber from the exact source-equality core — the fiber is a visual
+    overlay, like the soft transition band, and must not break the
+    anchor/head guarantee.
     """
     seams = manifest.get("seams") or []
     direction = manifest.get("direction", "vertical")
     fiber_width = max(1, manifest.get("fiber_width", 7))
     if not seams:
         return None
-    rng = random.Random(int(manifest.get("seed", DEFAULT_SEED)) + 777)
+    geom = seam_paper_geometry(seams, direction, fiber_width,
+                               int(manifest.get("seed", DEFAULT_SEED)))
+    shadow_offset = max(0, int(manifest.get("seam_offset", 3)))
+    with_shadow = int(manifest.get("seam_shadow", 26)) > 0
     mask = Image.new("L", (width, height), 0)
     d = ImageDraw.Draw(mask)
-    shadow_offset = max(0, int(manifest.get("seam_offset", 3)))
-    for path in seams:
-        if direction == "vertical":
-            pts = [(path[r], r) for r in range(len(path))]
-        else:
-            pts = [(c, path[c]) for c in range(len(path))]
-        if not pts:
-            continue
-        widths = [rng.randint(2, fiber_width) for _ in pts]
-        for (x, y), w in zip(pts, widths):
-            r = w + 1  # shadow reach (with its perpendicular offset)
-            if direction == "vertical":
-                d.ellipse((x + shadow_offset - r, y - r, x + shadow_offset + r, y + r), fill=255)
+    for g in geom:
+        for kind, coords in paper_shapes(g, shadow_offset, with_shadow):
+            if kind == "poly":
+                d.polygon(coords, fill=255)
             else:
-                d.ellipse((x - r, y + shadow_offset - r, x + r, y + shadow_offset + r), fill=255)
-            r = w  # ivory tube
-            d.ellipse((x - r, y - r, x + r, y + r), fill=255)
+                d.line(coords, fill=255, width=1)
     return mask
 
 
@@ -1336,7 +1452,13 @@ def parse_args() -> argparse.Namespace:
         default=Path("four-slice-work"),
         help="Directory holding manifest, crops, masks, and rendered zones",
     )
-    parser.add_argument("--direction", choices=("vertical", "horizontal"), help="Slice direction (prepare)")
+    parser.add_argument(
+        "--direction",
+        choices=("auto", "vertical", "horizontal"),
+        default="auto",
+        help="Slice direction: auto (default) derives it deterministically from "
+             "image structure and aspect, vertical or horizontal override",
+    )
     parser.add_argument(
         "--boundary",
         choices=("torn", "contour", "mask", "rect"),
