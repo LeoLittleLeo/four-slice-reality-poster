@@ -73,7 +73,7 @@ Allow obvious color differences between slices. Keep them related through a smal
 
 Preserve primary-face identity. Do not restore source pixels when the coherent candidate already has natural anatomy and recognizable identity. If restoration is needed, use an irregular semantic mask or verified aligned source face and reject any result that damages head, hair, jaw, neck, shoulder, clothing, or body continuity.
 
-When a body or important building crosses abstract modules, default to continuous semantic form while allowing a sharp rendering change. Use an intentional editorial break only when it does not destroy human or architectural readability:
+When a body or important building crosses abstract modules, continuous semantic form with a sharp rendering change is a good default, but an intentional editorial break is equally valid: body parts and buildings may exist across multiple abstraction states at once — only the primary head must remain continuously recognizable. Choose between:
 
 - **continuous semantic form:** keep pose, silhouette, roofline, perspective, or massing aligned while changing medium at the boundary; or
 - **intentional editorial break:** interrupt or shift the form in a controlled way that reads as designed abstraction.
@@ -101,7 +101,7 @@ Inspect the poster at thumbnail size and ask:
 - Does the Reality Anchor remain the clearly photographic reality state without requiring unsafe full-block restoration?
 - Does the primary face preserve recognizable identity and natural anatomy without a patch edge?
 - If restoration was attempted, is it visibly better than the pre-restoration candidate?
-- Are the head contour, hair silhouette, shoulders, clothing, and body connections coherent?
+- Are the head contour, hair silhouette, and face-to-neck connection coherent? (Body and building continuity across states may be soft or intentionally broken.)
 - If important architecture owns the Anchor, does it preserve silhouette, massing, perspective, landmark identity, and structural rhythm while using cross-module state contrast effectively?
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?

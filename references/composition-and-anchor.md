@@ -81,7 +81,7 @@ Zone 3 → render the Zone-3 portion
 
 This is one continuous subject rendered through multiple abstraction states, not three copies of the building.
 
-Preserve enough alignment, silhouette continuity, perspective continuity, structural rhythm, or pose continuity for the viewer to read it as one subject crossing module boundaries.
+Alignment, silhouette continuity, perspective continuity, structural rhythm, or pose continuity are preferred but not required: a subject may also read as intentional fragments living at different abstraction levels simultaneously, which is often more impactful. Only the primary head must remain continuously recognizable in the Reality state.
 
 Never restart the full subject inside each module.
 

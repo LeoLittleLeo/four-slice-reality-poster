@@ -9,13 +9,15 @@
 
 ## People
 
-Simplify important people before breaking them. Prioritize shape simplification, contour abstraction, color blocking, and painterly support. Preserve silhouette, head/body relationship, pose, gesture, orientation, major limb placement, body presence, and broad clothing shape longer than skin, pores, hair texture, fabric texture, wrinkles, accessories, and subtle shading.
+Only the primary head is hard-locked: preserve the primary face identity and natural head anatomy above everything. The rest of the body is not hard-locked — body parts may cross module boundaries and exist at different abstraction levels simultaneously, like buildings.
+
+Keep head protection first: preserve face identity, head contour, hairline, and face-to-neck continuity longest. For the body, prioritize shape simplification, contour abstraction, color blocking, and painterly support; silhouette, head/body relationship, pose, gesture, and presence are soft preferences — readable fragments across abstraction states are acceptable and can be more impactful than a fully continuous body.
 
 - At 30%, preserve proportions, pose, silhouette, clothing structure, and face direction; reduce surface detail; normally omit geometry.
 - At 65%, strengthen simplification, contours, color blocks, and painterly masses; simplify face and body detail; use geometry only as an accent.
 - At 90%, permit a symbolic figure, dominant color blocking, painterly treatment, and limited geometry while retaining a recognizable human silhouette, head/body relation, pose direction, and presence.
 
-Do not use fragmentation as the default for important people. If used, keep the whole form readable and avoid duplicated anatomy, displaced face fragments, malformed photorealistic remnants, misaligned cutouts, or random polygon bodies. When fidelity is difficult, prefer an intentional silhouette, contour, color block, or painterly mass.
+Do not use fragmentation as the default for important people. If used, keep each fragment readable and avoid duplicated anatomy, displaced face fragments, malformed photorealistic remnants, misaligned cutouts, or random polygon bodies. When fidelity is difficult, prefer an intentional silhouette, contour, color block, or painterly mass. A body may span multiple abstraction states, but never accidentally duplicate limbs or faces.
 
 ## Architecture
 
@@ -55,6 +57,7 @@ Never:
 22. Trigger architecture-anchor selection from an ordinary background building, generic streetscape façade, distant structure, incidental urban fabric, or visible area alone.
 23. Treat 30%, 65%, and 90% as the same structural abstraction level with only palette, brush texture, rendering style, or medium changes.
 24. Output the four states as four full-image versions of the photograph — a 2×2 grid, a strip, a contact sheet, or any layout where the full scene appears more than once — instead of one continuous image tiled by four adjacent regions.
+25. Force the whole primary body or a whole building into exactly one abstraction state. Cross-state presence is allowed and encouraged when it strengthens the poster; only accidental duplication (clones, double faces, ghost edges) is forbidden.
 
 ## Validation checklist
 
@@ -72,8 +75,8 @@ Confirm before delivery:
 - Restoration is skipped when Candidate A passes the gate.
 - When restoration is attempted, Candidate B replaces A only if identity visibly improves while anatomy and continuity remain natural and no patch artifact appears.
 - Pixel restoration is used only with an irregular semantic mask or verified alignment; rectangular face-box restoration is a last fallback.
-- No head seam distortion, body continuity break, or awkward human silhouette mismatch remains.
-- Head contour, hair edge, shoulders, clothing boundaries, and cross-slice body connections remain coherent.
+- No head seam distortion or awkward head silhouette mismatch remains; head contour, hair edge, and face-to-neck connection stay coherent.
+- Body, clothing, and building continuity across abstraction states may be soft or intentionally broken; the only hard rules are head identity/continuity and the absence of accidental duplication.
 - The selected final candidate balances face identity, human continuity, modular readability, and intentional boundaries instead of maximizing full-Anchor source similarity alone.
 - The other slices contain exactly one 30%, one 65%, and one 90% structural abstraction treatment in a deliberately non-mechanical order.
 - The 30%, 65%, and 90% modules differ in detail retention, component density, spatial fidelity, shape fidelity, and photographic surface retention.

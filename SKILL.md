@@ -102,6 +102,8 @@ Before producing the artwork, read:
 
 Preserve primary-face identity without assuming that pixel restoration is always necessary. Keep the strongest visually coherent candidate eligible for final delivery.
 
+**Only the primary head is hard-locked to the Reality state.** Everything else — the rest of the person's body, buildings, crowds, and all other subjects — may deliberately exist across multiple abstraction states at the same time. A building whose roof stays photographic while its façade lives at 65% and its silhouette at 90% is a feature, not an error. Cross-state coexistence of body parts and architecture is allowed and encouraged when it strengthens the poster; the only hard invariances are head identity/continuity and the absence of accidental duplication (clones, double faces, ghost edges).
+
 ### Face Restoration Gate
 
 After producing the strongest visually coherent candidate, inspect the primary face before performing any source restoration. When it already meets the following conditions, accept it as the selected face candidate, skip restoration, and continue to poster-level art direction and validation:
@@ -157,7 +159,9 @@ Required invariant:
 
 ```text
 final primary face identity = preserved
-final human continuity = coherent head contour + coherent shoulders/body + intentional module boundary
+final head continuity = coherent head contour + face-to-neck connection (hard)
+final body/building presence = optional across abstraction states;
+                               prefer readable fragments, never accidental clones
 ```
 
 Never accept:
@@ -192,7 +196,7 @@ final candidate = restoration with a facial patch, geometry mismatch, or broken 
 Resolve conflicts in this order:
 
 1. Primary Face Identity and Natural Facial Coherence.
-2. Head, Shoulder, and Human Body Continuity.
+2. Primary Head Identity and Continuity. (Body and building continuity are soft preferences; cross-state presence is allowed and encouraged.)
 3. Reality Anchor Role and Local Source Preservation.
 4. Architectural Identity.
 5. Four-State Readability, Logical-Zone Ownership, and Abstraction Assignment.
@@ -206,6 +210,7 @@ The Final Output Layout hard constraint (one continuous image, four adjacent reg
 
 - Preserve primary-face identity and natural anatomy; never restore pixels merely for equality.
 - Simplify people before breaking them.
+- Only the primary head must remain in one state; bodies and buildings may intentionally span multiple abstraction states (cross-state coexistence, never accidental cloning).
 - Remove architectural detail before identity.
 - Reduce repeated components before weakening core semantic identity.
 - Make 30%, 65%, and 90% differ in detail retention, component density, spatial fidelity, shape fidelity, and photographic surface retention.
