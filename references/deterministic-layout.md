@@ -397,6 +397,12 @@ Differentiate this abstraction level primarily by:
 
 Preserve scene identity and major spatial relationships.
 
+ONE-SCENE / ONE-OBJECT OWNERSHIP: every recognizable object (mountain,
+building, road, vehicle, pole, tree, person) has ONE continuous spatial
+existence on the final poster. An object that continues across this crop's
+boundary changes rendering language as it crosses — it is NEVER restarted,
+repeated, or reconstructed as another copy inside this region.
+
 Do not output a self-contained poster or a full-image reinterpretation.
 Render only this source-derived crop.
 ```

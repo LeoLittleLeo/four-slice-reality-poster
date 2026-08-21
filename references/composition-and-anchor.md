@@ -122,6 +122,23 @@ one source region
 
 Do not reproduce the same recognizable source region independently in multiple modules.
 
+### One-Scene / One-Object Ownership
+
+Every recognizable scene object has **one continuous spatial existence** on
+the final canvas.
+
+A mountain, building, road, vehicle, pole, tree, or person may cross multiple
+abstraction regions, but it must **never** restart, repeat, reappear, or be
+reconstructed as another copy inside another region.
+
+```text
+Cross-state coexistence MEANS:
+one physical object crosses a boundary and changes rendering language.
+
+Cross-state coexistence NEVER MEANS:
+the same object is separately redrawn once inside each region.
+```
+
 A module may reinterpret, simplify, fragment, repaint, redraw, geometrize, or locally rearrange the source content it owns, but it must not import and re-render substantial recognizable source content owned by another logical zone.
 
 ### No cross-module cloning

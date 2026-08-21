@@ -261,4 +261,5 @@ The Final Output Layout hard constraint (one continuous image, four adjacent reg
 - In the default collage family the four states share ONE editorial print / paper material language — LEVEL ≠ MEDIUM: differentiate abstraction by information density and structural reduction, not by forcing three unrelated mediums.
 - Torn-paper geometry in collage is region shape (layered paper pieces with deckled edges and one-sided shadows), not a decorative line drawn on top.
 - The four states are four adjacent regions of ONE continuous image; the scene appears exactly once — never four full-image versions, grids, strips, or contact sheets.
+- One-Scene / One-Object Ownership: every recognizable scene object has one continuous spatial existence on the final canvas — it may cross regions and change rendering language, but never restarts, repeats, or is redrawn as another copy inside another region.
 - Deliver one coherent poster, never four independent images.

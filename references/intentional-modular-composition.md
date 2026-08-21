@@ -141,6 +141,12 @@ When a body or important building crosses abstract modules, continuous semantic 
 
 Never create accidental duplicated limbs, double faces, ghost edges, cutout halos, or unrelated offset structures.
 
+One-Scene / One-Object Ownership: every recognizable scene object has one
+continuous spatial existence on the final canvas. It may cross regions and
+change rendering language at the boundary — it never restarts, repeats, or is
+redrawn as another copy inside another region. This is the semantic reading of
+"the scene appears exactly once".
+
 When important architecture owns the Reality Anchor, do not force the entire building into one photographic module. Keep the identity-critical portion photographic and, when compositionally useful, continue its bridge, roofline, tower, façade rhythm, skyline, massing, or perspective through neighboring abstract modules. Use the cross-state rendering change as deliberate contrast while preserving architectural identity and structural continuity.
 
 ## Optional transitions
