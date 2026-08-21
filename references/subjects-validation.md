@@ -68,7 +68,7 @@ Confirm before delivery:
 
 - Four disjoint state-ownership regions tile the source-ratio canvas exactly (conceptual "hidden logical zones"; literally equal quarters only in the rect family). Ownership, Reality Anchor selection, and 30/65/90 assignment are defined directly by the region masks.
 - Direction follows semantic structure rather than orientation alone.
-- Exactly one anchor exists in this order: primary-face ownership, crowd-dominant ownership, important-architecture ownership, then Logical Zone 2 fallback.
+- Exactly one anchor exists via the script's `--anchor auto`: primary-face ownership (the PRIMARY face's largest overlap inside the region masks) -> side-weighted central corridor (no primary face) -> Logical Zone 2 fallback. Crowd/architecture anchors are agent-chosen via `--anchor 1..4` — the script does not auto-detect them.
 - Crowd ownership reflects concentration, activity density, event significance, and coherent focal grouping—not raw person count alone.
 - Architecture ownership reflects silhouette, primary massing, landmark features, perspective-defining structure, and semantic importance—not minor façade detail alone.
 - Ordinary background buildings do not trigger architecture ownership unless one demonstrably functions as a landmark, scene-recognition cue, major compositional subject, or main non-human subject.
@@ -93,7 +93,7 @@ Confirm before delivery:
 - Important architecture loses surface detail before silhouette, massing, perspective, or landmark identity.
 - When important architecture owns the Anchor, its identity-critical portion remains photographic while other portions may continue through abstract modules with coherent silhouette, massing, perspective, landmark identity, and major structural rhythm.
 - Abstract slices retain source visual DNA even when spatial relationships change.
-- Four roughly balanced, ordered sequential regions are immediately readable at thumbnail size, and neighboring states differ through at least two deliberate visual signals.
+- Four substantial natural regions are immediately readable at thumbnail size as parts of ONE photograph, and neighboring states differ through at least two deliberate visual signals.
 - Hybrid Transition is applied: backgrounds and large color fields may break abruptly, while important people and buildings retain semantic continuity.
 - Hidden ownership zones remain geometrically equal while visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight.
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains. The default soft transition band (`--feather`, ~2%) keeps boundaries gentle, but the four states remain readable at thumbnail size.
@@ -127,11 +127,10 @@ Confirm before delivery:
   built-in sky/road/person masks are overridden by supplied
   `--class-masks-dir` masks or disabled with `--no-auto-semantic` whenever
   they misdetect a scene.
-- The four zone masks tile the canvas exactly with no gaps or overlaps; zone
-  areas stay roughly balanced (the script warns when max/min exceeds 2.5).
-- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zone masks tile the canvas exactly, the Reality Anchor region equals the source inside its mask, the head protection region equals the source (the primary face is never reconstructed, even when a face box straddles a zone boundary), and torn topology checks pass (3 continuous ordered seams, no crossings, no islands/pockets).
+- The four zone masks tile the canvas exactly with no gaps or overlaps. In the non-natural families areas stay roughly balanced (the script warns when max/min exceeds 2.5); the default natural family allows composition-driven region sizes.
+- `scripts/slice_and_compose.py --mode verify` passes: output size matches the source, the four zone masks tile the canvas exactly, the Reality Anchor region equals the source inside its mask, the head protection region equals the source (the PRIMARY head is never reconstructed, even when a face box straddles a zone boundary), and the boundary-appropriate topology checks pass (natural/collage: region size and connectivity; torn: 3 continuous ordered seams, no crossings, no islands/pockets).
 - Per-zone rendered crops were composed at fixed coordinates through their zone masks without scaling, gaps, or overlaps; no grid, strip, or contact-sheet layout was delivered.
 - Every slice clearly expresses Reality, 30%, 65%, or 90%; no global treatment dissolves them into one continuous illustration or abstraction gradient.
-- The poster maintains broad warm, nostalgic cinematic relationships while allowing clear, purposeful color differences among modules.
+- The four regions share ONE photographic color identity; color differences emerge from abstraction of the source color (compression, simplification, merging, reinterpretation) — never from arbitrary module-level recoloring.
 - The 30% slice remains closest to local photographic color, the 65% slice uses stronger grouping, and the 90% slice is most interpretive while retaining shared color DNA.
 - Saturation and contrast remain controlled; a small repeated accent set guides rhythm without scattered high-chroma clashes.

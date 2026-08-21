@@ -146,9 +146,9 @@ when a simple straight layout is the strongest design choice.
 
 ### Scheme A — per-zone crop re-render (default)
 
-1. `--mode prepare` defines the four regions (collage paper pieces, torn
-   seams, contour boundaries, supplied masks or strips), selects the anchor,
-   assigns 30%/65%/90%, writes one context crop per zone (region bounding box
+1. `--mode prepare` defines the four regions (natural regions, collage paper
+   pieces, torn seams, contour boundaries, supplied masks or strips),
+   selects the anchor, assigns 30%/65%/90%, writes one context crop per zone (region bounding box
    plus a small margin so the model can see its neighbors), and derives a
    **head protection mask** — a generous expansion of the `--face-boxes`
    covering hair and jaw/neck (or a supplied `--head-mask`).
@@ -314,7 +314,11 @@ Options:
   `restore_protected_anchor.py`).
 - `--face-boxes "x0,y0,x1,y1;..."` — semicolon-separated face boxes used for
   automatic anchor selection, contour face avoidance, boundary snapping, the
-  built-in `person` silhouette heuristic, and the default head protection mask.
+  built-in `person` silhouette heuristic, and the PRIMARY head protection mask.
+- `--primary-face N` — 1-based index into `--face-boxes` of the PRIMARY face.
+  Only the primary head is hard source-protected and used for anchor
+  selection; in multi-person photos the other faces are regular content.
+  Default: auto = the largest face box.
 - `--head-mask DIR/path` — optional grayscale head mask (source size). The head
   region is always composited from the source regardless of which zone it
   falls in, so the primary face can never be reconstructed. Defaults to a

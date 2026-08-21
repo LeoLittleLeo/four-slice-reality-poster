@@ -229,7 +229,7 @@ read as an intentional anchor.
 `scripts/slice_and_compose.py --anchor auto` implements exactly this:
 
 ```text
-1. primary face ownership  (largest face overlap inside the piece masks)
+1. primary face ownership  (largest face overlap inside the region masks)
 2. side-weighted collage without a face -> the central Reality corridor
 3. Logical Zone 2 fallback (a middle layer)
 ```
@@ -308,7 +308,7 @@ When restoration is genuinely needed, prefer `../scripts/restore_protected_ancho
 
 Assign exactly one 30%, one 65%, and one 90% abstraction treatment to the three non-anchor slices. Do not arrange the levels automatically as a gradient or make abstraction increase with distance from the anchor. Permutations such as `65 | Reality | 90 | 30` are valid. Choose by visual balance, semantic importance, subject placement, rhythm, palette, and contrast.
 
-Default suggestion (not a hard rule): the strongest abstraction often works well at an **outer paper layer** (top, bottom, or side), while Reality usually benefits from a central or compositionally important region.
+Default suggestion (not a hard rule): the strongest abstraction often works well at an **outer region** (top, bottom, or side), while Reality usually benefits from a central or compositionally important region.
 
 Interpret percentage as departure from photographic representation—not opacity, modified pixel count, blur, saturation, or filter strength.
 

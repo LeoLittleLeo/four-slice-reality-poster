@@ -25,9 +25,9 @@ four-state readability
 
 ## Boundary families
 
-Boundary language is split into families. **Layered Torn-Paper Collage is the
-DEFAULT**; Torn-Strip is legacy; Semantic Contour is optional and must be
-chosen explicitly.
+Boundary language is split into families. **Natural Regions is the DEFAULT**;
+Layered Torn-Paper Collage and Semantic Contour are optional; Torn-Strip is
+legacy.
 
 The governing principle for the default family:
 
@@ -87,7 +87,7 @@ Kept intact: four sequential strip-like states with three continuous
 irregular seams around 1/4, 1/2, 3/4; irregular but ordered; head-avoiding;
 hard cuts with the optional torn-paper seam overlay.
 
-### C. Semantic Contour Boundary — OPTIONAL (`--boundary contour`)
+### D. Semantic Contour Boundary — OPTIONAL (`--boundary contour`)
 
 The optional family derives boundaries from semantic structure:
 
@@ -105,7 +105,7 @@ it explicitly when a composition genuinely benefits from contour-following
 regions (see [deterministic-layout.md](deterministic-layout.md) for the
 algorithm).
 
-Valid boundary sources and treatments common to both families include:
+Valid boundary sources and treatments available across the families include:
 
 - a collage cut, brush edge, sketch stroke, or shape-defined mask;
 - a clean straight crop edge when it is genuinely the strongest design;
@@ -187,7 +187,7 @@ Inspect the poster at thumbnail size and ask:
 - Are four readable states present inside ONE designed editorial collage?
 - Is the output one continuous image tiled by four adjacent regions, or four full-image versions in a grid/strip/contact sheet? Reject any layout where the scene is repeated.
 - Does it feel like one physical editorial object (shared paper/print material language) rather than four unrelated medium filters?
-- Do the four states read as layered paper pieces with torn silhouettes and visual depth, not four wavy strips with lines between them?
+- Do the four states read as natural regions of ONE photograph, with torn-paper seams at the boundaries, not four wavy strips with lines between them?
 - Are the pieces substantial and connected (no tiny scraps, islands, pockets or scattered fragments)?
 - Does the seam/edge feel like torn paper (deckled fibers, uneven width) rather than a uniform white/cream stroke?
 - In the default natural family: are the regions four parts of ONE photograph, with torn-paper seams only at the boundaries (not four separate paper sheets)?

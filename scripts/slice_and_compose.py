@@ -1316,15 +1316,23 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         width, height = im.size
         img = im.convert("RGB")
 
-    head_boxes = head_boxes_from_faces(args.face_boxes, width, height)
+    # All face boxes (expanded heads) are used ONLY for seam/contour avoidance
+    # (a seam should not cut any face); the hard source-lock and the anchor
+    # selection use ONLY the PRIMARY head.
+    all_head_boxes = head_boxes_from_faces(args.face_boxes, width, height)
+    primary_face = pick_primary_face(args.face_boxes, args.primary_face)
+    if primary_face is not None:
+        who = f"forced box {args.primary_face}" if args.primary_face is not None else "auto (largest)"
+        print(f"Primary face ({who}): {tuple(primary_face)}")
+    primary_head_boxes = head_boxes_from_faces([primary_face], width, height) if primary_face else []
     head_mask = None
     if args.head_mask is not None:
         head_mask = load_class_mask(args.head_mask, width, height, "head")
-    elif head_boxes:
-        head_mask = head_mask_from_boxes(head_boxes, width, height)
+    elif primary_head_boxes:
+        head_mask = head_mask_from_boxes(primary_head_boxes, width, height)
 
-    # seam-avoidance boxes: expanded head boxes, else the supplied head mask bbox
-    avoid_boxes = head_boxes
+    # seam-avoidance boxes: ALL faces (visual quality), else the head mask bbox
+    avoid_boxes = all_head_boxes
     if not avoid_boxes and head_mask is not None:
         hb = head_mask.getbbox()
         if hb is not None:
@@ -1380,22 +1388,22 @@ def cmd_prepare(args: argparse.Namespace) -> None:
                            args.seed)
         masks = masks_from_paths(direction, width, height, seams)
     elif args.boundary == "contour":
-        edges, face = edge_and_face_images(img, width, height, head_boxes)
+        edges, face = edge_and_face_images(img, width, height, all_head_boxes)
         sem = build_semantic_images(img, width, height, args.face_boxes,
                                     args.auto_semantic, args.class_masks_dir)
         masks = contour_masks(direction, width, height, edges, face,
-                              head_boxes, args.band, args.min_zone,
+                              all_head_boxes, args.band, args.min_zone,
                               sem, args.class_weights)
     else:  # mask
         masks = load_masks_dir(args.masks_dir, width, height)
     check_tiling(masks, width, height)
 
     if args.anchor == "auto":
-        anchor = pick_anchor(masks, head_boxes)
-        # no face boxes: side-weighted layout prefers the central Reality
+        anchor = pick_anchor(masks, primary_head_boxes)
+        # no primary face: side-weighted layout prefers the central Reality
         # corridor; otherwise fall back to Logical Zone 2 (a middle layer)
-        if not head_boxes and args.boundary in ("natural", "collage") and layout == "side-weighted":
-            anchor = 1  # central corridor piece
+        if not primary_head_boxes and args.boundary in ("natural", "collage") and layout == "side-weighted":
+            anchor = 1  # central corridor region
     else:
         anchor = int(args.anchor) - 1  # CLI is 1-based like restore_protected_anchor.py
 
@@ -1482,6 +1490,7 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "paper_grade": args.paper_grade if args.boundary in ("natural", "collage") else "none",
         "seed": args.seed,
         "head_mask": str(head_mask_path) if head_mask_path else None,
+        "primary_face": list(primary_face) if primary_face else None,
         "face_boxes": [list(b) for b in args.face_boxes],
         "zones": manifest_zones,
     }
@@ -1503,8 +1512,8 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         print(f"Torn: band={args.torn_band} roughness={args.torn_roughness} "
               f"scale={args.torn_scale} seed={args.seed} seam_style={args.seam_style}")
     if head_mask is not None:
-        print(f"Head protection: {head_mask_path} "
-              f"({', '.join(str(tuple(b)) for b in head_boxes) or 'supplied mask'})")
+        print(f"Head protection (PRIMARY head only): {head_mask_path} "
+              f"({', '.join(str(tuple(b)) for b in primary_head_boxes) or 'supplied mask'})")
     for z in manifest_zones:
         kind = "anchor" if z["level"] == "anchor" else f"{z['level']}% abstraction"
         print(
@@ -2023,12 +2032,13 @@ def cmd_verify(args: argparse.Namespace) -> None:
             if differs_masked(src.crop(hb), out.crop(hb), head_core.crop(hb)):
                 raise SystemExit("Head region differs from source; head protection broken.")
 
-    for fb in manifest.get("face_boxes", []):
-        fb_box = tuple(fb)
+    pf = manifest.get("primary_face")
+    if pf:
+        fb_box = tuple(pf)
         owners = [i for i, m in enumerate(masks) if mask_region_area(m, fb_box) > 0]
         if len(owners) > 1:
-            print(f"  warning: face box {fb_box} spans zones {[o + 1 for o in owners]}; "
-                  "the head mask still protects identity, but a boundary cuts the head region.")
+            print(f"  warning: PRIMARY face box {fb_box} spans zones {[o + 1 for o in owners]}; "
+                  "the primary head is still source-protected, but a boundary cuts its region.")
 
     counts = [m.histogram()[255] for m in masks]
     if manifest.get("boundary") != "collage":
@@ -2100,6 +2110,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--face-boxes",
         help='Semicolon list of x0,y0,x1,y1 boxes, e.g. "10,20,80,140;200,30,260,150"',
+    )
+    parser.add_argument(
+        "--primary-face",
+        type=int,
+        default=None,
+        help="1-based index of the PRIMARY face box in --face-boxes — the only "
+             "head that is hard source-protected and used for anchor selection. "
+             "Default: auto = the largest face box (multi-person photos: only "
+             "the primary head is locked to the source)",
     )
     parser.add_argument(
         "--head-mask",
@@ -2317,6 +2336,9 @@ def main() -> None:
         if args.source is None or args.direction is None:
             raise SystemExit("--source and --direction are required for --mode prepare.")
         args.face_boxes = parse_face_boxes(args.face_boxes)
+        if args.primary_face is not None and (args.primary_face < 1 or args.primary_face > len(args.face_boxes)):
+            raise SystemExit(f"--primary-face must be 1..{len(args.face_boxes)} "
+                             f"(index into --face-boxes); got {args.primary_face}.")
         if args.levels is not None:
             args.levels = [int(x) for x in args.levels.split(",")]
         args.class_weights = parse_class_weights(args.class_weights)
