@@ -333,3 +333,49 @@ The Final Output Layout hard constraint (one continuous image, four adjacent reg
 - The four states are four adjacent regions of ONE continuous image; the scene appears exactly once — never four full-image versions, grids, strips, or contact sheets.
 - One-Scene / One-Object Ownership: every recognizable scene object has one continuous spatial existence on the final canvas — it may cross regions and change rendering language, but never restarts, repeats, or is redrawn as another copy inside another region.
 - Deliver one coherent poster, never four independent images.
+
+## Final governing model
+
+```text
+SOURCE PHOTO
+↓
+SOURCE-INFORMED
++
+ROBOT-DREAMS-CONSTRAINED
+GLOBAL PALETTE INTERPRETATION
+↓
+ONE LIMITED SHARED POSTER PALETTE
+↓
+Reality   photographic palette expression
+30%       source-near palette reinterpretation
+          + Representational Transformation
+65%       strong palette regrouping
+          + Structural Reconstruction
+90%       aggressive palette compression
+          + Symbolic Reduction
+↓
+REGIONAL DOMINANT COLOR EMPHASIS IS ALLOWED
+INDEPENDENT REGIONAL PALETTE IDENTITY IS NOT
+↓
+CONTROLLED STRUCTURAL TORN-PAPER SEAMS
+↓
+NEAR-HARD ABSTRACTION TRANSITIONS
+↓
+ONE COHERENT ROBOT-DREAMS-INSPIRED POSTER
+```
+
+## Core hard rules
+
+```text
+SHARED PALETTE ≠ SAME COLOR PROPORTIONS.
+SOURCE-INFORMED ≠ SOURCE-COLOR-LOCKED.
+ROBOT DREAMS PALETTE ≠ WARM FILTER.
+REGIONAL COLOR EMPHASIS IS ALLOWED.
+INDEPENDENT REGIONAL PALETTES ARE NOT.
+65% MUST RECONSTRUCT.
+90% MUST SYMBOLICALLY REDUCE.
+TORN SEAM ≠ WAVY OUTLINE.
+PAPER BOUNDARY HAS PHYSICAL WIDTH.
+ABSTRACTION TRANSITIONS SHOULD BE NEAR-HARD,
+WITH THE PAPER SEAM CARRYING THE PHYSICAL TRANSITION.
+```

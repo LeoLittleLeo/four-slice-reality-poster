@@ -195,6 +195,125 @@ All of it is visual only — the piece masks tile exactly underneath, and
 `--mode verify` exempts only the intentional paper pixels from the
 anchor/head source-equality core.
 
+### Structural torn-paper boundary principle
+
+The target boundary is NOT a smooth decorative wave. Avoid boundaries that
+read like:
+
+```text
+~~~~~~~~~~~~~~~~~~~~~~~~
+```
+
+Avoid:
+
+- sinusoidal appearance;
+- repeated periodic curves;
+- uniformly smooth waves;
+- thin cream outlines;
+- clean vector strokes;
+- decorative contour lines;
+- broad blur transitions.
+
+The intended boundary is a **Controlled Structural Torn-Paper Seam** — it
+should feel physically torn while remaining compositionally controlled.
+
+### Torn-seam geometry
+
+Use:
+
+```text
+long calm runs
++
+irregular directional drift
++
+localized sharp tears
++
+occasional V-shaped notches
++
+short stepped jumps
++
+small fiber irregularity
+```
+
+The seam should resemble:
+
+```text
+____________
+            \__
+               \____
+           ___/
+__________/
+```
+
+rather than `~~~~~~~ ~~~~~~~~ ~~~~~~~`.
+
+Important properties:
+
+- non-periodic;
+- asymmetrical;
+- independently shaped boundaries;
+- abrupt local changes;
+- mixed long and short tear scales;
+- variable exposed-paper width;
+- visible paper-fiber character;
+- no repeated parallel waves.
+
+Do NOT make all seams visually parallel copies.
+
+### The seam has area, not just a line
+
+The paper boundary must not read as a thin outline drawn over the image — it
+should have visible physical width:
+
+```text
+REGION A
+██████████████╲
+████████████   ╲____
+            exposed torn-paper fibers
+                     ╲____
+                          REGION B
+```
+
+Use:
+
+- uneven exposed fiber width;
+- broken ivory / aged-paper bands;
+- localized widened tears;
+- small missing sections;
+- fine dark cut edge;
+- restrained directional shadow when appropriate.
+
+Avoid one uniform 2px cream stroke.
+
+### Natural boundary is near-hard, not broadly feathered
+
+Do not use broad feathering to create continuity between abstraction regions.
+The abstraction transition should be carried primarily by:
+
+- structural state change; plus
+- the physical torn-paper seam.
+
+Use near-hard region transition + minimal anti-aliasing + paper-fiber
+interface, rather than a large blurry feather that visually mixes the
+abstraction states. A small local anti-alias band is acceptable for technical
+cleanliness; broad blur that mixes abstraction states is not.
+
+### Boundary and color work together
+
+The region change should be readable through ALL of:
+
+```text
+PRIMARY METHOD CHANGE
++ STRUCTURAL INFORMATION-DENSITY CHANGE
++ REGIONAL SHARED-PALETTE REBALANCING
++ TORN-PAPER SEAM
+```
+
+Do NOT rely on only one of these. The seam separates the regions physically;
+the abstraction methods differentiate them structurally; the palette
+rebalancing differentiates their color organization; the shared palette keeps
+the whole poster coherent.
+
 ### Scheme B — full-canvas mask inpaint
 
 1. `--mode prepare` always writes the zone masks to `workdir/masks/zone{i}.png`.
@@ -432,6 +551,22 @@ PLACEMENT RULE (depends on {PRIMARY_METHOD}):
   never import content from outside the crop, and must not duplicate any
   recognizable source subject.
 
+ROBOT DREAMS SHARED PALETTE RULE:
+- Interpret the source colors through ONE limited Robot Dreams-inspired
+  poster palette.
+- The shared palette is SOURCE-INFORMED but not restricted to literal
+  source hues. Neutral or ordinary photographic colors may be mapped into
+  compatible shared colors such as dusty blue, aged cream, ochre,
+  terracotta, muted coral, sage, dusty olive, warm gray, muted navy, and
+  warm charcoal.
+- Do NOT merely preserve the original local colors and add a warm filter.
+- This region MAY emphasize a dominant subset of the shared palette, but it
+  MUST NOT establish an independent palette identity.
+- All colors must remain compatible with the same global poster palette.
+
+COLOR BEHAVIOR — {LEVEL}%:
+{LEVEL_SPECIFIC_COLOR}
+
 The output image must keep the SAME aspect ratio and
 orientation as the input crop: a portrait crop stays portrait, a landscape
 crop stays landscape — never rotate, never change the output format. Keep it
@@ -441,6 +576,38 @@ of the scene. Do not crop, pad, or add margins of your own. Keep the warm,
 nostalgic, sunlit, slightly retro Robot Dreams-inspired palette. The slice
 must remain clearly traceable to this exact photograph while departing in
 structural information density as instructed.
+```
+
+Fill `{LEVEL_SPECIFIC_COLOR}` with the level-specific color block:
+
+```text
+30%:
+Remain relatively close to the source's local color relationships, but
+compress minor variation into the shared Robot Dreams palette. Preserve most
+major color relationships while visibly replacing overly digital, neutral,
+or photographic colors with softer shared-palette equivalents where
+appropriate. Use moderate regional palette rebalancing.
+```
+
+```text
+65%:
+Reorganize the local source colors into broader shared-palette masses.
+Significantly reduce small photographic color variation. Neutral surfaces
+may be reinterpreted using compatible shared colors. Allow a clear dominant
+subset of the shared palette. Color grouping should reinforce the selected
+Primary Abstraction Method and contribute to substantial structural
+reconstruction.
+```
+
+```text
+90%:
+Aggressively compress the local source color information into a small,
+dominant subset of the shared Robot Dreams palette. Literal local hue
+fidelity is NOT required. Large neutral or photographic surfaces may become
+ochre, terracotta, dusty blue, cream, muted olive, warm charcoal, or other
+compatible shared-palette masses. Color must function as part of the
+symbolic abstraction. Do NOT merely stylize the original photograph while
+keeping every source color relationship intact.
 ```
 
 ### Collage per-zone render block (`--boundary collage`)
@@ -470,6 +637,18 @@ Differentiate this abstraction level primarily by:
 - shape merging,
 - detail omission,
 - graphic massing.
+
+ROBOT DREAMS SHARED PALETTE RULE:
+- Interpret the source colors through ONE limited Robot Dreams-inspired
+  poster palette, shared with every other zone.
+- The palette is SOURCE-INFORMED but not restricted to literal source hues:
+  neutral or ordinary photographic colors may be mapped into compatible
+  shared colors (dusty blue, aged cream, ochre, terracotta, muted coral,
+  sage, dusty olive, warm gray, muted navy, warm charcoal).
+- Do NOT merely preserve the original local colors and add a warm filter.
+- This zone MAY emphasize a dominant subset of the shared palette, but MUST
+  NOT establish an independent palette identity.
+- All colors must remain compatible with the same global poster palette.
 
 Preserve scene identity and major spatial relationships.
 
@@ -503,6 +682,15 @@ offset, crop, or re-layer the source elements WITHIN the masked region (that
 is the method); for every other method keep the masked region's subject
 placement identical to the source. Never import content from outside the
 mask, and never duplicate a recognizable source subject.
+ROBOT DREAMS SHARED PALETTE RULE: interpret the source colors through ONE
+limited Robot Dreams-inspired poster palette; the palette is SOURCE-INFORMED
+but not restricted to literal source hues (neutral or ordinary photographic
+colors may become dusty blue, aged cream, ochre, terracotta, muted coral,
+sage, dusty olive, warm gray, muted navy, warm charcoal). Do NOT merely
+preserve the original local colors and add a warm filter. This masked region
+MAY emphasize a dominant subset of the shared palette, but MUST NOT establish
+an independent palette identity; all colors must stay compatible with the
+same global poster palette.
 The mask marks the ONLY region you may change. Keep every pixel outside the
 mask EXACTLY unchanged — do not redraw, complete, reformat, or recompose
 content outside the mask. The output is the SAME single canvas at the SAME
@@ -622,3 +810,84 @@ It warns (does not fail) when:
 Compose and verify both fail when a rendered zone is a gross full-scene copy
 or has a wrong aspect/orientation; re-render that zone with the strict
 per-zone render block.
+
+### Anti-similarity rule (agent-side)
+
+Reject an abstract region if it remains visually too close to the source
+merely because:
+
+- all source objects remain at almost full detail;
+- photographic textures remain dominant;
+- the local source color distribution is almost unchanged;
+- only a filter, grain, tint, stroke overlay, or mild stylization was added;
+- the abstraction method is visible only at close inspection.
+
+Especially for 65% and 90%, require visible departure at thumbnail size. A
+valid 65% or 90% region should clearly reduce or reconstruct several of:
+
+```text
+detail retention
+component density
+spatial fidelity
+shape fidelity
+photographic surface retention
+local color complexity
+local palette size
+```
+
+### Visual target
+
+A successful result should NOT read as:
+
+```text
+original photograph
++ three localized filters
++ three decorative wavy lines
+```
+
+It should read as one recognizable scene interpreted through one Robot
+Dreams-inspired visual universe, with:
+
+- Reality → photographic;
+- 30% → artistic but source-near;
+- 65% → visibly reconstructed;
+- 90% → strongly symbolic / graphic;
+
+while the global palette remains coherent, regional color emphasis may
+differ, and the boundaries feel physically torn.
+
+### Final validation (palette · abstraction · boundary)
+
+Before accepting the poster, confirm:
+
+**Palette**
+- The poster clearly belongs to one Robot Dreams-inspired palette universe.
+- The palette is source-informed, not restricted to literal source colors.
+- Neutral source surfaces may be reinterpreted through compatible
+  shared-palette colors.
+- Regions may emphasize different subsets of the shared palette.
+- No region establishes an unrelated independent palette.
+- Reality remains photographic; 30% stays relatively close to source color
+  relationships; 65% visibly groups shared colors into broader masses; 90%
+  visibly compresses color into a small symbolic subset.
+- The result does not look like the original photograph with only a warm
+  filter.
+
+**Abstraction**
+- 30%, 65%, and 90% differ in structural information density.
+- Their Primary Methods remain perceptually dominant.
+- 65% is visibly reconstructed rather than merely stylized.
+- 90% has lost most photographic surface information while retaining source
+  DNA.
+- The three abstract states are immediately distinguishable at thumbnail
+  size.
+
+**Boundary**
+- The seams do not resemble sinusoidal or repeated waves.
+- Each seam has independent, non-periodic torn geometry.
+- Long calm runs coexist with sharp local tears and notches.
+- The exposed paper boundary has variable width and visible fiber character.
+- The seam reads as a physical torn interface, not a decorative line.
+- Broad feathering does not dissolve the state boundaries.
+- The final image remains ONE continuous scene, not four independent paper
+  sheets.

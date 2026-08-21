@@ -7,6 +7,8 @@
 - Palette families
 - Saturation, contrast, and accents
 - Level-Dependent Color Reinterpretation
+- Palette Rebalancing Is Part of Abstraction
+- Responsibility Split: Python vs Image Model
 - Subject-specific color
 - Execution and validation
 
@@ -347,6 +349,70 @@ shifts, or per-region saturation curves that change WHICH colors are
 available — the palette is one, the abstraction (its proportion rebalancing
 and dominant color emphasis) differs. Regional dominant color emphasis is
 fine; regional palette identity is not.
+
+## Palette Rebalancing Is Part of Abstraction
+
+Do NOT treat color as independent decoration. Regional color redistribution
+must EMERGE from the selected abstraction method — the method carries the
+shared palette in its own structural language:
+
+```text
+Colored Sketch
+→ shared colors carried by strokes, fills, and retained photographic patches
+
+Line Abstraction
+→ reduced color fields supporting dominant contour structure
+
+Painterly Abstraction
+→ shared colors merged into broad brush and tonal masses
+
+Geometric Abstraction
+→ shared palette organized into planar fields
+
+Fragmentation
+→ shared colors redistributed across source-derived fragments
+
+Collage Abstraction
+→ shared colors organized through layered source-derived masses
+
+Shape Reduction
+→ very few shared colors assigned to large silhouette masses
+
+Chinese Ink Wash
+→ shared palette compressed into muted washes, negative space,
+  and atmospheric fields
+
+Cartoon Pixel
+→ compact shared palette mapped into graphic pixel blocks
+```
+
+Do NOT assign arbitrary colors merely because they look decorative: every
+regional color choice must be explainable as that method's way of carrying
+the shared palette.
+
+## Responsibility Split: Python vs Image Model
+
+Do NOT require the deterministic Python pipeline to perform aggressive
+palette quantization on the whole image. The responsibilities split:
+
+```text
+PYTHON PIPELINE
+→ establishes a uniform warm photographic base
+→ protects Reality and primary head
+→ preserves global coherence
+→ performs deterministic composition
+
+IMAGE MODEL
+→ performs actual palette reinterpretation
+→ performs level-dependent regional color compression
+→ performs regional dominant-color rebalancing
+→ combines color reinterpretation with the selected Primary Method
+```
+
+The deterministic `robot_dreams_grade()` may remain a subtle global
+photographic grade. It is NOT by itself the full Robot Dreams palette
+transformation. Do not describe a simple warm grade as equivalent to the
+complete palette reinterpretation system.
 
 ## Cross-slice relationship
 
