@@ -144,6 +144,37 @@ give a region an independent palette identity. Follow
 [cinematic-color-system.md](references/cinematic-color-system.md) for
 detailed implementation.
 
+### Level-Dependent Color Reinterpretation
+
+Color abstraction must increase TOGETHER with structural abstraction — the
+four states differ not only in shape/detail but in how designed the color
+organization becomes:
+
+- **Reality:** photographic — source-faithful color + the uniform warm
+  Robot Dreams grade. May receive warmer midtones, softened highlights,
+  slightly lifted blacks, mild saturation compression, subtle nostalgic
+  fading. Do NOT posterize or aggressively recolor Reality; the anchor and
+  primary head stay natural and photographic.
+- **30%:** source-near palette interpretation — source local color
+  relationships → limited Robot Dreams palette mapping → moderate palette
+  compression. Preserve most major hue relationships, color variety, object
+  color identity, photographic light logic. Allow gentle grouping and
+  replacing digital-looking colors with softer Robot Dreams equivalents.
+  Not merely `source + warm filter`.
+- **65%:** palette regrouping — local photographic color → shared palette
+  interpretation → strong grouping into broader color masses (e.g. many
+  small gray/beige/green details → 3–5 broader masses → ochre / dusty blue
+  / cream / muted olive). Not merely a stronger 30% — structurally AND
+  chromatically reorganized.
+- **90%:** aggressive palette compression — source color evidence → Robot
+  Dreams palette interpretation → aggressive compression → a small dominant
+  subset of 2–5 shared colors. Gray roads become ochre/terracotta/muted
+  blue masses; skies become dusty blue/cream fields; shadows become warm
+  charcoal/muted navy instead of literal black. Color is part of the
+  symbolic construction, but stays inside the shared palette, keeps enough
+  semantic color logic to stay traceable, and never introduces unrelated
+  psychedelic colors.
+
 ## Required reading
 
 Before producing the artwork, read:

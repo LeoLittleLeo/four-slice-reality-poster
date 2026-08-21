@@ -455,6 +455,13 @@ Slice D → ochre / muted yellow / soft brick
 
 四状态的可读性来自**抽象（结构信息密度与主抽象方法）**与共享调色板内的主导色强调，不是独立区域颜色身份。详细规则：
 
+**颜色抽象随结构抽象同步递增**：
+
+- **Reality**：摄影级——源图忠实色 + 统一微暖 Robot Dreams grade；只允许更暖中间调、柔化高光、轻微提黑、温和压饱和、细微怀旧褪色；**不得 posterize 或激进改色**。
+- **30%**：源近邻调色板诠释——保留大部分主要色相关系、颜色多样性、物体颜色身份与摄影光逻辑；允许温和分组与"数字感颜色→柔和 Robot Dreams 等价色"；不能只是 `源图 + 暖滤镜`。
+- **65%**：调色板重组——强分组为更大色块（如许多小灰/米/绿细节 → 3–5 块大色面 → ochre / dusty blue / cream / muted olive）；不能只是更强的 30%，须结构与色彩双重重组。
+- **90%**：激进调色板压缩——收敛到 2–5 个共享主色；灰路→ochre/terracotta/muted blue 色块、天空→dusty blue/cream 色面、阴影→warm charcoal/muted navy 而非照片黑；颜色参与符号建构，但仍须留在共享调色板内、保持可追溯的语义色逻辑、不引入无关迷幻色。
+
 [`references/cinematic-color-system.md`](references/cinematic-color-system.md)
 
 ---

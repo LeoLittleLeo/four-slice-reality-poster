@@ -6,7 +6,7 @@
 - Global emotional palette
 - Palette families
 - Saturation, contrast, and accents
-- Regional palette rebalancing
+- Level-Dependent Color Reinterpretation
 - Subject-specific color
 - Execution and validation
 
@@ -183,28 +183,134 @@ fragments, selected strokes, or color blocks. Do not scatter strong accents
 everywhere — the same source accents keep the same character in every region
 that contains them.
 
-## Regional palette rebalancing
+## Level-Dependent Color Reinterpretation
 
-Each region's color behavior is its abstraction method applied to the shared
-palette — a rebalancing of proportions AND a dominant color emphasis, never
-an independent palette:
+Color abstraction must increase TOGETHER with structural abstraction. The
+difference between Reality, 30%, 65%, and 90% is not only shape/detail
+reduction — the organization of color must also become progressively more
+designed. Each region's color behavior is its abstraction method applied to
+the shared palette — a rebalancing of proportions AND a dominant color
+emphasis, never an independent palette.
 
-- **Reality Anchor:** source-faithful by construction. The anchor is
-  composited from the (uniformly graded) source through its own zone mask, so
-  it keeps the shared palette of its slice exactly. Palette unity never
-  outranks face identity or human continuity.
-- **30% abstraction:** closest to local photographic color. The 30%-pool
-  methods (Colored Sketch, Line Abstraction, Painterly Abstraction) preserve
-  much of the shared color variation while restructuring it structurally;
-  their color is the shared palette drawn, lined, or brushed.
-- **65% abstraction:** the 65%-pool methods (Geometric Abstraction,
-  Fragmentation, Collage Abstraction) restructure form; the shared palette is
-  grouped into broader masses — same colors, larger proportion chunks, and
-  the region may lead with a subset of shared hues.
-- **90% abstraction:** the 90%-pool methods (Shape Reduction, Chinese Ink
-  Wash, Cartoon Pixel) keep only a semantic skeleton; the shared palette
-  narrows to its most essential members (reduced shapes, washes, or pixel
-  palette).
+### Reality Anchor — photographic
+
+Reality remains photographic:
+
+```text
+source-faithful photographic color
++
+uniform Robot Dreams-inspired global grade
+```
+
+Reality may receive:
+
+- warmer midtones;
+- softened highlights;
+- slightly lifted blacks;
+- mild saturation compression;
+- subtle nostalgic fading.
+
+Do NOT posterize or aggressively recolor Reality. The Reality Anchor and the
+protected primary head must remain natural and photographic. Palette unity
+never outranks face identity or human continuity.
+
+### 30% abstraction — source-near palette interpretation
+
+30% remains closest to the source photograph:
+
+```text
+source local color relationships
+↓
+limited Robot Dreams palette mapping
+↓
+moderate palette compression
+```
+
+Preserve:
+
+- most major local hue relationships;
+- much of the original color variety;
+- recognizable object color identity;
+- photographic light logic.
+
+Allow:
+
+- simplification of minor color variation;
+- gentle color grouping;
+- replacing digital-looking colors with softer Robot Dreams equivalents;
+- increased use of dusty blue, cream, ochre, muted coral, sage, or related
+  shared colors;
+- limited regional dominant-color emphasis.
+
+Do NOT leave the region as merely `original source color + warm filter` —
+there must be visible artistic reinterpretation.
+
+### 65% abstraction — palette regrouping
+
+65% should clearly reorganize both structure and color:
+
+```text
+local photographic color
+↓
+shared palette interpretation
+↓
+strong grouping into broader color masses
+```
+
+Allow:
+
+- stronger replacement of neutral source surfaces with shared palette colors;
+- larger contiguous color fields;
+- fewer local color variations;
+- stronger dominant-color emphasis;
+- redistribution of shared colors according to the selected Primary Method;
+- color masses that support geometric, fragmented, or collage structure.
+
+For example:
+
+```text
+many small gray / beige / green details
+↓
+3–5 broader masses
+↓
+ochre / dusty blue / cream / muted olive
+```
+
+The result should no longer feel primarily photographic. Do NOT merely make
+the 30% treatment stronger — 65% must feel structurally AND chromatically
+reorganized.
+
+### 90% abstraction — aggressive palette compression
+
+90% may depart strongly from literal photographic color:
+
+```text
+source color evidence
+↓
+Robot Dreams palette interpretation
+↓
+aggressive palette compression
+↓
+small dominant subset of shared colors
+```
+
+Prefer a compact regional set — 2–5 dominant shared colors, depending on the
+Primary Method. Allow:
+
+- gray roads becoming ochre / terracotta / muted blue masses;
+- vegetation becoming large olive / ochre / dark-green shapes;
+- skies becoming dusty blue / cream fields;
+- architectural surfaces becoming cream / terracotta / muted blue planes;
+- shadows becoming warm charcoal / muted navy instead of literal
+  photographic black.
+
+At 90%, color is part of the symbolic construction — it does NOT need to
+reproduce every original local hue. However:
+
+- remain inside the global shared palette;
+- preserve source-derived value hierarchy when useful;
+- preserve enough semantic color logic to keep the scene traceable;
+- do not introduce unrelated psychedelic colors.
 
 As abstraction rises, the same shared palette is carried through
 progressively stronger structural reinterpretation and progressively narrower
