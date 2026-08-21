@@ -211,11 +211,23 @@ modify more than one zone at a time.
 
 ```text
 # 1. Define the layout (deterministic)
-#    ONE photo in four natural regions (default); layout auto-derives
+#    ONE photo in four natural regions (default); layout auto-derives.
+#    --levels assigns 30/65/90; the script routes the Primary Method per
+#    level through the Level-Gated pools (auto, or --methods override
+#    validated against each level's pool) and writes both into the manifest.
 python scripts/slice_and_compose.py --mode prepare \
     --source photo.png --boundary natural --layout auto \
     --anchor auto --face-boxes "100,60,180,150;330,120,410,210" \
     --levels 65,90,30 --workdir work/
+
+#    explicit Level-Gated method routing (each method from ITS level's pool;
+#    a cross-pool method or Color Blocking is refused)
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --boundary natural --layout auto \
+    --anchor auto --face-boxes "100,60,180,150" \
+    --levels 65,90,30 \
+    --methods "30:Colored Sketch,65:Fragmentation,90:Shape Reduction" \
+    --workdir work/
 
 #    explicit side-weighted natural layout (alley / central corridor)
 python scripts/slice_and_compose.py --mode prepare \
@@ -252,7 +264,10 @@ python scripts/slice_and_compose.py --mode prepare \
     --anchor auto --levels 65,90,30 --workdir work/
 
 # 2a. Render each non-anchor crop in work/crops/zone{i}.png with the
-#     per-zone render prompt block, save to work/rendered/zone{i}.png
+#     per-zone render prompt block — fill {LEVEL} and {PRIMARY_METHOD}
+#     from the manifest (each zone records its level and routed Primary
+#     Method), {SUPPORTING_METHODS} with any supporting methods or "none";
+#     save to work/rendered/zone{i}.png
 
 # 2b. Compose the poster (collage: paper grain + fiber edges + shadows)
 python scripts/slice_and_compose.py --mode compose \
@@ -335,6 +350,19 @@ Options:
   **auto-staggered** seed/source-derived permutation (never the sequential
   `30,65,90`), so the three abstract states are always non-linearly arranged.
   Pass an explicit permutation for composition-driven choices.
+- `--methods "30:Colored Sketch,65:Fragmentation,90:Shape Reduction"` —
+  Primary Abstraction Method per level, routed by the **Level-Gated system**
+  (see [abstraction-language.md](abstraction-language.md)): the level gates
+  the eligible pool FIRST, then the method is picked inside that pool. Each
+  explicit method must belong to ITS level's pool (30% = Colored Sketch /
+  Line Abstraction / Painterly Abstraction; 65% = Geometric Abstraction /
+  Fragmentation / Collage Abstraction; 90% = Shape Reduction / Chinese Ink
+  Wash / Cartoon Pixel); a method from another level's pool or Color Blocking
+  (Supporting-only) is refused. Default: a deterministic auto pick per pool
+  from the source+seed hash — same photo + seed always repeats exactly, and
+  different photos produce different methods. The routed methods are written
+  into the manifest (`methods` and each zone's `primary_method`) and are
+  checked again by `--mode verify`.
 - `--margin 0.12` — context margin around each zone crop, as a fraction of the
   zone's bounding box. Give the model enough context to keep the scene
   semantically connected.
@@ -367,12 +395,23 @@ each containing the full scene, gutters, or panel gaps.
 
 ### Per-zone render block (primary path)
 
-Render `work/crops/zone{i}.png` with the assigned level filled into `{LEVEL}`:
+Render `work/crops/zone{i}.png` with the assigned level filled into
+`{LEVEL}`, the selected Primary Method into `{PRIMARY_METHOD}`, and any
+supporting methods (or `none`) into `{SUPPORTING_METHODS}`:
 
 ```text
 This image is a CROP — a slice of a larger photograph, NOT the whole picture.
+
+ABSTRACTION LEVEL: {LEVEL}%
+PRIMARY ABSTRACTION METHOD: {PRIMARY_METHOD}
+SUPPORTING METHODS: {SUPPORTING_METHODS}
+
 Re-render ONLY the content visible inside this crop at {LEVEL}% abstraction
-from the original photograph. The rest of the photograph does not exist for
+from the original photograph, using {PRIMARY_METHOD} as the dominant
+abstraction language. The Primary Abstraction Method is mandatory and must
+be perceptually dominant — do not substitute another Primary Method. Use
+Supporting Methods only when they reinforce the Primary Method; they must
+never visually override it. The rest of the photograph does not exist for
 you: do NOT reconstruct, complete, extrapolate, or invent content outside
 this crop, and do NOT show the full scene. The output must contain exactly
 the same slice, the same framing, the same camera angle, the same subject
@@ -390,13 +429,24 @@ structural information density as instructed.
 
 ### Collage per-zone render block (`--boundary collage`)
 
-Use instead of the generic block when the boundary family is collage:
+Use instead of the generic block when the boundary family is collage. Fill
+`{LEVEL}`, `{PRIMARY_METHOD}`, and `{SUPPORTING_METHODS}` (or `none`) as in
+the generic block:
 
 ```text
 This crop belongs to ONE Layered Torn-Paper Collage poster.
 
+ABSTRACTION LEVEL: {LEVEL}%
+PRIMARY ABSTRACTION METHOD: {PRIMARY_METHOD}
+SUPPORTING METHODS: {SUPPORTING_METHODS}
+
 Keep the same editorial print / paper material language as the other zones.
 Do not invent an unrelated artistic medium just to make this region different.
+
+The Primary Abstraction Method is mandatory and must be perceptually
+dominant — do not substitute another Primary Method. Use Supporting Methods
+only when they reinforce the Primary Method; they must never visually
+override it.
 
 Differentiate this abstraction level primarily by:
 - structural simplification,
@@ -419,16 +469,27 @@ Render only this source-derived crop.
 
 ### Scheme B inpaint block
 
+Fill `{LEVEL}`, `{PRIMARY_METHOD}`, and `{SUPPORTING_METHODS}` (or `none`)
+as in the generic block:
+
 ```text
+ABSTRACTION LEVEL: {LEVEL}%
+PRIMARY ABSTRACTION METHOD: {PRIMARY_METHOD}
+SUPPORTING METHODS: {SUPPORTING_METHODS}
+
 Re-render ONLY the masked region at {LEVEL}% abstraction from the original
-photograph. The mask marks the ONLY region you may change. Keep every pixel
-outside the mask EXACTLY unchanged — do not redraw, complete, reformat, or
-recompose content outside the mask. The output is the SAME single canvas at
-the SAME aspect ratio, never a new image, a grid, a contact sheet, or
-multiple versions of the scene. Keep the masked region's composition,
-framing, and subject placement identical to the source. Do not add frames,
-borders, gutters, labels, or panels. Keep the warm, nostalgic, sunlit,
-slightly retro Robot Dreams-inspired palette.
+photograph, using {PRIMARY_METHOD} as the dominant abstraction language. The
+Primary Abstraction Method is mandatory and must be perceptually dominant —
+do not substitute another Primary Method. Use Supporting Methods only when
+they reinforce the Primary Method; they must never visually override it.
+The mask marks the ONLY region you may change. Keep every pixel outside the
+mask EXACTLY unchanged — do not redraw, complete, reformat, or recompose
+content outside the mask. The output is the SAME single canvas at the SAME
+aspect ratio, never a new image, a grid, a contact sheet, or multiple
+versions of the scene. Keep the masked region's composition, framing, and
+subject placement identical to the source. Do not add frames, borders,
+gutters, labels, or panels. Keep the warm, nostalgic, sunlit, slightly retro
+Robot Dreams-inspired palette.
 ```
 
 ## Engineering rules
@@ -458,7 +519,13 @@ slightly retro Robot Dreams-inspired palette.
   or disable them with `--no-auto-semantic`. If a boundary still cuts a face,
   re-run with a wider `--band`, a forced anchor, or supplied masks.
 - Append the same global color-identity sentence to every zone prompt so the
-  four rendered slices stay inside one Robot Dreams-inspired universe.
+  four rendered slices stay inside one Robot Dreams-inspired universe. Every
+  per-zone prompt carries the zone's `{LEVEL}`, `{PRIMARY_METHOD}`, and
+  `{SUPPORTING_METHODS}`; the method fields come from the Level-Gated system
+  (see [abstraction-language.md](abstraction-language.md)) — the level gates
+  the pool first, then the region's subject/structure/color selects the
+  method inside that pool. Do not omit the method fields, and never let a
+  render substitute a different Primary Method than the one assigned.
 - Compose sanity-checks every rendered zone before pasting and **refuses to
   build the poster** when a render is unusable: an aspect/orientation
   mismatch with its crop (a landscape full scene for a portrait strip) or a
@@ -509,7 +576,11 @@ slightly retro Robot Dreams-inspired palette.
 - for `torn`: the three seams are missing, do not span the full canvas, cross
   or collapse, or the zones contain islands/pockets/loops (ordered strip
   topology broken); a seam deviating more than ~20% of the slice axis from
-  its nominal boundary is also rejected; or
+  its nominal boundary is also rejected;
+- an abstract zone's recorded Primary Method is not in its level's pool, or
+  the anchor zone records a Primary Method other than `Reality` — the
+  Level-Gated method routing is a deterministic hard rule (see
+  [abstraction-language.md](abstraction-language.md)); or
 - the scene is structurally repeated (any layout where the full photograph
   appears more than once — grid, strip, contact sheet).
 
@@ -519,11 +590,13 @@ It warns (does not fail) when:
   applied),
 - a natural/collage region is small (< ~10% of the canvas),
 - a torn seam deviates far from its nominal boundary (warns above ~12% of the
-  slice axis) or has a large local jump, or
+  slice axis) or has a large local jump,
 - a rendered abstract zone resembles the FULL source scene instead of its own
   slice — the symptom of "four repeated images at different abstraction
   levels", caused by the image model completing the photograph inside a zone
-  render.
+  render, or
+- a zone has no recorded `primary_method` — a stale manifest from before the
+  method router (re-run `--mode prepare` to record Level-Gated routing).
 
 Compose and verify both fail when a rendered zone is a gross full-scene copy
 or has a wrong aspect/orientation; re-render that zone with the strict

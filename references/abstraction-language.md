@@ -63,15 +63,20 @@ Differentiate the three states through BOTH:
 LEVEL ≠ MEDIUM
 ```
 
-A method is not bound to a level (30% may use ink wash, 90% may use
-painterly), but the three chosen methods must be distinct. For example:
+Under the Level-Gated system a method IS bound to a level: each method
+belongs to exactly one level's pool (30% can never use ink wash, 90% can
+never use painterly — those methods live in other pools). What LEVEL ≠
+MEDIUM means now is that a level does not prescribe ONE fixed method: it
+prescribes an eligible pool, and the region picks one method inside that
+pool. The three chosen methods must be distinct, and each must come from
+its own level's pool. For example:
 
 ```text
-GOOD (same material system, distinct methods)
+GOOD (each region's method comes from its own level's pool)
 
-30% = Colored Sketch (print-like)
-65% = Painterly Abstraction (print-like)
-90% = Shape Reduction (print-like)
+30% = Colored Sketch (30% pool)
+65% = Fragmentation (65% pool)
+90% = Shape Reduction (90% pool)
 ```
 
 ```text
@@ -185,6 +190,26 @@ a level does not prescribe a fixed method, it prescribes an eligible pool;
 the region character picks the method inside that pool.
 ```
 
+### Deterministic router in the script (hard rule, not agent discretion)
+
+The pool gate is enforced by `scripts/slice_and_compose.py`, not left to the
+agent:
+
+* `--mode prepare` routes the Primary Method per level through these pools
+  and writes it into the manifest (top-level `methods`, plus each zone's
+  `primary_method`; the anchor zone is `Reality`). Default: a deterministic
+  auto pick per pool from the source+seed hash — the same photo + seed always
+  repeats exactly, and different photos get different methods per level
+  (pools stay sets, never singletons).
+* `--methods "30:Colored Sketch,65:Fragmentation,90:Shape Reduction"`
+  overrides the pick for content-aware selection. The script **refuses** a
+  method that is not in ITS level's pool (e.g. Chinese Ink Wash at 65%), and
+  **refuses** Color Blocking as a Primary Method — the level gates the pool
+  first, then the region's subject/structure/color picks inside that pool.
+* `--mode verify` re-checks every recorded zone method against its level's
+  pool (a stale manifest without method routing only warns, keeping old
+  workdirs working).
+
 ## Method diversity and dominant language
 
 The three abstract modules must not only differ in abstraction level; they must also differ clearly in their dominant abstraction language.
@@ -225,9 +250,9 @@ For example:
 ```text
 GOOD
 
-30% → Colored Sketch
-65% → Painterly Abstraction
-90% → Geometric Abstraction
+30% → Painterly Abstraction (30% pool)
+65% → Collage Abstraction (65% pool)
+90% → Cartoon Pixel (90% pool)
 ```
 
 ```text
@@ -327,9 +352,12 @@ For example:
 
 Do not automatically translate higher abstraction into larger, flatter, or fewer color blocks.
 
-Do not use Color Blocking as the Primary Method for more than one abstract module by default.
-
-Color Blocking may become a Primary Method only when the source image itself contains strong naturally occurring graphic color structures, such as:
+Color Blocking is **Supporting-only** under the Level-Gated system: it
+belongs to NO Primary pool and has NO Primary eligibility at any level
+(30%, 65%, or 90%). It may become a Primary Method ONLY when the user
+explicitly overrides the default method-pool system. Without that
+override, never select it as a Primary Method — even when the source image
+contains strong naturally occurring graphic color structures such as:
 
 * large façades;
 * strong shadow fields;
@@ -339,6 +367,10 @@ Color Blocking may become a Primary Method only when the source image itself con
 * water reflections;
 * strong architectural planes; or
 * similarly dominant chromatic structures.
+
+Those structures are exactly when Color Blocking works best as a
+SUPPORTING method beneath a Primary Method, not as the Primary Method
+itself.
 
 Avoid generic posterized regions that erase the perceptual identity of the selected Primary Method.
 
@@ -432,11 +464,13 @@ Default treatment:
 * True monochrome ink (pure ink on paper white) is a deliberate stylistic choice and requires user direction.
 * Do not drift into lifeless gray, cold steel monochrome, or muddy neutral washes.
 
-Level behavior:
+Level behavior (90% pool only):
 
-* 30%: ink rendering with source structure, massing, and spatial relationships largely preserved (工笔-leaning) — the composition stays recognizable under an ink tonal structure with light wash.
-* 65%: stronger 写意 interpretation — simplified forms, dry-brush structure, wash masses, and partial 留白 while silhouette and massing remain traceable.
-* 90%: 写意 skeleton — minimal brush strokes, dominant 留白, sparse ink accents, retaining only the essential source silhouette, massing, or directional structure.
+* Chinese Ink Wash is eligible at **90% only** under the default pools — it
+  is never selected at 30% or 65%.
+* At 90%: 写意 skeleton — minimal brush strokes, dominant 留白, sparse ink
+  accents, retaining only the essential source silhouette, massing, or
+  directional structure.
 
 Rules:
 
@@ -449,11 +483,13 @@ Rules:
 
 Reinterpret the owned source content as pixel-art-driven cartoon rendering: a visible pixel grid, a limited pixel palette, bold cartoon outlines, simplified flat shapes, and optional dithering. The module must be **rebuilt as a pixel composition** — never a downsampled, pixelated, or blurred copy of the photograph.
 
-Level behavior:
+Level behavior (90% pool only):
 
-* 30%: source-faithful pixel re-render — the pixel grid and limited palette are already perceptible while structure, placement, and shape fidelity stay true to the source.
-* 65%: clearer cartoon conversion — simplified shapes, bold cartoon outlines, reduced pixel palette, flat fills, and stronger silhouette logic.
-* 90%: minimal pixel iconography — strongly reduced pixel shapes, symbols, and silhouettes while retaining the source's semantic skeleton (pose, skyline, roofline, massing, or characteristic outline).
+* Cartoon Pixel is eligible at **90% only** under the default pools — it
+  is never selected at 30% or 65%.
+* At 90%: minimal pixel iconography — strongly reduced pixel shapes,
+  symbols, and silhouettes while retaining the source's semantic skeleton
+  (pose, skyline, roofline, massing, or characteristic outline).
 
 Rules:
 
@@ -562,15 +598,13 @@ Remove or merge a substantial amount of secondary components, significantly redu
 
 The 65% module should be structurally transformed through its selected Primary Abstraction Method rather than merely simplified into larger color regions.
 
-Depending on the selected Primary Method, emphasize one or more of:
+Depending on the selected Primary Method (chosen from the 65% pool —
+Geometric Abstraction, Fragmentation, or Collage Abstraction), emphasize
+one or more of:
 
-* contour reconstruction;
-* hand-drawn colored strokes;
-* painterly brush restructuring;
 * source-derived geometric planes;
-* controlled fragmentation;
-* collage recomposition; or
-* symbolic or silhouette-based shape reduction.
+* controlled fragmentation; or
+* collage recomposition.
 
 Color masses may support the transformation but should not automatically dominate it.
 
@@ -590,17 +624,14 @@ High abstraction does not inherently mean large flat color blocks.
 
 Express the semantic skeleton through the selected Primary Abstraction Method.
 
-Depending on that method, the result may consist primarily of:
+Depending on that method (chosen from the 90% pool — Shape Reduction,
+Chinese Ink Wash, or Cartoon Pixel), the result may consist primarily of:
 
-* sparse or detached structural lines;
-* expressive hand-drawn marks;
-* painterly gesture and brush structures;
-* source-derived geometric planes or facets;
-* fragmented and displaced structural remnants;
-* editorial collage fragments;
 * silhouettes;
-* symbols; or
-* highly reduced shapes.
+* symbols;
+* highly reduced shapes;
+* ink-wash strokes with dominant negative space; or
+* minimal pixel-art iconography.
 
 Preserve only enough source DNA for recognition, such as:
 
@@ -642,21 +673,19 @@ Source ownership controls **which part of the original image may be represented*
 
 These are independent dimensions.
 
-Therefore a 90% abstraction may be:
+Therefore a 90% abstraction (using a method from the 90% pool — Shape
+Reduction, Chinese Ink Wash, or Cartoon Pixel) may be:
 
-* sparse line work;
-* fragmented reconstruction;
-* symbolic geometry;
-* expressive painting;
-* reduced silhouettes;
-* collage reconstruction;
+* reduced silhouettes or symbols;
 * ink-wash strokes with dominant negative space;
 * minimal pixel-art iconography; or
-* another approved source-derived abstraction language.
+* another 90%-pool method's structural language.
 
 It does not need to contain broad filled color regions.
 
-Likewise, a 30% abstraction may use Color Blocking when appropriate without making Color Blocking the default pathway toward stronger abstraction.
+Likewise, a 30% abstraction may use Color Blocking as a SUPPORTING method
+when appropriate, without making Color Blocking the default pathway toward
+stronger abstraction — Color Blocking is never a Primary Method by default.
 
 Changing abstraction level or method never grants permission to duplicate or import recognizable source content from another logical zone.
 
@@ -692,17 +721,21 @@ choose a desired abstraction method
 
 ### Human-dominant modules
 
-Prefer Primary Methods from:
+The level gates the pool FIRST; the subject character then selects inside
+that pool:
 
-* Shape Reduction;
-* contour-focused Line Abstraction;
-* Painterly Abstraction;
-* Colored Sketch when clothing, pose, or gesture supports it; and
-* Fragmentation when identity-critical anatomy remains protected.
+* **30% pool** (Colored Sketch, Line Abstraction, Painterly Abstraction):
+  prefer contour-focused Line Abstraction, Painterly Abstraction, or
+  Colored Sketch when clothing, pose, or gesture supports it.
+* **65% pool** (Geometric Abstraction, Fragmentation, Collage Abstraction):
+  prefer Fragmentation when identity-critical anatomy remains protected.
+  Use Geometric Abstraction selectively and mainly on clothing, massing,
+  or background structure rather than on faces or anatomy.
+* **90% pool** (Shape Reduction, Chinese Ink Wash, Cartoon Pixel): prefer
+  Shape Reduction for pose-preserving silhouettes; Chinese Ink Wash for a
+  写意 symbolic figure; Cartoon Pixel for a flat, iconic figure.
 
-Use Geometric Abstraction selectively and mainly at stronger abstraction levels.
-
-Use Color Blocking mainly as support for:
+Color Blocking is Supporting-only and may be used as support for:
 
 * clothing masses;
 * background separation;
@@ -710,7 +743,8 @@ Use Color Blocking mainly as support for:
 * light-shadow organization; or
 * tonal compression.
 
-Do not use Color Blocking as the automatic Primary Method.
+Color Blocking is never a Primary Method (Supporting-only) — do not use it
+as the automatic Primary Method.
 
 Preserve primary-face identity and coherent human anatomy regardless of abstraction method.
 
@@ -722,14 +756,19 @@ Do not restart the complete person independently inside each module.
 
 ### Architecture-dominant modules
 
-Prefer Primary Methods from:
+The level gates the pool FIRST; the architectural character then selects
+inside that pool:
 
-* Line Abstraction;
-* Colored Sketch;
-* Geometric Abstraction;
-* Fragmentation;
-* Painterly Abstraction; and
-* Collage Abstraction.
+* **30% pool** (Colored Sketch, Line Abstraction, Painterly Abstraction):
+  structural drawing (Line Abstraction), colored architectural sketch
+  (Colored Sketch), or painterly massing (Painterly Abstraction).
+* **65% pool** (Geometric Abstraction, Fragmentation, Collage Abstraction):
+  plane extraction (Geometric Abstraction), controlled deconstruction
+  (Fragmentation), or collage reconstruction (Collage Abstraction).
+* **90% pool** (Shape Reduction, Chinese Ink Wash, Cartoon Pixel): landmark
+  silhouette and massing (Shape Reduction), ink-wash architectural
+  atmosphere (Chinese Ink Wash), or flat pixel architecture (Cartoon
+  Pixel).
 
 Architecture is especially suitable for variation between:
 
@@ -742,7 +781,9 @@ Architecture is especially suitable for variation between:
 
 Do not default architecture to broad flat façade color blocks when line structure, perspective, roofline, repeated façade rhythm, landmark geometry, or massing could provide a more distinctive abstraction language.
 
-Use Color Blocking as support unless the source architecture is naturally defined by strong graphic chromatic fields.
+Color Blocking is Supporting-only: use it as tonal/chromatic organization
+beneath the Primary Method. Strong graphic chromatic fields in the source
+architecture do NOT make Color Blocking eligible as a Primary Method.
 
 When one building spans multiple logical zones, each module may reinterpret only its corresponding source portion.
 
@@ -752,17 +793,18 @@ Never regenerate the complete building separately in multiple modules.
 
 ### Landscape and environment modules
 
-Prefer Primary Methods from:
+The level gates the pool FIRST; the environmental character then selects
+inside that pool:
 
-* Painterly Abstraction;
-* Line Abstraction;
-* Shape Reduction;
-* Geometric or spatial-plane abstraction;
-* Colored Sketch;
-* Fragmentation; or
-* Collage when the scene genuinely supports reconstruction.
+* **30% pool** (Colored Sketch, Line Abstraction, Painterly Abstraction):
+  Painterly Abstraction, Line Abstraction, or Colored Sketch.
+* **65% pool** (Geometric Abstraction, Fragmentation, Collage Abstraction):
+  geometric or spatial-plane abstraction, Fragmentation, or Collage when
+  the scene genuinely supports reconstruction.
+* **90% pool** (Shape Reduction, Chinese Ink Wash, Cartoon Pixel): Shape
+  Reduction, or Chinese Ink Wash for atmospheric, poetic renderings.
 
-Color Blocking may organize:
+Color Blocking (Supporting-only) may organize:
 
 * sky;
 * ground;
@@ -772,7 +814,8 @@ Color Blocking may organize:
 * atmospheric regions; or
 * broad natural planes.
 
-It should not automatically become the visible identity of the module.
+It is never the Primary Method and must not become the visible identity of
+the module.
 
 For dense foliage, clouds, crowds, street clutter, repetitive buildings, or repeated environmental detail, combine Component Reduction with the selected Primary Method instead of reducing everything into generic flat blobs.
 
@@ -807,38 +850,32 @@ Prefer combinations with visibly different perceptual mechanisms.
 For example:
 
 ```text
-30% → Colored Sketch
-65% → Painterly Abstraction
-90% → Fragmentation
+30% → Colored Sketch (30% pool)
+65% → Fragmentation (65% pool)
+90% → Shape Reduction (90% pool)
 ```
 
 or:
 
 ```text
-30% → Line Abstraction
-65% → Collage Abstraction
-90% → Shape Reduction
+30% → Line Abstraction (30% pool)
+65% → Collage Abstraction (65% pool)
+90% → Cartoon Pixel (90% pool)
 ```
 
 or:
 
 ```text
-30% → Painterly Abstraction
-65% → Geometric Abstraction
-90% → Sparse Line Abstraction
-```
-
-or:
-
-```text
-30% → Colored Sketch
-65% → Chinese Ink Wash
-90% → Cartoon Pixel
+30% → Painterly Abstraction (30% pool)
+65% → Geometric Abstraction (65% pool)
+90% → Chinese Ink Wash (90% pool)
 ```
 
 These examples illustrate method diversity only.
 
-Do not bind a specific method to a specific abstraction percentage.
+The POOL is bound to the level; the method is chosen inside that pool.
+Never lock a level to one fixed method (singleton), and never borrow a
+method from another level's pool.
 
 Each method must still operate primarily on the source content owned by its logical zone.
 

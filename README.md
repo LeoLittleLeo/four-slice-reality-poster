@@ -163,10 +163,11 @@ python scripts/slice_and_compose.py --mode prepare \
 
 默认锚点选择优先级：
 
-1. **主体人物脸部所在逻辑区**
-2. **主要人群语义所在逻辑区**
-3. **重要建筑所在逻辑区**
-4. 如果以上均不存在，则默认选择 **Logical Zone 2**
+1. **主体人物（PRIMARY 脸部）所在逻辑区**（按脸框在区域掩码内的面积取最大者）
+2. 无主脸且为 `side-weighted` 布局时：**中央走廊区域**
+3. 否则默认选择 **Logical Zone 2**
+
+只有主头部会被强制保留为源照片；其余人脸仅用于接缝/轮廓避让。
 
 剩余三个逻辑区分别获得：
 
@@ -832,13 +833,15 @@ not four separate paper sheets.
 
 ```text
 LEVEL ≠ MEDIUM —
-the three abstract states use three different Primary Abstraction Methods,
-all inside the same photograph.
+LEVEL determines the eligible method POOL first,
+then the region's content picks one method inside that pool;
+30% ≠ 65% ≠ 90% is guaranteed by construction.
 ```
 
 ```text
-Use one shared color universe,
-but allow four distinct dominant color roles.
+ONE PHOTO COLOR —
+one photographic color identity, shared by all four regions;
+each region differs only by abstraction, never by a module-level palette.
 ```
 
 ```text

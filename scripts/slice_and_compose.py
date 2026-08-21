@@ -46,6 +46,19 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 Box = Tuple[int, int, int, int]
 LEVELS = (30, 65, 90)
+# Level-Gated Primary Abstraction Method System (default pools, pairwise
+# disjoint — each method belongs to exactly one level's pool; see
+# references/abstraction-language.md). LEVEL DETERMINES ELIGIBLE METHOD
+# FAMILY. The script routes the Primary Method deterministically from these
+# pools; --methods overrides the pick, but every override is validated
+# against the pool of its level (a method from another level's pool is
+# refused). Color Blocking is Supporting-only and appears in NO pool.
+METHOD_POOLS = {
+    30: ("Colored Sketch", "Line Abstraction", "Painterly Abstraction"),
+    65: ("Geometric Abstraction", "Fragmentation", "Collage Abstraction"),
+    90: ("Shape Reduction", "Chinese Ink Wash", "Cartoon Pixel"),
+}
+SUPPORTING_ONLY_METHODS = ("Color Blocking",)
 # Non-sequential default permutations (everything except the identity
 # 30,65,90): the script's default level assignment is staggered, never
 # spatially sequential.
@@ -1297,6 +1310,66 @@ def assign_levels(anchor: int, levels: List[int]) -> Dict[int, int]:
     return {zone: level for zone, level in zip(non_anchor, levels)}
 
 
+def auto_methods(source: Path, seed: int) -> Dict[int, str]:
+    """Deterministic default Primary Method per abstraction level.
+
+    Picks one method from each level's own pool (Level-Gated system) from a
+    stable hash of `source` and `seed`, so different photos get different
+    methods per level while the same source + seed always repeats exactly.
+    Pools are pairwise disjoint, so `30% ≠ 65% ≠ 90%` holds by construction.
+    """
+    methods = {}
+    for level in LEVELS:
+        pool = METHOD_POOLS[level]
+        idx = (zlib.crc32(str(source).encode()) ^ seed ^ level) % len(pool)
+        methods[level] = pool[idx]
+    return methods
+
+
+def parse_methods(value: Optional[str], source: Path, seed: int) -> Dict[int, str]:
+    """Resolve the Primary Method per level.
+
+    `value` may be None (auto: `auto_methods`) or a comma list of
+    `LEVEL:METHOD` entries. Every explicit method must belong to ITS level's
+    pool; a method from another level's pool (e.g. ink wash at 65%) is
+    refused — level gates the pool first, then the method is picked inside
+    that pool. Color Blocking is Supporting-only and is refused as a Primary
+    Method.
+    """
+    if value is None:
+        return auto_methods(source, seed)
+    methods = {}
+    for part in value.split(","):
+        part = part.strip()
+        if ":" not in part:
+            raise SystemExit(f"--methods entries must be LEVEL:METHOD, got {part!r}")
+        lvl_s, name = part.split(":", 1)
+        try:
+            level = int(lvl_s.strip())
+        except ValueError:
+            raise SystemExit(f"--methods level must be an integer, got {lvl_s!r}")
+        name = name.strip()
+        if level not in LEVELS:
+            raise SystemExit(f"--methods level must be one of {list(LEVELS)}; got {level}")
+        if name in SUPPORTING_ONLY_METHODS:
+            raise SystemExit(
+                f"--methods: {name!r} is Supporting-only and has no Primary "
+                f"eligibility; select a Primary Method from the {level}% pool "
+                f"{list(METHOD_POOLS[level])}"
+            )
+        if name not in METHOD_POOLS[level]:
+            raise SystemExit(
+                f"--methods: {name!r} is not in the {level}% pool "
+                f"{list(METHOD_POOLS[level])}. Level gates the pool FIRST; "
+                f"pick the method inside that pool (or override the pools "
+                f"explicitly)."
+            )
+        methods[level] = name
+    if sorted(methods) != list(LEVELS):
+        raise SystemExit(f"--methods must cover every level {list(LEVELS)}; got {sorted(methods)}")
+    return methods
+
+
 def crop_box_for(bbox: Box, width: int, height: int, margin: float) -> Box:
     x0, y0, x1, y1 = bbox
     mx = int(margin * (x1 - x0))
@@ -1416,6 +1489,15 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         raise SystemExit(f"--levels must be a permutation of {list(LEVELS)}; got {levels}")
     level_map = assign_levels(anchor, levels)
 
+    # Level-Gated Primary Method routing (deterministic hard rule): level
+    # gates the pool first, then the Primary Method is picked inside that
+    # pool. Auto picks from a stable source+seed hash; --methods overrides
+    # are validated against each level's pool.
+    method_map = parse_methods(args.methods, source, args.seed)
+    for level in LEVELS:
+        print(f"Primary Method @ {level}% -> {method_map[level]} "
+              f"(pool: {', '.join(METHOD_POOLS[level])})")
+
     workdir = Path(args.workdir)
     crops_dir = workdir / "crops"
     masks_dir = workdir / "masks"
@@ -1448,6 +1530,9 @@ def cmd_prepare(args: argparse.Namespace) -> None:
                 "crop": str(crop_path),
                 "mask": str(mask_path),
                 "level": "anchor" if i == anchor else level_map[i],
+                "primary_method": (
+                    "Reality" if i == anchor else method_map[level_map[i]]
+                ),
                 "rendered": str(rendered_dir / f"zone{i}.png"),
             }
         )
@@ -1489,6 +1574,8 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "paper_texture": args.paper_texture if args.boundary == "collage" else "none",
         "paper_grade": args.paper_grade if args.boundary in ("natural", "collage") else "none",
         "seed": args.seed,
+        "method_pools": {str(k): list(v) for k, v in METHOD_POOLS.items()},
+        "methods": {str(k): v for k, v in method_map.items()},
         "head_mask": str(head_mask_path) if head_mask_path else None,
         "primary_face": list(primary_face) if primary_face else None,
         "face_boxes": [list(b) for b in args.face_boxes],
@@ -1517,10 +1604,12 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     for z in manifest_zones:
         kind = "anchor" if z["level"] == "anchor" else f"{z['level']}% abstraction"
         print(
-            f"  zone {z['index'] + 1}: {kind} | bbox={tuple(z['box'])} | "
-            f"crop={z['crop']} | mask={z['mask']} | rendered={z['rendered']}"
+            f"  zone {z['index'] + 1}: {kind} | method={z['primary_method']} | "
+            f"bbox={tuple(z['box'])} | crop={z['crop']} | mask={z['mask']} | "
+            f"rendered={z['rendered']}"
         )
-    print("Render each abstract zone crop with the per-zone prompt block, then run --mode compose.")
+    print("Render each abstract zone crop with the per-zone prompt block "
+          "(fill {LEVEL} and {PRIMARY_METHOD} from this manifest), then run --mode compose.")
 
 
 def load_masks_dir(masks_dir: Path, width: int, height: int) -> List[Image.Image]:
@@ -2001,6 +2090,35 @@ def cmd_verify(args: argparse.Namespace) -> None:
         check_collage_regions(masks, width, height)
     check_zone_renders(manifest, src, args.workdir)
 
+    # Level-Gated method routing is a deterministic hard rule: every abstract
+    # zone's recorded Primary Method must belong to its level's pool, and the
+    # anchor must be Reality (never a Primary Method). Old manifests without
+    # method routing keep working (warn instead of failing).
+    for z in zones:
+        if z.get("level") == "anchor":
+            if z.get("primary_method") not in (None, "Reality"):
+                raise SystemExit(
+                    f"zone {z['index'] + 1} (anchor) has Primary Method "
+                    f"{z.get('primary_method')!r}; the anchor must be Reality."
+                )
+        else:
+            pm = z.get("primary_method")
+            if pm is None:
+                print(
+                    f"  warning: zone {z['index'] + 1} has no recorded "
+                    "primary_method (stale manifest from before the method "
+                    "router); re-run --mode prepare to record Level-Gated "
+                    "method routing."
+                )
+                continue
+            pool = METHOD_POOLS.get(int(z["level"]), ())
+            if pm not in pool:
+                raise SystemExit(
+                    f"zone {z['index'] + 1} ({z['level']}%) Primary Method {pm!r} is not "
+                    f"in the {z['level']}% pool {list(pool)}; method routing broken "
+                    f"(level gates the pool first)."
+                )
+
     feather = manifest.get("feather", 0)
     seam_band = None
     if manifest.get("boundary") == "collage":
@@ -2133,6 +2251,19 @@ def parse_args() -> argparse.Namespace:
         help="Permutation of 30,65,90 assigned in spatial order to the three "
              "non-anchor zones; default: auto-staggered seed/source-derived "
              "permutation (never the sequential 30,65,90)",
+    )
+    parser.add_argument(
+        "--methods",
+        default=None,
+        help="Primary Abstraction Method per level, e.g. "
+             "\"30:Colored Sketch,65:Fragmentation,90:Shape Reduction\". "
+             "Level-Gated system: each method must belong to ITS level's pool "
+             "(30% = Colored Sketch/Line Abstraction/Painterly Abstraction; "
+             "65% = Geometric Abstraction/Fragmentation/Collage Abstraction; "
+             "90% = Shape Reduction/Chinese Ink Wash/Cartoon Pixel); a method "
+             "from another level's pool or Color Blocking (Supporting-only) "
+             "is refused. Default: deterministic auto pick per pool from the "
+             "source+seed hash (same photo + seed always repeats exactly)",
     )
     parser.add_argument(
         "--margin",

@@ -141,13 +141,17 @@ Give each visible module a stable visual core and make its assigned state readab
 - 65% must show substantial reconstruction and reduced photographic fidelity.
 - 90% must be predominantly abstract while retaining source DNA.
 
-Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, palette emphasis, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength.
+Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength. Palette emphasis is NOT a valid differentiating signal: all regions share one photographic color identity and differ only by abstraction.
 
 For the 30%, 65%, and 90% modules, at least one differentiating signal between every pair must be structural information density: detail retention, component count, spatial fidelity, shape fidelity, or photographic surface retention. Palette, brush texture, and medium changes may reinforce the difference but cannot create it alone.
 
 Keep all four modules roughly balanced in area and visual importance. Do not create one dominant main image with three tiny fragments, random collage scraps, or an unstructured montage. The Reality module may expand or contract around a protected subject, but rebalance the other modules so all four states remain substantial.
 
-Allow obvious color differences between slices. Keep them related through a small number of shared hues, accents, or emotional temperature cues rather than identical global grading.
+Keep ONE photographic color identity across all four slices: every region
+shows the source photograph's color passed through its own abstraction
+method. Color differences appear only where the abstraction itself
+reinterprets the source color (strokes, planes, silhouettes, washes) — never
+as module-level palette shifts, hue roles, or per-slice color emphasis.
 
 ## Subject continuity
 
