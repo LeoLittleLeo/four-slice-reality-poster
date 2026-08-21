@@ -2,43 +2,70 @@
 
 ## Contents
 
-- One-photo color identity
+- Robot Dreams Shared Palette System
 - Global emotional palette
 - Palette families
 - Saturation, contrast, and accents
-- Color behavior follows abstraction, never per-region roles
+- Regional palette rebalancing
 - Subject-specific color
 - Execution and validation
 
-## One-photo color identity
+## Robot Dreams Shared Palette System
 
-The poster is ONE photograph. All four regions share ONE photographic color
-identity: the color of a region is the source photograph's color, passed
-through that region's abstraction method. Regions differ ONLY by abstraction
-— there are no per-region color roles, no module-level recolorings, no
-"distinct but related color emphasis" per slice, and no abrupt palette shifts
-announcing a new state.
+The poster is ONE photograph, and its color comes from ONE shared, limited
+palette — not four independent palettes:
 
-Color differences across regions are permitted only as a by-product of the
-abstraction of the source color:
+```text
+SOURCE PHOTO
+↓
+GLOBAL ROBOT-DREAMS PALETTE MAPPING
+↓
+shared limited palette
+↓
+each abstraction region may rebalance
+the proportions of those shared colors
+↓
+ONE coherent poster
+```
 
-- a line drawing keeps the source hues in its strokes;
-- a geometric reinterpretation keeps the source palette inside its planes;
-- shape reduction keeps source-derived colors in its silhouettes;
-- ink wash keeps the source's color character in its washes;
+The shared palette is derived from the source photograph's own colors under
+the uniform warm Robot Dreams-inspired grade (the deterministic pipeline
+applies this mapping to the whole poster via `--paper-grade`, a color-only
+transform: no grain, no structure change, no per-region tinting). The
+Reality Anchor and the primary head are re-composited from the GRADED
+source, so they live in exactly the same shared palette as every abstract
+region.
+
+The color language is therefore:
+
+- **one shared limited palette** for all four regions — the same hue family,
+  the same warm/cool relationship, the same accents, the same emotional
+  temperature;
+- **regional palette rebalancing**: each abstraction region may shift the
+  PROPORTIONS of those shared colors — a 30% region stays close to the
+  source's local color distribution, a 65% region groups the shared colors
+  into broader masses, a 90% region narrows the proportion set toward the
+  most essential shared hues. Rebalancing changes how much of each shared
+  color appears, never which colors are available;
+- **no palette identity per region**: a region must never introduce a hue,
+  accent, or color relationship that is not in the shared palette, and never
+  assign itself a distinct dominant-hue role that breaks the shared
+  relationship.
+
+Color differences across regions are permitted only as rebalancing of the
+shared palette:
+
+- a line drawing keeps the shared hues in its strokes;
+- a geometric reinterpretation keeps the shared palette inside its planes;
+- shape reduction keeps shared colors in its silhouettes;
+- ink wash keeps the shared color character in its washes;
 - and so on.
 
-The same source color must be treated consistently by the same method in the
-same region. The deterministic pipeline applies ONE uniform warm
-Robot Dreams-inspired grade to the whole poster (`--paper-grade`, a color-only
-transform: no grain, no structure change, no per-region tinting). The Reality
-Anchor and the primary head are re-composited from the GRADED source, so they
-share the same color identity as every abstract region.
-
-Never assign a different palette, dominant hue, or color role to a region to
-make the states "readable". Readability of the four states comes from
-abstraction (structural information density and Primary Method), not from
-color roles.
+The same shared color must be treated consistently by the same method in the
+same region. Never assign a different palette, dominant hue, or color role to
+a region to make the states "readable" — readability comes from abstraction
+(structural information density and Primary Method), not from giving regions
+different color identities.
 
 ## Global emotional palette
 
@@ -57,7 +84,7 @@ or random pop-art moods unless explicitly requested.
 
 ## Palette families
 
-Build the palette primarily from:
+Build the shared palette primarily from:
 
 - **Warm foundations:** warm beige, cream, dusty peach, muted coral, warm sand, soft terracotta, sunlit ochre, warm light brown, soft brick, and faded orange-red.
 - **Air and sky:** powder blue, dusty sky blue, pale cyan, washed turquoise, muted teal, and soft cloud gray-blue. Keep these airy rather than digital.
@@ -87,43 +114,47 @@ fragments, selected strokes, or color blocks. Do not scatter strong accents
 everywhere — the same source accents keep the same character in every region
 that contains them.
 
-## Color behavior follows abstraction, never per-region roles
+## Regional palette rebalancing
 
-Each region's color behavior is its abstraction method applied to the source
-color — nothing more:
+Each region's color behavior is its abstraction method applied to the shared
+palette — a rebalancing of proportions, nothing more:
 
 - **Reality Anchor:** source-faithful by construction. The anchor is
   composited from the (uniformly graded) source through its own zone mask, so
-  it keeps the photographic color of its slice exactly. Palette unity never
+  it keeps the shared palette of its slice exactly. Palette unity never
   outranks face identity or human continuity.
 - **30% abstraction:** closest to local photographic color. The 30%-pool
   methods (Colored Sketch, Line Abstraction, Painterly Abstraction) preserve
-  much source variation while restructuring it structurally; their color is
-  the source color drawn, lined, or brushed.
+  much of the shared color variation while restructuring it structurally;
+  their color is the shared palette drawn, lined, or brushed.
 - **65% abstraction:** the 65%-pool methods (Geometric Abstraction,
-  Fragmentation, Collage Abstraction) restructure form; color stays
-  source-derived inside the planes, fragments, or collage pieces.
+  Fragmentation, Collage Abstraction) restructure form; the shared palette is
+  grouped into broader masses — same colors, larger proportion chunks.
 - **90% abstraction:** the 90%-pool methods (Shape Reduction, Chinese Ink
-  Wash, Cartoon Pixel) keep only a semantic skeleton; color stays
-  source-derived in the reduced shapes, washes, or pixel palette.
+  Wash, Cartoon Pixel) keep only a semantic skeleton; the shared palette
+  narrows to its most essential members (reduced shapes, washes, or pixel
+  palette).
 
-As abstraction rises, the same source color is carried through progressively
-stronger structural reinterpretation. Do not add per-region palette
-compression, per-region hue shifts, or per-region saturation curves — the
-color identity is one, the abstraction differs.
+As abstraction rises, the same shared palette is carried through
+progressively stronger structural reinterpretation and progressively narrower
+proportion sets. Do not add per-region palette compression, per-region hue
+shifts, or per-region saturation curves that change WHICH colors are
+available — the palette is one, the abstraction (and its proportion
+rebalancing) differs.
 
 ## Cross-slice relationship
 
-Because all regions share one photographic color identity, the poster is
-coherent by construction: the same hues, the same highlights, the same warm
-grade recur wherever the same source content recurs. Use a small number of
-hue echoes, shared highlight logic, or repeated accents to reinforce
-coherence.
+Because all regions share one limited palette, the poster is coherent by
+construction: the same hues, the same highlights, the same warm grade recur
+wherever the same source content recurs, rebalanced by each region's
+abstraction. Use a small number of hue echoes, shared highlight logic, or
+repeated accents to reinforce coherence.
 
 Do not blend colors across boundaries to soften the seams — the paper-material
 seam is the boundary's representation, and it is drawn by the pipeline. Do not
 shift the palette at a boundary to "announce" a new abstraction state: the
-state change is announced by the structural language, not by color.
+state change is announced by the structural language and the proportion
+rebalancing, not by a new color identity.
 
 Apply color relationships with [intentional-modular-composition.md](intentional-modular-composition.md).
 
@@ -143,8 +174,8 @@ overwhelms the massing.
 
 Use sky, street, landscape, and other environmental regions to carry airy
 blues, warm reflected light, dusty sunlight, soft horizons, and gentle tonal
-openness across the composition — the same sky color in every region that
-contains it, at that region's abstraction.
+openness across the composition — the same shared sky color in every region
+that contains it, at that region's abstraction.
 
 ## Decision priority
 
@@ -170,8 +201,9 @@ comes from their abstraction languages, never from per-region color roles.
    candidate with deterministic non-generative operations that cannot alter
    facial geometry, facial texture structure, feature placement, or identity;
    otherwise leave it unchanged.
-3. Render each abstract zone with the same color identity as the source slice
-   it owns — the method's structural language carries the source color.
+3. Render each abstract zone from the SHARED palette — the method's structural
+   language carries the shared colors, rebalancing their proportions per
+   region.
 4. Apply the same warm grade uniformly to the whole poster; never tint regions
    differently.
 5. Repeat a small, controlled accent set consistently wherever the same source
@@ -179,6 +211,7 @@ comes from their abstraction languages, never from per-region color roles.
 
 Before delivery, confirm that the poster reads as ONE photograph whose four
 regions differ only by abstraction: the anchor is the (graded) source; the
-30%, 65%, and 90% regions reinterpret their own slice of the same color
-identity; saturation and contrast remain controlled; accents are intentional;
-and no region has been given its own palette, hue role, or color emphasis.
+30%, 65%, and 90% regions reinterpret their own slice of the SAME shared
+palette, rebalancing its proportions; saturation and contrast remain
+controlled; accents are intentional; and no region has been given its own
+palette, hue role, or color identity.

@@ -115,10 +115,11 @@ Valid boundary sources and treatments available across the families include:
 - a limited contour or motif crossing that connects modules without hiding the division.
 
 Boundaries are never expressed by module-level color breaks: all regions
-share one photographic color identity, so a boundary shows a change in
-rendering/abstraction language and the paper-material seam, not a palette
-shift. (A deliberate tonal or chromatic break was an older design option and
-is no longer part of the default language.)
+share one shared limited palette (Robot Dreams Shared Palette System), so a
+boundary shows a change in rendering/abstraction language and the
+paper-material seam, not a palette shift. (A deliberate tonal or chromatic
+break was an older design option and is no longer part of the default
+language.)
 
 Do not soften a boundary merely because it is visible. Refine it only when it
 resembles an error: white halos, ragged masking, double edges, offset copies,
@@ -129,10 +130,10 @@ generation residue.
 
 Use Hybrid Transition as the default boundary strategy:
 
-- Allow backgrounds, skies, ground planes, low-information areas, and large color fields to change rendering abruptly across a boundary (structure and medium change; the shared photographic color identity does not).
+- Allow backgrounds, skies, ground planes, low-information areas, and large color fields to change rendering abruptly across a boundary (structure and medium change; the shared limited palette does not).
 - Preserve semantic continuity for important people through recognizable pose, silhouette, gesture, and head/body relationship.
 - Preserve semantic continuity for important buildings through silhouette, roofline, perspective, primary massing, and landmark structure.
-- Permit visible medium, texture, or abstraction changes across the same continuous subject — never module-level color changes: the region keeps the source's color at its abstraction, with color differences emerging only from the abstraction itself.
+- Permit visible medium, texture, or abstraction changes across the same continuous subject — never module-level color changes: the region keeps the shared palette at its abstraction, rebalancing the proportions of those shared colors.
 - Keep transitions local and selective; do not force every boundary or every object to blend.
 
 Semantic continuity does not require visual seamlessness. A person or building may remain readable while its rendering language changes sharply at the exact module boundary.
@@ -146,7 +147,7 @@ Give each visible module a stable visual core and make its assigned state readab
 - 65% must show substantial reconstruction and reduced photographic fidelity.
 - 90% must be predominantly abstract while retaining source DNA.
 
-Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength. Palette emphasis is NOT a valid differentiating signal: all regions share one photographic color identity and differ only by abstraction.
+Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength. Palette emphasis is NOT a valid differentiating signal: all regions share one shared limited palette and differ only by abstraction.
 
 For the 30%, 65%, and 90% modules, at least one differentiating signal between every pair must be structural information density: detail retention, component count, spatial fidelity, shape fidelity, or photographic surface retention. Palette, brush texture, and medium changes may reinforce the difference but cannot create it alone.
 
@@ -158,11 +159,12 @@ substantial. In the default natural family region sizes are
 composition-driven (no quarter-based balance requirement); the non-natural
 families stay roughly balanced in area.
 
-Keep ONE photographic color identity across all four slices: every region
-shows the source photograph's color passed through its own abstraction
-method. Color differences appear only where the abstraction itself
-reinterprets the source color (strokes, planes, silhouettes, washes) — never
-as module-level palette shifts, hue roles, or per-slice color emphasis.
+Keep ONE shared limited palette across all four slices: every region shows
+the source photograph's color passed through its own abstraction method,
+rebalancing the proportions of the shared colors. Color differences appear
+only where the abstraction itself reinterprets the shared colors (strokes,
+planes, silhouettes, washes) — never as module-level palette shifts, hue
+roles, or per-slice color emphasis.
 
 ## Subject continuity
 

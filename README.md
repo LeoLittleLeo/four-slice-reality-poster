@@ -2,11 +2,7 @@
 
 > 将一张照片重构为一个由 **Reality + 30% / 65% / 90% 抽象状态**组成的四状态编辑海报，同时尽量保留人物身份、建筑识别度与原始场景语义。
 
-`four-slice-reality-poster` 是一个面向 Codex / Agent 图像工作流的 Skill。
-
-它把**同一张照片**分成四个**自然区域**，每个区域只是抽象方式不同（Reality + 30% / 65% / 90% 抽象状态）——不是四张纸片拼贴。边界以**纸面材质层**来表现：在抽象状态变化处画一条撕纸接缝；没有 z-order、没有整片纸身体、没有把各区变成独立纸片的纸纹。
-
-场景只出现一次；唯一强制保护的是主头部。
+`four-slice-reality-poster` 是一个面向 Codex / Agent 图像工作流的 Skill：把**同一张照片**分成四个**自然区域**，每个区域只是抽象方式不同——**不是四张纸片拼贴**。边界以**纸面材质层**来表现（抽象状态变化处一条撕纸接缝，无 z-order、无纸片身体、无纸纹分层）。场景只出现一次；唯一强制保护的是主头部。
 
 可选边界家族：`collage`（分层撕纸纸片）、`torn`（legacy 有序撕纸条带）、`contour`（语义轮廓）、`mask`（自绘区域）、`rect`（等分直条）。
 
@@ -34,16 +30,7 @@ DEFAULT / natural                        LEGACY / torn-strip
 
 ## ✦ Visual Objective
 
-这个 Skill 首先保证四种视觉状态都可以被清晰感知，其次才追求整体融合。
-
-默认使用 **Natural Regions（自然区域）**：
-
-* **同一幅照片**被四个自然区域共同组成，每个区域只是抽象方式不同；
-* 区域是照片的一部分，不是独立纸片（无 z-order、无整片纸身体、无纸纹分层）；
-* 边界以**纸面材质层**来表现：抽象状态变化处画一条撕纸接缝；
-* Reality 保持摄影质感（源图合成），并与各区共享同一微暖 Robot Dreams 调色；
-* 三个抽象区域必须使用三种**不同的主抽象方法**（30% ≠ 65% ≠ 90%），共享同一照片视觉系统；
-* 场景只出现一次；禁止 blob 分割、孤岛、contact sheet、2×2、四张完整照片、gutters。
+这个 Skill 首先保证四种视觉状态都可以被清晰感知，其次才追求整体融合。默认使用 **Natural Regions（自然区域）**（见开头引言与 [Boundary Families](#-boundary-families)）。
 
 核心原则：
 
@@ -75,54 +62,20 @@ GOOD（正例）：
 Skill 把照片划分为**四个状态所有权区域**（region masks，精确平铺、每像素单一归属）。"四个等分的隐藏逻辑区"仅是概念参考——只在 `rect`（等分直条）家族字面成立；默认 `natural`/`collage` 家族的区域是构图驱动、非四等分的。
 
 ```text
-Vertical division
+Vertical division               Horizontal division
 
-┌────┬────┬────┬────┐
-│ Z1 │ Z2 │ Z3 │ Z4 │
-└────┴────┴────┴────┘
+┌────┬────┬────┬────┐           ┌──────────────┐
+│ Z1 │ Z2 │ Z3 │ Z4 │           │      Z1      │
+└────┴────┴────┴────┘           ├──────────────┤
+                                 │      Z2      │
+这四个区域只决定视觉状态的       ├──────────────┤
+逻辑归属——最终不必出现四个       │      Z3      │
+矩形切片。                       ├──────────────┤
+                                 │      Z4      │
+                                 └──────────────┘
 ```
 
-或：
-
-```text
-Horizontal division
-
-┌──────────────┐
-│      Z1      │
-├──────────────┤
-│      Z2      │
-├──────────────┤
-│      Z3      │
-├──────────────┤
-│      Z4      │
-└──────────────┘
-```
-
-这四个区域只决定 **视觉状态的逻辑归属**。
-
-它们并不意味着最终必须出现四个矩形切片。
-
-默认（Torn-Strip）下，最终可见边界是三条贯穿画布的撕纸式接缝：
-
-* 多尺度不规则（低频漂移 + 中频撕裂 + 高频纤维毛边）；
-* 基本沿切片方向，但局部可蜿蜒；
-* 不跟随人物/建筑/道路/天空的轮廓；
-* 可以穿过建筑、道路、树、人群和身体；
-* 仅避开受保护的主头部。
-
-可选（Semantic Contour）时，边界可以沿着：
-
-* 人体轮廓；
-* 人群边缘；
-* 建筑结构；
-* 天际线；
-* 树冠；
-* 道路；
-* 阴影；
-* 大型色块；
-* 表现性笔触；
-
-形成语义分割式的模块。语义轮廓不是默认边界家族。
+每个边界家族如何把这些归属变成可见模块，见下文 [Boundary Families](#-boundary-families)。
 
 ## ✦ Boundary Families
 
@@ -159,39 +112,24 @@ python scripts/slice_and_compose.py --mode prepare \
 
 ---
 
-四个逻辑区中只会选择一个 **Reality Anchor**，作为主要摄影现实状态。
+## ✦ Reality Anchor & Level Assignment
+
+四个区域中只会选择一个 **Reality Anchor**，作为主要摄影现实状态。
 
 默认锚点选择优先级：
 
-1. **主体人物（PRIMARY 脸部）所在逻辑区**（按脸框在区域掩码内的面积取最大者）
+1. **主体人物（PRIMARY 脸部）所在区域**（按脸框在区域掩码内的面积取最大者）
 2. 无主脸且为 `side-weighted` 布局时：**中央走廊区域**
 3. 否则默认选择 **Logical Zone 2**
 
 只有主头部会被强制保留为源照片；其余人脸仅用于接缝/轮廓避让。
 
-剩余三个逻辑区分别获得：
-
-* `30%` abstraction
-* `65%` abstraction
-* `90%` abstraction
-
-三个抽象等级各出现一次。
-
-它们**不要求按照空间位置机械递增或递减**。
-
-例如：
+其余三个区域分别获得 `30%` / `65%` / `90%` 抽象，各出现一次，**不要求按照空间位置机械递增或递减**：
 
 ```text
-Reality → 65% → 30% → 90%
+Reality → 65% → 30% → 90%      （合法）
+Reality → 30% → 65% → 90%      （也合法，取决于照片）
 ```
-
-完全可以比：
-
-```text
-Reality → 30% → 65% → 90%
-```
-
-更适合某张照片。
 
 状态分配由以下因素共同决定：
 
@@ -300,9 +238,19 @@ Reality → 30% → 65% → 90%
 
 ---
 
-## ✦ Face Identity Lock
+## ✦ Face Identity Lock & Head Continuity
 
-人物身份保护是整个 Skill 的最高优先级。
+人物身份保护是整个 Skill 的最高优先级。**只有主头部是硬锁定的**——人脸身份、头部轮廓、发际线与脸—颈连接必须连贯；身体其余部分不是硬要求，可以横跨模块、同时存在于不同抽象状态（和建筑一样），跨状态的可读碎片往往比完整连续的身体更有冲击力。
+
+```text
+Face
+ ↓
+Head contour
+ ↓
+Face-to-neck connection   （硬）
+──────────────
+Shoulders / Body          （软偏好，可跨状态）
+```
 
 核心目标不是：
 
@@ -312,7 +260,7 @@ Reality → 30% → 65% → 90%
 
 > **最终人物必须保持可识别身份、自然面部结构，以及连贯的头部—颈部—肩部关系。**
 
-生成完成后，首先执行 **Face Restoration Gate**。
+### Face Restoration Gate（仅限 one-shot 回退路径）
 
 > **仅限 one-shot / 非确定性回退路径。** 确定性管线（prepare → render → compose → verify）的主头部由代码从源图强制合成并校验，**不运行 Gate、不做任何恢复**；Gate 只在一步式生成（未使用源头部合成）时启用。
 
@@ -375,40 +323,20 @@ Only keep B when visibly better
 
 则必须退回 Candidate A。
 
+模块边界可以穿过人物附近（默认 `torn` 接缝允许穿过身体），但不能制造：
+
+* 错位抠图；
+* 双重轮廓；
+* 意外重复的肢体/双脸/鬼影；
+* 肩部断裂；
+* 人物局部平移；
+* 类似 Photoshop 抠图未对齐的残次效果。
+
 核心原则：
 
 > **Preserve identity before pixels.**
 
 > **自然且身份正确的人脸，优先于错误的“原图贴脸”。**
-
----
-
-## ✦ Head Continuity
-
-**只有主头部是硬锁定的**：人脸身份、头部轮廓、发际线与脸—颈连接必须连贯。
-
-身体其余部分不是硬要求——身体部位可以横跨模块、同时存在于不同抽象状态（和建筑一样），跨状态的可读碎片往往比完整连续的身体更有冲击力。
-
-```text
-Face
- ↓
-Head contour
- ↓
-Face-to-neck connection   （硬）
-──────────────
-Shoulders / Body          （软偏好，可跨状态）
-```
-
-模块边界可以穿过人物附近（默认 torn 接缝允许穿过身体），但不能制造：
-
-* 错位抠图；
-* 双重轮廓；
-* 意外重复的肢体/双脸/鬼影；
-* 类似 Photoshop 抠图未对齐的残次效果。
-* 肩部断裂；
-* 重影；
-* 人物局部平移；
-* 类似 Photoshop 抠图未对齐的残次效果。
 
 ---
 
@@ -441,12 +369,12 @@ Reality
 
 ---
 
-## ✦ Ordered Torn-Strip Modules
+## ✦ Ordered Torn-Strip Modules（legacy）
 
-虽然状态所有权区域由脚本的精确掩码定义，但最终视觉层默认不是规则四切片，而是四条有序区域的撕纸式接缝。
+`torn` 家族：四个有序区域 + 三条贯穿画布的撕纸式接缝（约 1/4、1/2、3/4）。虽然状态所有权区域由脚本的精确掩码定义，但可见边界不是规则四切片，而是有序撕纸接缝。
 
 ```text
-logical zones
+state-ownership regions
        ↓
 multi-scale torn-paper seams
        ↓
@@ -495,11 +423,24 @@ four ordered sequential regions
 * navy
 * warm denim
 
-### One Universe, Four Roles
+### Robot Dreams Shared Palette System
 
-四个模块需要存在于同一个电影色情绪世界，但不应全部套用相同色调。
+四个区域共享**同一个有限调色板**——源照片本色经统一微暖 Robot Dreams 调色映射而成。每个抽象区域可以**再平衡这些共享颜色的比例**（30% 贴近源图颜色分布、65% 把共享色聚成更大色块、90% 收敛到最核心的共享色），但**不能改变调色板本身**：不得引入共享色之外的色相、强调色或色相角色。
 
-例如：
+```text
+SOURCE PHOTO
+↓
+GLOBAL ROBOT-DREAMS PALETTE MAPPING
+↓
+shared limited palette
+↓
+each abstraction region may rebalance
+the proportions of those shared colors
+↓
+ONE coherent poster
+```
+
+禁止用"每区一套主色"来区分状态：
 
 ```text
 Slice A → terracotta / warm brown / sand
@@ -508,35 +449,7 @@ Slice C → dusty blue / muted teal
 Slice D → ochre / muted yellow / soft brick
 ```
 
-这不是固定分配，只是示例。
-
-核心公式：
-
-```text
-ONE SHARED CINEMATIC COLOR UNIVERSE
-
-+
-
-FOUR DISTINCT DOMINANT COLOR ROLES
-
-=
-
-ONE COHERENT BUT CLEARLY MODULAR POSTER
-```
-
-模块之间允许利用：
-
-* 冷暖差；
-* 主色差；
-* 明度差；
-* 大型色块差；
-* Accent 差异；
-
-产生清晰边界。
-
-不需要依赖人工分割线。
-
-详细规则：
+四状态的可读性来自**抽象（结构信息密度与主抽象方法）**，不是来自区域颜色身份。详细规则：
 
 [`references/cinematic-color-system.md`](references/cinematic-color-system.md)
 
@@ -597,16 +510,11 @@ Choose Reality Anchor
     ↓
 Assign 30% / 65% / 90%
     ↓
-Choose distinct structural abstraction languages
+Route Primary Methods (AUTO ROUTER / AGENT OVERRIDE)
     ↓
-Establish shared cinematic palette
+Render each zone, compose, verify (deterministic pipeline)
     ↓
-Generate four-state composition
-    ↓
-Convert logical zones
-into irregular visible modules
-    ↓
-Face Restoration Gate
+(one-shot fallback only) Face Restoration Gate
     ↓
 Poster-level art direction
     ↓
@@ -614,6 +522,8 @@ Subject & structure validation
     ↓
 Final Poster
 ```
+
+确定性管线（prepare → render → compose → verify）**不运行 Face Restoration Gate**：主头部由代码从源图合成并校验；Gate 只在 one-shot 回退路径启用。
 
 ---
 
@@ -839,9 +749,10 @@ then the region's content picks one method inside that pool;
 ```
 
 ```text
-ONE PHOTO COLOR —
-one photographic color identity, shared by all four regions;
-each region differs only by abstraction, never by a module-level palette.
+ROBOT DREAMS SHARED PALETTE —
+one shared limited palette for all four regions;
+each region rebalances the proportions of those shared colors,
+never its own palette identity.
 ```
 
 ```text
