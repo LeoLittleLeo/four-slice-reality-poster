@@ -82,18 +82,35 @@ GLOBAL PALETTE INTERPRETATION
 LIMITED SHARED POSTER PALETTE
 ```
 
-Regions must NOT be separated by region-specific color roles, dominant hues,
-warm/cool contrasts, or value roles: that would turn the poster back into
-four differently-colored design modules instead of one photo.
+Regional **dominant color emphasis** is ALLOWED; **independent regional
+palette identity** is NOT:
+
+```text
+Shared Palette ≠ Same Color Distribution
+
+ALLOWED:      regional dominant color emphasis
+NOT ALLOWED:  independent regional palette identity
+
+Region A → dusty blue + cream dominant, terracotta accent
+Region B → ochre + warm gray dominant, muted blue accent
+Region C → terracotta + ochre dominant, cream + dusty blue support
+→ valid: all regions draw from the same shared palette
+
+Do NOT require: every region the same dominant hue;
+                source blue stays blue at the same proportion;
+                source gray stays gray, source green stays green.
+Do require:     all regional colors belong to the same poster-level
+                color universe.
+```
 
 In other words: a region's color is always a reinterpretation of ITS OWN
 slice of the source evidence through the shared palette, transformed by that
 region's abstraction level (30% stays closest to the source color evidence,
 90% is most interpretive) — the shared palette stays the same, only its
-proportions are rebalanced. Assigning clearly
-different dominant color roles per region (e.g. Slice A → terracotta, Slice
-B → cream, Slice C → dusty blue, Slice D → ochre) is an OPTIONAL artistic
-choice only when the user explicitly requests it — never the default.
+proportions and dominant emphasis are rebalanced. A region leading with a
+subset of shared hues (e.g. Slice A → terracotta/ochre-led, Slice B →
+dusty-blue-led, both using only shared-palette colors) is valid; a region
+with its own independent palette identity is not.
 
 ### Color Separation
 
@@ -101,8 +118,9 @@ The boundary between regions is expressed by the paper-material seam, not by
 per-region color contrast. Do not rely on hue shifts, warm/cool breaks, or
 value jumps between regions to make the states readable — the states differ
 structurally (information density, method), and the seam marks the boundary.
-Never intentionally shift one region's color away from the photograph to
-create a divider.
+Regional dominant color emphasis within the shared palette is fine, but
+never shift a region's color outside the shared poster palette to create a
+divider.
 
 ### Color Character
 
@@ -113,14 +131,18 @@ Avoid neon cyberpunk, purple-magenta sci-fi glow, random rainbow abstraction, ag
 ### Core Color Rule
 
 ```text
-ONE PHOTO'S COLOR IDENTITY
-+ UNIFORM WARM ROBOT DREAMS-INSPIRED GRADE
-+ ABSTRACTION DIFFERS BY STRUCTURE, NOT BY REGION COLOR
+ONE LIMITED SHARED ROBOT DREAMS PALETTE
++ REGIONAL DOMINANT COLOR EMPHASIS (within the shared palette)
++ ABSTRACTION DIFFERS BY STRUCTURE
 =
 ONE COHERENT POSTER THAT IS STILL ONE PHOTO
 ```
 
-Do not separate regions by assigning them different dominant color roles. Follow [cinematic-color-system.md](references/cinematic-color-system.md) for detailed implementation.
+Regions may differ in dominant color emphasis (dusty-blue-led vs ochre-led
+etc.) as long as every color belongs to the shared poster palette. Do not
+give a region an independent palette identity. Follow
+[cinematic-color-system.md](references/cinematic-color-system.md) for
+detailed implementation.
 
 ## Required reading
 
@@ -226,7 +248,7 @@ final candidate = restoration with a facial patch, geometry mismatch, or broken 
 4. Select exactly one Reality Anchor. The script's `--anchor auto` implements: 1) primary-face ownership (largest face overlap inside the region masks); 2) for `side-weighted` layout without a face, the central Reality corridor; 3) Logical Zone 2 fallback. Architecture/crowd anchors are NOT auto-detected by the script — choose them explicitly with `--anchor 1..4` when the scene's main subject is a building or crowd. Keep the state-ownership regions fixed (never re-shape them to protect content).
 5. Identify the primary face and surrounding head/body continuity context before generation; do not pre-commit to source-pixel restoration. Pass accurate `--face-boxes` (or a `--head-mask`) so the script derives a generous head protection region covering hair and jaw/neck — the PRIMARY head is force-composited from the source regardless of which zone it falls in. In multi-person photos only the primary head is source-protected: the script picks the largest face box by default, or `--primary-face N` forces a specific box; secondary faces are regular content.
 6. Assign 30%, 65%, and 90% abstraction exactly once to the remaining regions. The script's default is an **auto-staggered permutation** (seed/source-derived, never the sequential `30,65,90` — e.g. `90,65,30`, `65,30,90`, `30,90,65`), so the three abstract states are always non-linearly arranged. Pass an explicit `--levels` (any permutation) for composition-driven choices. Choose based on balance, meaning, rhythm, and color—not distance from the anchor. As a default suggestion (not a hard rule), the strongest abstraction often works well at an outer region (top, bottom, or side), while Reality benefits from a central or compositionally important region.
-7. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. The four regions share ONE shared limited palette under the uniform warm grade (Robot Dreams Shared Palette System) — each region shows its own slice of the photo's color passed through that region's abstraction method, rebalancing the proportions of the shared colors; never assign distinct dominant color roles, hue shifts, or palette identities per region. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
+7. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. The four regions share ONE shared limited palette under the uniform warm grade (Robot Dreams Shared Palette System) — each region shows its own slice of the photo's color passed through that region's abstraction method, rebalancing the proportions of the shared colors and allowed a dominant color emphasis within the shared palette; never give a region an independent palette identity or a hue set outside the shared poster palette. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
 8. Render each abstract zone **separately** (primary path). The Primary Abstraction Method is routed **deterministically by the script** through the **Level-Gated system** in two levels: the **AUTO ROUTER** (default) measures each ACTUAL region via its zone mask (saturation, hue variance, warmth, edge density, detail — color + structure, no semantics) and picks the best-fitting method inside that level's pool; the **AGENT OVERRIDE** (`--methods "30:...,65:...,90:..."`) is semantic routing (subject + structure + color) on top — the script **refuses** any method from another level's pool or Color Blocking (Supporting-only), so the pools stay pairwise disjoint and `30% ≠ 65% ≠ 90%` is guaranteed by construction. `--mode prepare` writes every zone's `primary_method` into the manifest. Treat abstraction as structural reinterpretation, never filter intensity. Enforce perceptual separation across 30%, 65%, and 90% through structural information density—not merely rendering style, palette, brush texture, or medium. Reduce, merge, group, or omit non-essential repeated components when this improves clarity, but preserve the primary person, identity-critical face, dominant crowd event, landmark architecture, and major scene-defining masses. Render each non-anchor context crop (`work/crops/zone{i}.png`) with the per-zone render prompt block from [deterministic-layout.md](references/deterministic-layout.md) (use the collage block when `--boundary collage`), filling `{LEVEL}` with the manifest's zone level, `{PRIMARY_METHOD}` with the manifest's routed `primary_method`, and `{SUPPORTING_METHODS}` with any supporting methods or `none`; the model never decides the poster layout and never receives a whole-poster slicing instruction. **Each zone render must show ONLY its own slice of the photograph, at the same aspect ratio and orientation as its crop — the model must never complete, reconstruct, or re-invent the rest of the scene inside a zone render.** Subject placement inside the slice stays fixed for every method EXCEPT Fragmentation and Collage Abstraction, which may displace, offset, crop, or re-layer the slice's own elements (that IS the method) while still never importing content from outside the crop and never duplicating a recognizable subject. Compose refuses to build the poster when a zone render has the wrong aspect (e.g. a landscape full scene for a portrait strip) or is a near-copy of the full scene; if either happens, reject it and re-render with the strict slice prompt block.
 9. Compose deterministically: `python scripts/slice_and_compose.py --mode compose --workdir work/ --output <final>.png`. The script pastes the rendered zones back at fixed coordinates through their zone masks, always keeps the Reality Anchor composited from the source, and force-composites the head protection mask from the source on top — the primary face is the original photograph even when a face box straddles a zone boundary. For `natural` (default) a subtle warm Robot Dreams-inspired grade is applied uniformly (`--paper-grade`), Reality/head re-composited from the graded source, and the **paper material layer is drawn ONLY at the region boundaries as torn-paper seams** (`--seam-style paper`) — no z-order, no sheet bodies, no sheet grain; each region is just the photo re-rendered at its abstraction level. For `collage` the full paper finish (fiber edges, one-sided shadows, grain) is applied. For `torn` the cuts are hard (`feather = 1`) with the torn-paper seam overlay. `contour`/`mask`/`rect` use a soft transition band. For Scheme B, inpaint the full canvas with `work/masks/zone{i}.png` and run `--mode enforce-anchor` instead. The four visible modules are the natural regions (default), collage paper pieces, torn ordered regions, contour regions, supplied masks, or rect strips; they tile the canvas exactly with no gaps or overlaps. Keep them substantial and readable, and preserve the Skill's modular color and palette rules.
 10. One-shot full-poster generation is a fallback only: if used, the model prompt MUST contain the Final Output Layout hard-constraint block verbatim, MUST keep the source aspect ratio and orientation (portrait stays portrait), and the result must pass `--mode verify`. Reject any grid, strip, contact sheet, or repeated-scene output.
@@ -259,7 +281,7 @@ The Final Output Layout hard constraint (one continuous image, four adjacent reg
 - Reduce repeated components before weakening core semantic identity.
 - Make 30%, 65%, and 90% differ in detail retention, component density, spatial fidelity, shape fidelity, and photographic surface retention.
 - Make abstraction a structural transformation, not a filter.
-- Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this ONE shared limited palette — regions differ by abstraction only, rebalancing the proportions of the shared colors, never by slice-to-slice dominant color roles.
+- Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this ONE shared limited palette — regions differ by abstraction and may lead with different subsets of the shared colors (dominant color emphasis), but never take independent palette identities or slice-to-slice palette roles outside the shared universe.
 - Keep ownership exact and disjoint — the four state-ownership regions tile the canvas, every pixel has one owner; make visible module edges natural, designed, and readable.
 - ONE PHOTO, FOUR NATURAL REGIONS: each region differs only by its abstraction; the paper material layer is the representation of the boundary (a seam where the abstraction changes), never separate paper sheets.
 - In the default natural family the regions share the same photograph — LEVEL ≠ MEDIUM: differentiate abstraction by information density and structural reduction, and the three abstract states MUST use three different Primary Abstraction Methods (never three intensities of the same method).

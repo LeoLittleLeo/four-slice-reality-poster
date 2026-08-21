@@ -436,7 +436,15 @@ green vegetation    → sage / dusty olive / softened blue-green / ochre-green
 white concrete      → warm cream / sand / pale peach / soft gray-blue
 ```
 
-禁止用"每区一套主色"来区分状态：
+**Shared Palette ≠ Same Color Distribution**：允许**区域主导色强调**，禁止**独立区域调色板身份**。例如（均合法，因为都取自同一共享调色板）：
+
+```text
+Region A → dusty blue + cream dominant, terracotta accent
+Region B → ochre + warm gray dominant, muted blue accent
+Region C → terracotta + ochre dominant, cream + dusty blue support
+```
+
+不要求每区同一主导色相；不要求源图蓝色在各区同比例保持蓝、灰色保持灰、绿色保持绿。只要求：**所有区域颜色都属于同一个海报级颜色宇宙**。禁止的是区域引入共享调色板之外的色相或独立调色板身份：
 
 ```text
 Slice A → terracotta / warm brown / sand
@@ -445,7 +453,7 @@ Slice C → dusty blue / muted teal
 Slice D → ochre / muted yellow / soft brick
 ```
 
-四状态的可读性来自**抽象（结构信息密度与主抽象方法）**，不是来自区域颜色身份。详细规则：
+四状态的可读性来自**抽象（结构信息密度与主抽象方法）**与共享调色板内的主导色强调，不是独立区域颜色身份。详细规则：
 
 [`references/cinematic-color-system.md`](references/cinematic-color-system.md)
 
@@ -748,8 +756,9 @@ then the region's content picks one method inside that pool;
 ROBOT DREAMS SHARED PALETTE —
 source color evidence reinterpreted through the palette families,
 one shared limited poster palette for all four regions;
-each region rebalances the proportions of those shared colors,
-never its own palette identity.
+each region rebalances the proportions of those shared colors
+and may lead with a dominant color emphasis,
+never an independent palette identity.
 ```
 
 ```text

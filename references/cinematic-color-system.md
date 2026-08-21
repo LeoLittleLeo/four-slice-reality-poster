@@ -52,25 +52,52 @@ The color language is therefore:
   masses, a 90% region narrows the proportion set toward the most essential
   shared hues. Rebalancing changes how much of each shared color appears,
   never which colors are available;
-- **no palette identity per region**: a region must never introduce a hue,
-  accent, or color relationship that is not in the shared palette, and never
-  assign itself a distinct dominant-hue role that breaks the shared
-  relationship.
+- **regional dominant color emphasis is ALLOWED, independent regional
+  palette identity is NOT**: a region may lead with a subset of the shared
+  colors (e.g. dusty blue + cream dominant with a terracotta accent) while
+  another region leads with a different subset (e.g. ochre + warm gray
+  dominant with a muted blue accent) — this is valid because every region
+  still draws from the SAME shared palette. What is forbidden is a region
+  introducing hues, accents, or color relationships that are not in the
+  shared palette, or building its own independent palette identity.
 
-Color differences across regions are permitted only as rebalancing of the
-shared palette:
+```text
+Shared Palette ≠ Same Color Distribution
+
+ALLOWED:      regional dominant color emphasis
+NOT ALLOWED:  independent regional palette identity
+
+Region A → dusty blue + cream dominant, terracotta accent
+Region B → ochre + warm gray dominant, muted blue accent
+Region C → terracotta + ochre dominant, cream + dusty blue support
+→ valid: all regions draw from the same shared palette
+
+Do NOT require:
+  every region has the same dominant hue
+  source blue remains blue at the same proportion
+  source gray remains gray, source green remains green
+
+Do require:
+  all regional colors belong to the same poster-level color universe
+```
+
+Color differences across regions are permitted as rebalancing of the shared
+palette AND as regional dominant color emphasis:
 
 - a line drawing keeps the shared hues in its strokes;
 - a geometric reinterpretation keeps the shared palette inside its planes;
 - shape reduction keeps shared colors in its silhouettes;
 - ink wash keeps the shared color character in its washes;
+- one region may be dusty-blue-led while another is ochre-led, as long as
+  both only use shared-palette colors;
 - and so on.
 
 The same shared color must be treated consistently by the same method in the
-same region. Never assign a different palette, dominant hue, or color role to
-a region to make the states "readable" — readability comes from abstraction
-(structural information density and Primary Method), not from giving regions
-different color identities.
+same region. Never give a region its own palette identity to make the states
+"readable" — readability comes from abstraction (structural information
+density and Primary Method), and regional dominant color emphasis is a
+rebalancing tool inside the shared palette, not a license for independent
+palette identity.
 
 ## Global emotional palette
 
@@ -159,7 +186,8 @@ that contains them.
 ## Regional palette rebalancing
 
 Each region's color behavior is its abstraction method applied to the shared
-palette — a rebalancing of proportions, nothing more:
+palette — a rebalancing of proportions AND a dominant color emphasis, never
+an independent palette:
 
 - **Reality Anchor:** source-faithful by construction. The anchor is
   composited from the (uniformly graded) source through its own zone mask, so
@@ -171,7 +199,8 @@ palette — a rebalancing of proportions, nothing more:
   their color is the shared palette drawn, lined, or brushed.
 - **65% abstraction:** the 65%-pool methods (Geometric Abstraction,
   Fragmentation, Collage Abstraction) restructure form; the shared palette is
-  grouped into broader masses — same colors, larger proportion chunks.
+  grouped into broader masses — same colors, larger proportion chunks, and
+  the region may lead with a subset of shared hues.
 - **90% abstraction:** the 90%-pool methods (Shape Reduction, Chinese Ink
   Wash, Cartoon Pixel) keep only a semantic skeleton; the shared palette
   narrows to its most essential members (reduced shapes, washes, or pixel
@@ -181,8 +210,9 @@ As abstraction rises, the same shared palette is carried through
 progressively stronger structural reinterpretation and progressively narrower
 proportion sets. Do not add per-region palette compression, per-region hue
 shifts, or per-region saturation curves that change WHICH colors are
-available — the palette is one, the abstraction (and its proportion
-rebalancing) differs.
+available — the palette is one, the abstraction (its proportion rebalancing
+and dominant color emphasis) differs. Regional dominant color emphasis is
+fine; regional palette identity is not.
 
 ## Cross-slice relationship
 
@@ -195,8 +225,9 @@ repeated accents to reinforce coherence.
 Do not blend colors across boundaries to soften the seams — the paper-material
 seam is the boundary's representation, and it is drawn by the pipeline. Do not
 shift the palette at a boundary to "announce" a new abstraction state: the
-state change is announced by the structural language and the proportion
-rebalancing, not by a new color identity.
+state change is announced by the structural language, the proportion
+rebalancing, and the regional dominant color emphasis — never by a color that
+leaves the shared poster palette.
 
 Apply color relationships with [intentional-modular-composition.md](intentional-modular-composition.md).
 
@@ -226,13 +257,15 @@ applies only after face identity, human continuity, Reality role,
 architectural identity, and four-state readability are secure:
 
 1. Protection of already-secure face, body, Reality, and architectural structure.
-2. Readability of the four abstraction states (via abstraction, not color roles).
+2. Readability of the four abstraction states (via abstraction; regional dominant color emphasis may help, independent palette identity never does).
 3. Emotional warmth and one shared palette relationship.
 4. Poster-level color coherence.
 5. Literal local color accuracy.
 
-There is no "module-to-module color contrast" item: contrast between regions
-comes from their abstraction languages, never from per-region color roles.
+There is no "independent module palette identity" item: contrast between
+regions comes from their abstraction languages and from dominant color
+emphasis WITHIN the shared palette — never from per-region palette
+identities.
 
 ## Execution and validation
 
@@ -259,6 +292,6 @@ Before delivery, confirm that the poster reads as ONE photograph whose four
 regions differ only by abstraction: the anchor is the (graded) source; the
 30%, 65%, and 90% regions reinterpret their own slice of the SAME limited
 shared poster palette (built from source color evidence through the Robot
-Dreams palette families), rebalancing its proportions; saturation and
-contrast remain controlled; accents are intentional; and no region has been
-given its own palette, hue role, or color identity.
+Dreams palette families), rebalancing its proportions and allowing each
+region a dominant color emphasis — but no region has been given its own
+independent palette identity, hue set, or color universe.

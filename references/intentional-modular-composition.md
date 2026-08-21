@@ -133,7 +133,7 @@ Use Hybrid Transition as the default boundary strategy:
 - Allow backgrounds, skies, ground planes, low-information areas, and large color fields to change rendering abruptly across a boundary (structure and medium change; the shared limited palette does not).
 - Preserve semantic continuity for important people through recognizable pose, silhouette, gesture, and head/body relationship.
 - Preserve semantic continuity for important buildings through silhouette, roofline, perspective, primary massing, and landmark structure.
-- Permit visible medium, texture, or abstraction changes across the same continuous subject — never module-level color changes: the region keeps the shared palette at its abstraction, rebalancing the proportions of those shared colors.
+- Permit visible medium, texture, or abstraction changes across the same continuous subject — the region keeps the shared palette at its abstraction, rebalancing proportions and allowed a dominant color emphasis within the shared palette; never an independent module palette identity.
 - Keep transitions local and selective; do not force every boundary or every object to blend.
 
 Semantic continuity does not require visual seamlessness. A person or building may remain readable while its rendering language changes sharply at the exact module boundary.
@@ -147,7 +147,7 @@ Give each visible module a stable visual core and make its assigned state readab
 - 65% must show substantial reconstruction and reduced photographic fidelity.
 - 90% must be predominantly abstract while retaining source DNA.
 
-Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength. Palette emphasis is NOT a valid differentiating signal: all regions share one shared limited palette and differ only by abstraction.
+Differentiate adjacent modules with at least two deliberate signals such as rendering medium, information density, edge language, value structure, texture, geometry, or spatial reconstruction. Do not rely only on subtle filter strength. Regional dominant color emphasis (within the shared palette) may reinforce differentiation but cannot be the primary signal: all regions share one shared limited palette and differ structurally.
 
 For the 30%, 65%, and 90% modules, at least one differentiating signal between every pair must be structural information density: detail retention, component count, spatial fidelity, shape fidelity, or photographic surface retention. Palette, brush texture, and medium changes may reinforce the difference but cannot create it alone.
 
@@ -162,10 +162,11 @@ families stay roughly balanced in area.
 Keep ONE shared limited poster palette across all four slices: every region
 shows the source photograph's color EVIDENCE reinterpreted through the Robot
 Dreams palette families, passed through its own abstraction method,
-rebalancing the proportions of the shared colors. Color differences appear
-only where the abstraction itself reinterprets the shared colors (strokes,
-planes, silhouettes, washes) — never as module-level palette shifts, hue
-roles, or per-slice color emphasis.
+rebalancing the proportions of the shared colors and allowed a dominant
+color emphasis within them. Color differences appear only as the abstraction
+reinterprets the shared colors (strokes, planes, silhouettes, washes) and as
+regional dominant color emphasis — never as independent module palette
+identities, hue roles, or per-slice color universes.
 
 ## Subject continuity
 
