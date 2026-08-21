@@ -24,57 +24,39 @@ them into exact pixel regions.
 
 ## Boundary families
 
-`--boundary` selects how the four regions are cut. All five families tile the
+`--boundary` selects how the four regions are cut. All six families tile the
 canvas exactly (no gaps, no overlaps) and keep the Reality Anchor and the
 primary head protected.
 
-### `collage` (DEFAULT) — Layered Torn-Paper Collage
+### `natural` (DEFAULT) — one photo, four natural regions
 
-The default boundary family is a **layered torn-paper collage**: one designed
-editorial object, not four strips with lines between them. Four paper pieces
-are layered (z-ordered) with composition-driven sizes and **angular deckled
-torn silhouettes** — straight-ish runs with sudden direction changes and sharp
-V-notches, with only modest wander (~1% of the slice axis) and NO broad
-low-frequency undulation: torn paper tears along runs and jumps, it does not
-undulate like a wave. The paper body, deckled fiber edges and one-sided
-shadows are **region geometry**, not a decorative line drawn on top.
+The default boundary family. **ONE photograph is jointly composed of four
+natural regions**, each region differing only in its abstraction treatment.
+The paper material layer is the **representation of the boundary**: a
+torn-paper seam drawn where the abstraction changes. There is NO z-order, NO
+sheet body, NO sheet grain — the regions are parts of one photo, not four
+paper sheets.
 
-```text
-TORN EDGE IS REGION GEOMETRY,
-NOT A DECORATIVE LINE DRAWN ON TOP.
-```
+- composition-driven layouts (`--layout`, default `auto`: `horizontal-layered`
+  or `side-weighted`; `vertical-strip`/`horizontal-strip` reuse the torn
+  logic);
+- smooth organic boundary paths (gentle, irregular, ~2-3% amplitude — not
+  torn-jagged, not a regular wave);
+- soft feather transition by default (~2% of the smaller dimension);
+- uniform warm Robot Dreams-inspired grade (`--paper-grade subtle`, default);
+  Reality and the head re-composited from the graded source;
+- the paper-material seam at each region boundary (`--seam-style paper`,
+  `--fiber-width`, `--seam-shadow`, `--seam-offset`) — the same torn-paper
+  ribbon used by the legacy family, drawn along the natural region edges;
+- each region is the photo re-rendered at its abstraction level, and the
+  three abstract states MUST use three different Primary Abstraction Methods.
 
-Allowed: layered stacking, local side insets, larger paper pieces,
-irregular torn silhouettes, paper overlap and visual depth.
-Forbidden: arbitrary blob segmentation, scattered fragments, floating
-islands, contact sheets, 2×2 grids, gutters, or four full-photo copies.
-The scene still appears exactly once.
+### `collage` (optional) — layered torn-paper sheets
 
-The layout is selected by `--layout` (default `auto`):
-
-- `horizontal-layered` — broad layered paper bands with independent torn
-  silhouettes (middle-heavy nominal profile, NOT quarter-based). Default
-  priority template.
-- `side-weighted` — a central Reality corridor flanked by broad left/right
-  paper fields plus a top (or bottom) supplementary layer; for alleys and
-  central-perspective streets.
-- `vertical-strip` / `horizontal-strip` — strip modes reusing the legacy torn
-  logic, only when a modular strip layout is wanted.
-- `auto` — derives the layout deterministically: wide scenes and
-  horizontal-banded scenes -> `horizontal-layered`; portrait scenes with
-  strong vertical structure (alleys, narrow streets) -> `side-weighted`.
-
-Collage parameters (all deterministic via `--seed`):
-
-- `--collage-band 0.12` — max paper-boundary deviation from its nominal
-  profile (fraction of the slice axis).
-- `--collage-roughness 1.0` — medium tear amplitude multiplier.
-- `--collage-overlap 5` — visual paper-overlap / one-sided shadow offset (px).
-- `--paper-edge-width 9` — exposed deckled paper-fiber band width (px).
-- `--paper-shadow 20` — one-sided paper shadow opacity (0..255, 0 disables).
-- `--paper-texture subtle|none` — subtle deterministic paper grain overlay
-  (default `subtle`; Reality is re-composited clean, so it reads
-  photographic while the paper pieces read printed).
+The optional paper-sheet family: four layered paper pieces with independent
+torn silhouettes, z-order, one-sided shadows, per-piece fiber bands and paper
+grain — a physical editorial torn-paper collage. Choose it explicitly when the
+four-sheet collage look is wanted. Uses `--paper-*` and `--collage-overlap`.
 
 ### `torn` (legacy) — ordered torn-strip composition
 
@@ -177,11 +159,25 @@ when a simple straight layout is the strongest design choice.
    force-composited from the source on top** — so the primary head is the
    original photograph even when a face box straddles a zone boundary.
 
-### Collage paper finish (compose, `--boundary collage`)
+### Natural finish (compose, `--boundary natural`)
 
-For collage the compose step adds the paper body:
+For the default natural family the compose step keeps it ONE photo:
 
 1. after pasting the abstract pieces, a subtle warm Robot Dreams-inspired
+   cinematic grade is applied uniformly (`--paper-grade subtle`); the anchor
+   and head are then re-composited from the **graded source** (color only —
+   no grain, no structure change);
+2. the **paper material layer is drawn ONLY at the region boundaries** as
+   torn-paper seams (`--seam-style paper`, `--fiber-width`, `--seam-shadow`,
+   `--seam-offset`) — the boundary is the paper material's representation;
+3. no z-order, no sheet bodies, no sheet grain: each region is just the photo
+   re-rendered at its abstraction level.
+
+### Collage paper finish (compose, `--boundary collage`)
+
+For the optional collage family the compose step adds the paper sheets:
+
+1. after pasting the paper pieces, a subtle warm Robot Dreams-inspired
    cinematic grade and a subtle deterministic paper grain are blended over
    them (`--paper-grade subtle`, `--paper-texture subtle`); the anchor and
    head are then re-composited from the **graded source** — Reality and the
@@ -212,16 +208,22 @@ modify more than one zone at a time.
 
 ```text
 # 1. Define the layout (deterministic)
-#    Layered Torn-Paper Collage (default); layout auto-derives
+#    ONE photo in four natural regions (default); layout auto-derives
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --boundary collage --layout auto \
+    --source photo.png --boundary natural --layout auto \
     --anchor auto --face-boxes "100,60,180,150;330,120,410,210" \
     --levels 65,90,30 --workdir work/
 
-#    explicit side-weighted collage (alley / central corridor)
+#    explicit side-weighted natural layout (alley / central corridor)
 python scripts/slice_and_compose.py --mode prepare \
-    --source alley.png --boundary collage --layout side-weighted \
+    --source alley.png --boundary natural --layout side-weighted \
     --anchor auto --face-boxes "300,120,380,210" \
+    --levels 65,90,30 --workdir work/
+
+#    optional layered torn-paper sheets (collage)
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --boundary collage --layout auto \
+    --anchor auto --face-boxes "100,60,180,150" \
     --levels 65,90,30 --workdir work/
 
 #    legacy ordered torn-strip composition
@@ -267,25 +269,26 @@ Options:
 - `--direction auto|vertical|horizontal` — slice direction for legacy torn /
   contour / rect (collage layouts define their own orientation). `auto`
   (default) derives it deterministically from image structure and aspect.
-- `--boundary collage|torn|contour|mask|rect` — boundary family (default
-  `collage`).
+- `--boundary natural|collage|torn|contour|mask|rect` — boundary family
+  (default `natural`: one photo, four natural regions, paper-material seam at
+  the boundaries).
 - `--layout auto|horizontal-layered|side-weighted|vertical-strip|horizontal-strip`
-  — collage layout (default `auto`). `vertical-strip`/`horizontal-strip`
+  — natural/collage layout (default `auto`). `vertical-strip`/`horizontal-strip`
   reuse the legacy torn logic.
-- `--collage-band 0.12` — collage: max paper-boundary deviation from its
+- `--collage-band 0.12` — natural/collage: max boundary deviation from its
   nominal profile (fraction of the slice axis).
-- `--collage-roughness 1.0` — collage: medium tear amplitude multiplier.
-- `--collage-overlap 5` — collage: visual paper-overlap / one-sided shadow
-  offset in px.
-- `--paper-edge-width 6` — collage: exposed deckled paper-fiber band width in
-  px (sparse, broken micro sections).
-- `--paper-shadow 20` — collage: one-sided paper shadow opacity 0..255
+- `--collage-roughness 1.0` — natural/collage: medium irregularity multiplier.
+- `--collage-overlap 5` — collage only: visual paper-overlap / one-sided
+  shadow offset in px.
+- `--paper-edge-width 6` — collage only: exposed deckled paper-fiber band
+  width in px (sparse, broken micro sections).
+- `--paper-shadow 20` — collage only: one-sided paper shadow opacity 0..255
   (`0` disables).
-- `--paper-texture subtle|none` — collage: subtle deterministic paper grain
-  (default `subtle`).
-- `--paper-grade subtle|none` — collage: subtle warm Robot Dreams-inspired
-  cinematic grade over the abstract pieces (default `subtle`; Reality and the
-  head stay untouched).
+- `--paper-texture subtle|none` — collage only: subtle deterministic paper
+  grain (default `subtle`).
+- `--paper-grade subtle|none` — natural/collage: subtle warm Robot
+  Dreams-inspired cinematic grade applied uniformly (default `subtle`;
+  Reality and the head are composited from the graded source).
 - `--torn-band 0.06` — torn mode: typical global seam deviation as a fraction
   of the slice axis (local tears reach ~`torn_band * 1.5`).
 - `--torn-roughness 1.0` — torn mode: multiplier for medium/high-frequency
@@ -336,8 +339,8 @@ Options:
   `zone0.png`..`zone3.png` (255 = region).
 - `--feather N` — soft transition width in px for zone boundaries. Per-mode
   default: `collage` and `torn` use `1` px (hard paper cut, anti-aliased);
-  `contour`, `mask` and `rect` use ~2% of the smaller image dimension (capped
-  at 12.5%). Explicit `0` restores fully hard edges.
+  `natural`, `contour`, `mask` and `rect` use ~2% of the smaller image
+  dimension (capped at 12.5%). Explicit `0` restores fully hard edges.
 
 ## Verbatim prompt blocks
 
@@ -488,12 +491,13 @@ slightly retro Robot Dreams-inspired palette.
 
 - the output size differs from the source;
 - the four zone masks do not tile the canvas exactly (any gap or overlap);
-- the Reality Anchor core or head core differs from the source (in collage
-  mode the source reference is the GRADED source; the fully-opaque interior
-  of the softened mask must equal it exactly, while the soft transition band,
-  the torn paper-fiber pixels, and the collage paper finish are exempt);
-- for `collage`: a paper piece is too small (< ~6% of the canvas), or a piece
-  has disconnected islands; pieces may have very different areas — no
+- the Reality Anchor core or head core differs from the source (in
+  natural/collage mode the source reference is the GRADED source; the
+  fully-opaque interior of the softened mask must equal it exactly, while the
+  soft transition band, the torn paper-fiber pixels, and the collage paper
+  finish are exempt);
+- for `natural`/`collage`: a region is too small (< ~6% of the canvas), or a
+  region has disconnected islands; regions may have very different areas — no
   quarter-based balance check is applied;
 - for `torn`: the three seams are missing, do not span the full canvas, cross
   or collapse, or the zones contain islands/pockets/loops (ordered strip
@@ -506,7 +510,7 @@ It warns (does not fail) when:
 
 - a non-anchor zone is pixel-identical to its source slice (no abstraction
   applied),
-- a collage piece is small (< ~10% of the canvas),
+- a natural/collage region is small (< ~10% of the canvas),
 - a torn seam deviates far from its nominal boundary (warns above ~12% of the
   slice axis) or has a large local jump, or
 - a rendered abstract zone resembles the FULL source scene instead of its own

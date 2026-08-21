@@ -4,25 +4,26 @@
 
 `four-slice-reality-poster` 是一个面向 Codex / Agent 图像工作流的 Skill。
 
-它不是把照片简单切成四条，再分别套上不同强度的滤镜，而是把一张照片构造成 **一张设计完整的 Layered Torn-Paper Collage（分层撕纸拼贴海报）**：四个构图驱动的分层纸片（Reality + 30% / 65% / 90% 抽象）共享同一种编辑印刷/纸张材质语言，撕纸边界是区域本身的形状，而不是画在上面的线。
+它把**同一张照片**分成四个**自然区域**，每个区域只是抽象方式不同（Reality + 30% / 65% / 90% 抽象状态）——不是四张纸片拼贴。边界以**纸面材质层**来表现：在抽象状态变化处画一条撕纸接缝；没有 z-order、没有整片纸身体、没有把各区变成独立纸片的纸纹。
 
 场景只出现一次；唯一强制保护的是主头部。
 
-可选边界家族：`torn`（legacy 有序撕纸条带）、`contour`（语义轮廓）、`mask`（自绘区域）、`rect`（等分直条）。
+可选边界家族：`collage`（分层撕纸纸片）、`torn`（legacy 有序撕纸条带）、`contour`（语义轮廓）、`mask`（自绘区域）、`rect`（等分直条）。
 
 ```text
-OLD / torn-strip（legacy）           DEFAULT / collage
+DEFAULT / natural                        LEGACY / torn-strip
 
-|~~~~|~~~~|~~~~|~~~~|              ~~~~~~~~~~~~~~~~~~~~
-                                    顶层纸片（抽象）
-                                   ~~~~~~~\_____/~~~~~~~
-        四根波浪条 + 三根米白线
-                                          Reality
-                                          （主场景）
-                                     ____________________
-                                         下层拼贴
-                                     ~~~~~\________/~~~~~~
-        四块 + 四根线                    四张纸片，有层次
+  ┌─────────────────────┐                |~~~~|~~~~|~~~~|~~~~|
+  │   region 1 (30%)    │                四根波浪条 + 三根米白线
+  │ ~~~~纸面接缝~~~~~  │
+  │  Reality (photo)    │
+  │ ~~~~纸面接缝~~~~~  │       NOT:
+  │   region 3 (65%)    │                ┌─────────────────────┐
+  │ ~~~~纸面接缝~~~~~  │                │ 纸片1   │ 纸片2  │
+  │   region 4 (90%)    │                │  纸片3  │ 纸片4  │
+  └─────────────────────┘                └─────────────────────┘
+  一幅照片，四个自然区域，               四张纸片拼贴
+  边界=纸面材质接缝
 ```
 
 最终目标：
@@ -35,38 +36,36 @@ OLD / torn-strip（legacy）           DEFAULT / collage
 
 这个 Skill 首先保证四种视觉状态都可以被清晰感知，其次才追求整体融合。
 
-默认使用 **Layered Torn-Paper Collage**：
+默认使用 **Natural Regions（自然区域）**：
 
-* 四张构图驱动的分层纸片，独立撕纸轮廓，z-order 层叠；
-* 所有纸片共享同一种编辑印刷/纸张材质语言（纸纹、印刷颗粒、暖色系、相似边缘处理）；
-* 抽象等级主要通过信息密度与结构简化区分（LEVEL ≠ MEDIUM），而不是三种互不相干的媒介；
-* 撕纸边缘是区域几何本身（deckled 纸纤维边 + 单侧纸影），不是描边线；
-* Reality 保持摄影质感（源图合成），并与抽象纸片共享同一微暖 Robot Dreams 调色（仅调色，不加纸纹、不改结构）；
-* 禁止 blob 分割、小碎片、孤岛、contact sheet、2×2、四张完整照片、gutters。
+* **同一幅照片**被四个自然区域共同组成，每个区域只是抽象方式不同；
+* 区域是照片的一部分，不是独立纸片（无 z-order、无整片纸身体、无纸纹分层）；
+* 边界以**纸面材质层**来表现：抽象状态变化处画一条撕纸接缝；
+* Reality 保持摄影质感（源图合成），并与各区共享同一微暖 Robot Dreams 调色；
+* 三个抽象区域必须使用三种**不同的主抽象方法**（30% ≠ 65% ≠ 90%），共享同一照片视觉系统；
+* 场景只出现一次；禁止 blob 分割、孤岛、contact sheet、2×2、四张完整照片、gutters。
 
 核心原则：
 
-> **TORN EDGE IS REGION GEOMETRY, NOT A DECORATIVE LINE DRAWN ON TOP.**
+> **ONE PHOTO + FOUR NATURAL REGIONS + EACH REGION DIFFERS ONLY BY ABSTRACTION**
 
-> **IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE, NOT JUST WAVY STRIPS.**
+> **THE PAPER MATERIAL LAYER IS THE REPRESENTATION OF THE BOUNDARY**
 
 BAD（反例）：
 
 ```text
+四张独立纸片拼贴（z-order 层叠、单侧纸影、整片纸纹）
+同一方法三档强度冒充三种抽象
 四根窄竖波浪条
-每区用完全不相关的媒介（彩铅 + 低多边形 + 水彩 + 照片）
-细米白线假装撕纸
-最终构图还能看出数学四等分
+每区用完全不相关的媒介（彩铅 + 低多边形 + 水彩）
 ```
 
 GOOD（正例）：
 
 ```text
-一种统一的编辑印刷语言
-宽大的撕纸纸片层
-中央 Reality 被更抽象的外围纸片包围
-不同抽象等级通过信息缩减表达
-可见的纸身体与 deckled 撕边
+同一幅照片的四个自然区域
+边界处有一条撕纸纸面接缝
+每区一种不同的主抽象方法，但同属这一张照片
 ```
 
 ---
@@ -127,24 +126,30 @@ Horizontal division
 
 ## ✦ Boundary Families
 
-`--boundary` 决定四种可见区域如何切分，默认 `collage`：
+`--boundary` 决定四种可见区域如何切分，默认 `natural`：
 
 | 家族 | 视觉目标 | 说明 |
 |---|---|---|
-| `collage`（**默认**） | 分层撕纸拼贴海报 | 四张构图驱动的分层纸片 + **角状 deckled 撕纸轮廓**（直线段+尖缺口，非波浪）+ z-order 单侧纸影 + 共享印刷/纸张材质 + 微暖 Robot Dreams 调色；`--layout auto\|horizontal-layered\|side-weighted\|...` |
+| `natural`（**默认**） | 同一幅照片 + 四个自然区域 | 每区只是抽象方式不同；边界以纸面材质接缝表现；无 z-order/纸片层叠/纸纹；`--layout auto\|horizontal-layered\|side-weighted\|...` |
+| `collage`（可选） | 分层撕纸纸片 | 四张构图驱动纸片 + 独立撕纸轮廓 + z-order 单侧纸影 + 纸纹（四张纸片拼贴风格） |
 | `torn`（legacy） | 有序撕纸条带 | 四条有序区域 + 三条贯穿画布的波浪撕纸接缝（约 1/4、1/2、3/4） |
 | `contour`（可选） | 语义轮廓边界 | 跟随剪影/建筑边缘/屋顶线/天际线/道路/地平线；不是默认 |
 | `mask`（自定义） | 完全自由的形状 | 提供 4 张内容感知 mask，脚本归一化为精确平铺 |
 | `rect`（回退） | 等分直条 | 纯整数坐标的四条等宽/等高条 |
 
-确定性：`collage` 与 `torn` 都使用 `--seed`（默认 42），相同输入必定输出相同的纸片/接缝。
+确定性：`natural`/`collage`/`torn` 都使用 `--seed`（默认 42），相同输入必定输出相同的区域/接缝。
 
 ```bash
-# 默认 collage（分层撕纸拼贴，layout 自动推导）
+# 默认 natural（一幅照片，四个自然区域，边界=纸面接缝）
 python scripts/slice_and_compose.py --mode prepare \
-    --source photo.png --boundary collage --layout auto \
+    --source photo.png --boundary natural --layout auto \
     --anchor auto --face-boxes "100,60,180,150" \
     --levels 65,90,30 --workdir work/
+
+# 可选：分层撕纸纸片拼贴
+python scripts/slice_and_compose.py --mode prepare \
+    --source photo.png --boundary collage --layout auto \
+    --face-boxes "100,60,180,150" --levels 65,90,30 --workdir work/
 
 # legacy 有序撕纸条带
 python scripts/slice_and_compose.py --mode prepare \
@@ -637,10 +642,11 @@ git pull
 安装后，可以在支持 Skill 调用的环境中使用：
 
 ```text
-Use $four-slice-reality-poster to transform my photo into ONE designed
-Layered Torn-Paper Collage poster: four layered paper pieces (Reality /
-30% / 65% / 90% abstraction) sharing one editorial print/paper material
-language. Never a 2x2 grid or four full-image versions.
+Use $four-slice-reality-poster to transform my photo into ONE continuous
+poster: the same photo divided into four natural regions, each region a
+different abstraction (Reality / 30% / 65% / 90%), with the boundary
+expressed by a torn-paper seam. Never a 2x2 grid or four full-image
+versions.
 ```
 
 中文：
@@ -648,8 +654,9 @@ language. Never a 2x2 grid or four full-image versions.
 ```text
 使用 $four-slice-reality-poster 处理这张照片。
 
-做成一张完整的分层撕纸拼贴海报：四个分层纸片（Reality + 30%/65%/90%
-抽象）共享同一种印刷/纸张材质语言，撕纸边界是纸片本身的形状。
+把同一张照片分成四个自然区域，每个区域只是抽象方式不同
+（Reality + 30%/65%/90%），区域边界用撕纸纸面接缝表现；
+不要做成四张独立纸片拼贴。
 ```
 
 也可以追加自定义要求：
@@ -812,21 +819,19 @@ Make visible module boundaries irregular, designed, and readable.
 ```
 
 ```text
-IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE,
-NOT JUST WAVY STRIPS —
-keep the four-state composition controlled and readable,
-but allow broad layered paper shapes.
+ONE PHOTO + FOUR NATURAL REGIONS —
+each region differs only by abstraction.
 ```
 
 ```text
-Torn edges are region geometry,
-not decorative lines drawn on top.
+The paper material layer is the representation of the boundary —
+not four separate paper sheets.
 ```
 
 ```text
 LEVEL ≠ MEDIUM —
-one shared material language,
-different abstraction through information reduction.
+the three abstract states use three different Primary Abstraction Methods,
+all inside the same photograph.
 ```
 
 ```text

@@ -20,9 +20,10 @@ Preserve the source image's aspect ratio and use its dimensions as the compositi
 Begin with exactly four geometrically equal hidden logical zones. Use either four equal vertical ownership zones or four equal horizontal ownership zones. Use them only for Reality Anchor selection, crowd and subject ownership, 30%/65%/90% assignment, and four-state validation. Do not move these hidden boundaries to protect content.
 
 Translate the hidden ownership system into four visible modules governed by
-the family-specific topology (see below). In the default collage family the
-modules are layered paper pieces with composition-driven sizes and torn
-silhouettes; in the legacy torn family they are four sequential regions with
+the family-specific topology (see below). In the default natural family the
+modules are four natural regions of ONE photograph (paper-material seam only
+at the boundaries); in the optional collage family they are layered paper
+pieces; in the legacy torn family they are four sequential regions with
 irregular seam edges; in the optional contour family they may follow semantic
 contours. In every family the visible modules must not duplicate or transfer
 recognizable source content across logical owners, must tile the same
@@ -86,18 +87,20 @@ collage layouts (`--mode verify` checks seam continuity, ordering, separation,
 and the absence of islands/pockets), and `--boundary mask` may produce any
 topology the supplied masks define.
 
-## Layered Collage Topology (default family)
+## Natural Region Topology (default family)
 
-The default `collage` family is NOT bound to quarter-based strips. The four
-paper pieces may have different, composition-driven sizes and independent torn
-silhouettes, layered in z-order. The topology must still be controlled and
-readable:
+The default `natural` family is NOT bound to quarter-based strips, but it is
+still ONE photograph: four natural regions whose sizes are composition-driven
+and whose boundaries are expressed by a paper-material seam. The topology
+must be controlled and readable:
 
 ```text
-IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE, NOT JUST WAVY STRIPS.
+ONE PHOTO
++ FOUR NATURAL REGIONS
++ EACH REGION DIFFERS ONLY BY ABSTRACTION
++ THE PAPER MATERIAL LAYER IS THE REPRESENTATION OF THE BOUNDARY
 
-Allow broad layered paper shapes whose geometry is driven by composition,
-depth, visual rhythm, and major scene masses.
+Allow composition-driven region sizes and smooth organic boundaries.
 
 Avoid arbitrary blob segmentation, islands, pockets, random fragments,
 contact sheets, 2x2 grids, and gutters.

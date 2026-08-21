@@ -960,15 +960,46 @@ def collage_torn_path(npos: int, axis: int, nominal_frac: float, band_frac: floa
     return [min(hi, max(lo, int(round(v)))) for v in path]
 
 
+def natural_path(npos: int, axis: int, nominal_frac: float, band_frac: float,
+                 rng: random.Random, roughness: float) -> List[int]:
+    """Smooth organic boundary for the `natural` default family.
+
+    ONE photo divided into four natural regions: boundaries are gentle,
+    organic curves — irregular but not torn-jagged and not a regular wave
+    (incommensurate low-frequency drift + smooth medium irregularity + a
+    +/-1px micro), with modest amplitude (~2-3% of the axis). Deterministic
+    via `rng`.
+    """
+    exc = max(2, int(axis * band_frac))
+    nom = nominal_frac * axis
+    amp_drift = max(2, int(axis * 0.02))
+    drift = [0.0] * npos
+    for _ in range(3):
+        freq = rng.uniform(0.6, 3.0) * 2.0 * math.pi / max(1, npos) * rng.choice((1.0, 1.7, 2.3))
+        phase = rng.uniform(0.0, 2.0 * math.pi)
+        a = amp_drift * rng.uniform(0.4, 1.0)
+        for i in range(npos):
+            drift[i] += a * math.sin(freq * i + phase)
+    window = max(4, int(npos * 0.05))
+    amp_tear = axis * band_frac * 0.35 * max(0.3, roughness)
+    tear = filtered_noise(rng, npos, amp_tear, window)
+    micro = [rng.randint(-1, 1) for _ in range(npos)]
+    path = [nom + drift[i] + tear[i] + micro[i] for i in range(npos)]
+    path = moving_average(path, 5)
+    lo = max(0, int(nom - exc))
+    hi = min(axis - 1, int(nom + exc))
+    return [min(hi, max(lo, int(round(v)))) for v in path]
+
+
 def horizontal_layered_masks(width: int, height: int, protect_boxes: List[Box],
                              band: float, roughness: float,
-                             seed: int) -> Tuple[List[Image.Image], List[List[int]]]:
+                             seed: int, style: str = "torn") -> Tuple[List[Image.Image], List[List[int]]]:
     """Four broad layered paper pieces (portrait default template).
 
     Layers stack vertically but are NOT quarter-strips: a middle-heavy,
     composition-driven nominal profile (about 20/24/28/28) and each boundary
-    gets its OWN independent torn silhouette (different broad curvature +
-    medium tear + micro fiber), so neighbouring edges are not parallel copies.
+    gets its OWN independent silhouette (torn deckled or smooth organic
+    depending on `style`), so neighbouring edges are not parallel copies.
     """
     npos = width
     axis = height
@@ -979,7 +1010,10 @@ def horizontal_layered_masks(width: int, height: int, protect_boxes: List[Box],
     paths: List[List[int]] = []
     prev = None
     for nom, kind in zip(nominals, kinds):
-        path = collage_torn_path(npos, axis, nom, band, kind, rng, roughness)
+        if style == "natural":
+            path = natural_path(npos, axis, nom, band, rng, roughness)
+        else:
+            path = collage_torn_path(npos, axis, nom, band, kind, rng, roughness)
         if prev is not None:
             path = [max(path[i], prev[i] + min_sep) for i in range(npos)]
         path = avoid_head_boxes(path, protect_boxes, 0, axis - 1, "horizontal")
@@ -997,7 +1031,7 @@ def horizontal_layered_masks(width: int, height: int, protect_boxes: List[Box],
 
 def side_weighted_masks(width: int, height: int, protect_boxes: List[Box],
                         band: float, roughness: float,
-                        seed: int) -> Tuple[List[Image.Image], dict]:
+                        seed: int, style: str = "torn") -> Tuple[List[Image.Image], dict]:
     """Alley / central-perspective template.
 
     piece 4 = a top paper band; below it, piece 2 = a central Reality
@@ -1006,9 +1040,14 @@ def side_weighted_masks(width: int, height: int, protect_boxes: List[Box],
     side fields are wide paper masses.
     """
     rng = random.Random(seed + 700)
-    t4 = collage_torn_path(width, height, 0.18, band, "arc-down", rng, roughness)      # top band bottom edge y(x)
-    c_left = collage_torn_path(height, width, 0.34, band, "s", rng, roughness)         # corridor left x(y)
-    c_right = collage_torn_path(height, width, 0.66, band, "arc-up", rng, roughness)   # corridor right x(y)
+    if style == "natural":
+        t4 = natural_path(width, height, 0.18, band, rng, roughness)
+        c_left = natural_path(height, width, 0.34, band, rng, roughness)
+        c_right = natural_path(height, width, 0.66, band, rng, roughness)
+    else:
+        t4 = collage_torn_path(width, height, 0.18, band, "arc-down", rng, roughness)      # top band bottom edge y(x)
+        c_left = collage_torn_path(height, width, 0.34, band, "s", rng, roughness)         # corridor left x(y)
+        c_right = collage_torn_path(height, width, 0.66, band, "arc-up", rng, roughness)   # corridor right x(y)
     min_sep = max(6, int(width * 0.12))
 
     def clamp_corridor():
@@ -1059,11 +1098,13 @@ def side_weighted_masks(width: int, height: int, protect_boxes: List[Box],
 
 def collage_masks(layout: str, width: int, height: int, protect_boxes: List[Box],
                   band: float, roughness: float,
-                  seed: int) -> Tuple[List[Image.Image], dict]:
-    """Generate four layered paper piece masks for the given collage layout.
+                  seed: int, style: str = "torn") -> Tuple[List[Image.Image], dict]:
+    """Generate four region masks for the given layout.
 
-    `vertical-strip` / `horizontal-strip` reuse the legacy torn logic.
-    Returns `(masks, geometry)`.
+    `style` selects the boundary character: "torn" (deckled paper, for the
+    `collage` family) or "natural" (smooth organic, for the `natural`
+    family). `vertical-strip` / `horizontal-strip` reuse the legacy torn
+    logic. Returns `(masks, geometry)`.
     """
     if layout in ("vertical-strip", "horizontal-strip"):
         direction = "vertical" if layout == "vertical-strip" else "horizontal"
@@ -1071,8 +1112,8 @@ def collage_masks(layout: str, width: int, height: int, protect_boxes: List[Box]
                            TORN_BAND_DEFAULT, roughness, 1.0, seed)
         return masks_from_paths(direction, width, height, paths), {"paths": paths}
     if layout == "side-weighted":
-        return side_weighted_masks(width, height, protect_boxes, band, roughness, seed)
-    return horizontal_layered_masks(width, height, protect_boxes, band, roughness, seed)
+        return side_weighted_masks(width, height, protect_boxes, band, roughness, seed, style)
+    return horizontal_layered_masks(width, height, protect_boxes, band, roughness, seed, style)
 
 
 def collage_fiber_masks(masks: List[Image.Image], width: int, height: int,
@@ -1271,10 +1312,11 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         if hb is not None:
             avoid_boxes = [tuple(hb)]
 
-    # Layout / direction resolution. Collage layouts define their own structure;
-    # --direction only drives legacy torn and the strip layouts.
+    # Layout / direction resolution. Layout-based families (natural, collage)
+    # define their own structure; --direction only drives legacy torn, contour
+    # and the strip layouts.
     layout = args.layout
-    if args.boundary == "collage":
+    if args.boundary in ("natural", "collage"):
         if layout == "auto":
             layout = suggest_layout(img, width, height)
             print(f"Auto layout -> {layout}")
@@ -1293,10 +1335,25 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
     seams = None
     collage_geom = None
-    if args.boundary == "collage":
+    boundaries = None
+    if args.boundary in ("natural", "collage"):
+        style = "torn" if args.boundary == "collage" else "natural"
         masks, collage_geom = collage_masks(layout, width, height, avoid_boxes,
                                             args.collage_band, args.collage_roughness,
-                                            args.seed)
+                                            args.seed, style)
+        # boundary paths for the paper-material seam at the region edges
+        if isinstance(collage_geom, dict):
+            if "top" in collage_geom:
+                boundaries = [
+                    {"path": collage_geom["top"], "dir": "horizontal"},
+                    {"path": collage_geom["left"], "dir": "vertical"},
+                    {"path": collage_geom["right"], "dir": "vertical"},
+                ]
+            elif "paths" in collage_geom:
+                d = "vertical" if layout == "vertical-strip" else "horizontal"
+                boundaries = [{"path": p, "dir": d} for p in collage_geom["paths"]]
+        elif isinstance(collage_geom, list):
+            boundaries = [{"path": p, "dir": "horizontal"} for p in collage_geom]
     elif args.boundary == "rect":
         masks = rect_masks(direction, width, height)
     elif args.boundary == "torn":
@@ -1317,9 +1374,9 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
     if args.anchor == "auto":
         anchor = pick_anchor(masks, head_boxes)
-        # no face boxes: side-weighted collage prefers the central Reality
+        # no face boxes: side-weighted layout prefers the central Reality
         # corridor; otherwise fall back to Logical Zone 2 (a middle layer)
-        if not head_boxes and args.boundary == "collage" and layout == "side-weighted":
+        if not head_boxes and args.boundary in ("natural", "collage") and layout == "side-weighted":
             anchor = 1  # central corridor piece
     else:
         anchor = int(args.anchor) - 1  # CLI is 1-based like restore_protected_anchor.py
@@ -1383,14 +1440,15 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "source": str(source),
         "direction": direction,
         "boundary": args.boundary,
-        "layout": layout if args.boundary == "collage" else "horizontal-layered",
+        "layout": layout if args.boundary in ("natural", "collage") else "horizontal-layered",
         "z_order": collage_z_order(layout) if args.boundary == "collage" else None,
         "size": [width, height],
         "anchor": anchor + 1,
         "margin": args.margin,
         "feather": feather,
         "seams": seams if seams else None,
-        "seam_style": args.seam_style if args.boundary == "torn" else "none",
+        "seam_style": args.seam_style if args.boundary in ("torn", "natural") else "none",
+        "collage_boundaries": boundaries if args.boundary == "natural" else None,
         "fiber_width": args.fiber_width,
         "seam_shadow": args.seam_shadow,
         "seam_offset": args.seam_offset,
@@ -1401,9 +1459,9 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         "collage_roughness": args.collage_roughness,
         "collage_overlap": args.collage_overlap,
         "paper_edge_width": args.paper_edge_width,
-        "paper_shadow": args.paper_shadow,
+        "paper_shadow": args.paper_shadow if args.boundary == "collage" else 0,
         "paper_texture": args.paper_texture if args.boundary == "collage" else "none",
-        "paper_grade": args.paper_grade if args.boundary == "collage" else "none",
+        "paper_grade": args.paper_grade if args.boundary in ("natural", "collage") else "none",
         "seed": args.seed,
         "head_mask": str(head_mask_path) if head_mask_path else None,
         "face_boxes": [list(b) for b in args.face_boxes],
@@ -1415,6 +1473,9 @@ def cmd_prepare(args: argparse.Namespace) -> None:
     print(f"Prepared deterministic four-zone layout -> {manifest_path}")
     print(f"Direction={direction}  boundary={args.boundary}  "
           f"size={width}x{height}  anchor=Logical Zone {anchor + 1}")
+    if args.boundary == "natural":
+        print(f"Natural: layout={layout} band={args.collage_band} "
+              f"roughness={args.collage_roughness} grade={args.paper_grade} seed={args.seed}")
     if args.boundary == "collage":
         print(f"Collage: layout={layout} band={args.collage_band} "
               f"roughness={args.collage_roughness} overlap={args.collage_overlap} "
@@ -1481,7 +1542,7 @@ def opaque_core(mask: Image.Image, feather: int) -> Image.Image:
 
 def enforce_anchor(canvas: Image.Image, source: Path, manifest: dict) -> Image.Image:
     feather = manifest.get("feather", 0)
-    grade_on = (manifest.get("boundary") == "collage"
+    grade_on = (manifest.get("boundary") in ("natural", "collage")
                 and manifest.get("paper_grade", "subtle") != "none")
     anchor = manifest["anchor"] - 1
     zone = manifest["zones"][anchor]
@@ -1562,7 +1623,25 @@ def cmd_compose(args: argparse.Namespace) -> None:
     for wmsg in render_warnings:
         print(f"  warning: {wmsg}")
 
-    if manifest.get("boundary") == "collage":
+    if manifest.get("boundary") == "natural":
+        # ONE photo, four natural regions: uniform warm grade over everything
+        # (Reality/head re-composited from the graded source), then the paper
+        # material layer is drawn ONLY at the region boundaries as torn-paper
+        # seams — no z-order, no per-piece sheet bodies, no sheet grain.
+        if manifest.get("paper_grade", "subtle") != "none":
+            canvas = robot_dreams_grade(canvas)
+        canvas = enforce_anchor(canvas, source, manifest)
+        if (manifest.get("seam_style", "paper") == "paper"
+                and manifest.get("collage_boundaries")):
+            for direction in ("vertical", "horizontal"):
+                paths = [b["path"] for b in manifest["collage_boundaries"] if b["dir"] == direction]
+                if paths:
+                    canvas = draw_paper_seams(canvas, paths, direction,
+                                              manifest.get("fiber_width", 7),
+                                              manifest.get("seed", DEFAULT_SEED),
+                                              manifest.get("seam_shadow", 26),
+                                              manifest.get("seam_offset", 3))
+    elif manifest.get("boundary") == "collage":
         # subtle Robot Dreams-inspired warm grade over the abstract pieces,
         # then shared paper grain; the anchor and head are re-composited
         # clean from the source afterwards, so Reality reads photographic.
@@ -1774,6 +1853,33 @@ def collage_overlay_mask(manifest: dict, masks: List[Image.Image],
     return union
 
 
+def boundary_seam_mask(manifest: dict, width: int, height: int) -> Optional[Image.Image]:
+    """Exemption mask for the `natural` family: the paper-material seams drawn
+    along the region boundaries (same geometry as `draw_paper_seams`, same
+    seed/shadow switch), so the intentional paper pixels do not break the
+    anchor/head source-equality core."""
+    boundaries = manifest.get("collage_boundaries") or []
+    if not boundaries:
+        return None
+    fiber_width = max(1, manifest.get("fiber_width", 7))
+    seed = int(manifest.get("seed", DEFAULT_SEED))
+    shadow_offset = max(0, int(manifest.get("seam_offset", 3)))
+    with_shadow = int(manifest.get("seam_shadow", 26)) > 0
+    mask = Image.new("L", (width, height), 0)
+    d = ImageDraw.Draw(mask)
+    for direction in ("vertical", "horizontal"):
+        paths = [b["path"] for b in boundaries if b["dir"] == direction]
+        if not paths:
+            continue
+        for g in seam_paper_geometry(paths, direction, fiber_width, seed):
+            for kind, coords in paper_shapes(g, shadow_offset, with_shadow):
+                if kind == "poly":
+                    d.polygon(coords, fill=255)
+                else:
+                    d.line(coords, fill=255, width=1)
+    return mask
+
+
 def check_torn_topology(manifest: dict, masks: List[Image.Image],
                         width: int, height: int) -> None:
     """Torn-strip topology validation for --boundary torn.
@@ -1852,9 +1958,9 @@ def cmd_verify(args: argparse.Namespace) -> None:
         raise SystemExit(f"Size mismatch: output={out.size}, expected {(width, height)}")
     with Image.open(manifest["source"]) as im:
         src = im.convert("RGBA")
-    # collage with the warm grade: Reality/head are composited from the
-    # GRADED source, so the source-equality checks compare against it too.
-    if (manifest.get("boundary") == "collage"
+    # natural/collage with the warm grade: Reality/head are composited from
+    # the GRADED source, so the source-equality checks compare against it too.
+    if (manifest.get("boundary") in ("natural", "collage")
             and manifest.get("paper_grade", "subtle") != "none"):
         src = robot_dreams_grade(src)
 
@@ -1864,7 +1970,7 @@ def cmd_verify(args: argparse.Namespace) -> None:
 
     if manifest.get("boundary") == "torn":
         check_torn_topology(manifest, masks, width, height)
-    elif manifest.get("boundary") == "collage":
+    elif manifest.get("boundary") in ("natural", "collage"):
         check_collage_regions(masks, width, height)
     check_zone_renders(manifest, src, args.workdir)
 
@@ -1872,6 +1978,10 @@ def cmd_verify(args: argparse.Namespace) -> None:
     seam_band = None
     if manifest.get("boundary") == "collage":
         seam_band = collage_overlay_mask(manifest, masks, width, height)
+    elif (manifest.get("boundary") == "natural"
+            and manifest.get("seam_style", "paper") == "paper"
+            and manifest.get("collage_boundaries")):
+        seam_band = boundary_seam_mask(manifest, width, height)
     elif (manifest.get("boundary") == "torn"
             and manifest.get("seam_style") == "paper"
             and manifest.get("seams")):
@@ -1947,11 +2057,13 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--boundary",
-        choices=("collage", "torn", "contour", "mask", "rect"),
-        default="collage",
-        help="Boundary family: collage (default) Layered Torn-Paper Collage, "
-             "torn legacy ordered torn-strip composition, contour optional "
-             "semantic contours, mask supplied masks, rect equal strips",
+        choices=("natural", "collage", "torn", "contour", "mask", "rect"),
+        default="natural",
+        help="Boundary family: natural (default) ONE photo in four natural "
+             "regions, each a different abstraction, with the boundary "
+             "expressed by a paper-material seam; collage layered torn-paper "
+             "sheets; torn legacy ordered torn-strip; contour optional "
+             "semantic contours; mask supplied masks; rect equal strips",
     )
     parser.add_argument(
         "--layout",

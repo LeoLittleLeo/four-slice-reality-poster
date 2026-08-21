@@ -32,22 +32,41 @@ chosen explicitly.
 The governing principle for the default family:
 
 ```text
-IRREGULAR EDGE SHOULD CREATE COLLAGE SHAPE,
-NOT JUST WAVY STRIPS.
-
-Keep the four-state composition controlled and readable.
-Avoid arbitrary blob segmentation, islands, pockets, and random fragments.
-
-However, do not force the visible regions to remain near-equal strips.
-Allow broad layered paper shapes whose geometry is driven by composition,
-depth, visual rhythm, and major scene masses.
+ONE PHOTO
++ FOUR NATURAL REGIONS
++ EACH REGION DIFFERS ONLY BY ABSTRACTION
++ THE PAPER MATERIAL LAYER IS THE REPRESENTATION OF THE BOUNDARY
 ```
 
-### A. Layered Torn-Paper Collage — DEFAULT (`--boundary collage`)
+Keep the four-state composition controlled and readable. Avoid arbitrary
+blob segmentation, islands, pockets, and random fragments. Do not force the
+visible regions to remain near-equal strips — allow composition-driven
+natural region shapes.
 
-Four layered paper pieces in z-order, each with its own torn silhouette and
-composition-driven size, sharing ONE editorial print / paper material
-language:
+### A. Natural Regions — DEFAULT (`--boundary natural`)
+
+**ONE photograph** jointly composed of four natural regions; each region is
+just the photo re-rendered at its abstraction level:
+
+- the paper material layer is drawn ONLY at the region boundaries as
+  torn-paper seams (the boundary is the paper material's representation);
+- no z-order, no sheet bodies, no sheet grain — the regions are parts of one
+  photo, NOT four paper sheets;
+- composition-driven layouts (`horizontal-layered` / `side-weighted` /
+  strips) with smooth organic boundary paths;
+- soft feather transitions by default; uniform warm grade shared by all four
+  states (Reality/head composited from the graded source);
+- the three abstract states MUST use three different Primary Abstraction
+  Methods (LEVEL ≠ MEDIUM), all inside the same photograph;
+- no blob segmentation, islands, pockets, contact sheets, 2×2 grids or
+  gutters;
+- the scene appears exactly once.
+
+### B. Layered Torn-Paper Collage — OPTIONAL (`--boundary collage`)
+
+The optional paper-sheet family: four layered paper pieces in z-order, each
+with its own torn silhouette and composition-driven size, sharing ONE
+editorial print / paper material language:
 
 - TORN EDGE IS REGION GEOMETRY, NOT A DECORATIVE LINE DRAWN ON TOP;
 - layered stacking, local side insets, larger paper pieces, irregular torn
@@ -57,12 +76,12 @@ language:
 - paper grain, deckled fiber edges and warm ivory are shared across all four
   states;
 - Reality is photographic (source-composited clean); 30/65/90 differ by
-  structural information density, not by unrelated mediums;
+  structural information density AND distinct Primary Abstraction Methods;
 - no blob segmentation, islands, pockets, contact sheets, 2×2 grids or
   gutters;
 - the scene appears exactly once.
 
-### B. Torn-Strip — LEGACY (`--boundary torn`)
+### C. Torn-Strip — LEGACY (`--boundary torn`)
 
 Kept intact: four sequential strip-like states with three continuous
 irregular seams around 1/4, 1/2, 3/4; irregular but ordered; head-avoiding;
@@ -171,14 +190,14 @@ Inspect the poster at thumbnail size and ask:
 - Do the four states read as layered paper pieces with torn silhouettes and visual depth, not four wavy strips with lines between them?
 - Are the pieces substantial and connected (no tiny scraps, islands, pockets or scattered fragments)?
 - Does the seam/edge feel like torn paper (deckled fibers, uneven width) rather than a uniform white/cream stroke?
-- In the default collage family: are the torn edges region geometry, not a drawn-on line? Is the paper shadow one-sided (upper piece onto lower) rather than a double-sided outline?
+- In the default natural family: are the regions four parts of ONE photograph, with torn-paper seams only at the boundaries (not four separate paper sheets)?
 - In the legacy torn family: do the four states still read as four broad sequential regions with three intentional torn-paper cuts?
 - Do the seams/pieces remain approximately aligned with the intended slicing direction?
 - Are there any islands, loops, U-shaped wraps or excessive excursions?
 - Does the primary head remain untouched?
 - Can Reality, 30%, 65%, and 90% be distinguished without explanation?
 - Do 30%, 65%, and 90% differ in structural information density across detail, component density, spatial fidelity, shape fidelity, and photographic surface retention?
-- In the default collage family: do the three abstract states share one material language while differing by information reduction (LEVEL ≠ MEDIUM)?
+- In the default natural family: do the three abstract states use three DIFFERENT Primary Abstraction Methods (LEVEL ≠ MEDIUM) inside the same photograph?
 - Do visible boundaries use meaningful contours, structures, fields, or strokes rather than default rectangular rigidity?
 - Do at least two visual signals differentiate neighboring modules?
 - Does the Reality Anchor remain the clearly photographic reality state without requiring unsafe full-block restoration?
@@ -189,4 +208,4 @@ Inspect the poster at thumbnail size and ask:
 - Does any unifying treatment flatten the four states into one painting?
 - Are color differences purposeful and poster-level relationships sufficient?
 
-Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. In the default collage family, also reject if the regions read as four unrelated medium patches, as four wavy strips with decorative lines, as arbitrary blob segmentation, or if a "torn edge" is a uniform cream outline rather than paper body geometry. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
+Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. In the default natural family, also reject if the poster reads as four separate paper sheets, as four wavy strips with decorative lines, as arbitrary blob segmentation, or if the paper material is painted over whole regions instead of representing only the boundary. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.
