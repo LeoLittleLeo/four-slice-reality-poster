@@ -148,7 +148,21 @@ detailed implementation.
 
 Color abstraction must increase TOGETHER with structural abstraction — the
 four states differ not only in shape/detail but in how designed the color
-organization becomes:
+organization becomes. Default relationship:
+
+| State | Source color fidelity | Palette compression | Regional color rebalancing | Color-field scale |
+|---|---|---|---|---|
+| **Reality** | Very high | Minimal | Minimal | Photographic |
+| **30%** | High | Low–moderate | Moderate | Mostly local |
+| **65%** | Medium | Strong | Strong | Broad masses |
+| **90%** | Low literal fidelity | Very strong | Very strong | Large symbolic fields |
+
+```text
+Reality   PHOTOGRAPHIC COLOR
+30%       INTERPRETED PHOTOGRAPHIC COLOR
+65%       DESIGNED COLOR MASSES
+90%       SYMBOLIC SHARED-PALETTE CONSTRUCTION
+```
 
 - **Reality:** photographic — source-faithful color + the uniform warm
   Robot Dreams grade. May receive warmer midtones, softened highlights,

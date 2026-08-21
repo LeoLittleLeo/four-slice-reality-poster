@@ -192,6 +192,34 @@ designed. Each region's color behavior is its abstraction method applied to
 the shared palette — a rebalancing of proportions AND a dominant color
 emphasis, never an independent palette.
 
+### Color progression across levels (default relationship)
+
+| State | Source color fidelity | Palette compression | Regional color rebalancing | Color-field scale |
+|---|---|---|---|---|
+| **Reality** | Very high | Minimal | Minimal | Photographic |
+| **30%** | High | Low–moderate | Moderate | Mostly local |
+| **65%** | Medium | Strong | Strong | Broad masses |
+| **90%** | Low literal fidelity | Very strong | Very strong | Large symbolic fields |
+
+The intended progression is:
+
+```text
+Reality
+PHOTOGRAPHIC COLOR
+↓
+30%
+INTERPRETED PHOTOGRAPHIC COLOR
+↓
+65%
+DESIGNED COLOR MASSES
+↓
+90%
+SYMBOLIC SHARED-PALETTE CONSTRUCTION
+```
+
+Each step is a distinct color organization, not merely a weaker/stronger
+version of the previous one.
+
 ### Reality Anchor — photographic
 
 Reality remains photographic:

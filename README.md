@@ -455,7 +455,21 @@ Slice D → ochre / muted yellow / soft brick
 
 四状态的可读性来自**抽象（结构信息密度与主抽象方法）**与共享调色板内的主导色强调，不是独立区域颜色身份。详细规则：
 
-**颜色抽象随结构抽象同步递增**：
+**颜色抽象随结构抽象同步递增**（默认关系）：
+
+| 状态 | 源色忠实度 | 调色板压缩 | 区域色再平衡 | 色域尺度 |
+|---|---|---|---|---|
+| Reality | 很高 | 最小 | 最小 | 摄影级 |
+| 30% | 高 | 低–中 | 中等 | 多为局部 |
+| 65% | 中 | 强 | 强 | 宽色块 |
+| 90% | 低字面忠实 | 很强 | 很强 | 大符号色域 |
+
+```text
+Reality   PHOTOGRAPHIC COLOR
+30%       INTERPRETED PHOTOGRAPHIC COLOR
+65%       DESIGNED COLOR MASSES
+90%       SYMBOLIC SHARED-PALETTE CONSTRUCTION
+```
 
 - **Reality**：摄影级——源图忠实色 + 统一微暖 Robot Dreams grade；只允许更暖中间调、柔化高光、轻微提黑、温和压饱和、细微怀旧褪色；**不得 posterize 或激进改色**。
 - **30%**：源近邻调色板诠释——保留大部分主要色相关系、颜色多样性、物体颜色身份与摄影光逻辑；允许温和分组与"数字感颜色→柔和 Robot Dreams 等价色"；不能只是 `源图 + 暖滤镜`。
