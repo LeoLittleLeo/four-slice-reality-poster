@@ -1310,28 +1310,66 @@ def assign_levels(anchor: int, levels: List[int]) -> Dict[int, int]:
     return {zone: level for zone, level in zip(non_anchor, levels)}
 
 
-def region_features(img: Image.Image) -> Dict[str, float]:
-    """Color and structure features of a region crop, read by the
-    content-aware method router. PIL only — no numpy.
+def region_features(img: Image.Image, mask: Optional[Image.Image] = None) -> Dict[str, float]:
+    """Color and structure features of a REGION, read by the content-aware
+    method router. PIL only — no numpy.
+
+    `img` is the region's bounding-box crop of the source; `mask` (optional)
+    is the zone mask cropped to the same box (L, 255 = region). Every
+    statistic is weighted by the mask, so ONLY the actual region pixels
+    count — the context margin around the region is never measured. Without
+    a mask the whole image is used.
 
     Returns saturation / hue variance / warmth / edge density / detail /
     luminance contrast of the region's own slice of the photograph.
     """
     rgb = img.convert("RGB")
+    if mask is None:
+        m = Image.new("L", rgb.size, 255)
+    else:
+        m = mask.convert("L")
+        if m.size != rgb.size:
+            m = m.resize(rgb.size)
+        # keep the mask binary so the weights reflect real region pixels
+        m = m.point(lambda p: 255 if p > 127 else 0)
+    # Downscale the analysis image so statistics stay fast and stable;
+    # features (saturation/hue/edges) are scale-robust at this resolution.
+    max_side = 256
+    if max(rgb.size) > max_side:
+        scale = max_side / float(max(rgb.size))
+        new_size = (max(1, int(rgb.size[0] * scale)), max(1, int(rgb.size[1] * scale)))
+        rgb = rgb.resize(new_size, Image.LANCZOS)
+        m = m.resize(new_size, Image.BILINEAR)
+        m = m.point(lambda p: 255 if p > 127 else 0)
+
+    def wstats(ch: Image.Image) -> Tuple[float, float]:
+        """Mask-weighted mean and stddev of channel `ch` (L), normalized 0..1.
+
+        mean = Σ(ch·m) / Σm / 255, var = Σ(m·(ch-mean)²) / Σm / 255².
+        `ImageChops.multiply` yields (a·b)//255, which lets us compute both
+        weighted moments with three multiply passes.
+        """
+        sm = float(ImageStat.Stat(m).sum[0])
+        if sm <= 0:
+            return 0.0, 0.0
+        s1 = float(ImageStat.Stat(ImageChops.multiply(ch, m)).sum[0])
+        s2 = float(ImageStat.Stat(ImageChops.multiply(ImageChops.multiply(ch, ch), m)).sum[0])
+        mean = s1 / sm
+        var = max(0.0, s2 / sm - mean * mean)
+        return mean, math.sqrt(var)
+
     hsv = rgb.convert("HSV")
     h, s, v = hsv.split()
-    sat = ImageStat.Stat(s)
-    val = ImageStat.Stat(v)
-    sat_mean = sat.mean[0] / 255.0
-    sat_std = sat.stddev[0] / 255.0
-    val_mean = val.mean[0] / 255.0
-    # circular hue variance, weighted by saturation (desaturated pixels
-    # contribute less) — how varied the region's hues are.
-    hpix = list(h.getdata())
-    spix = list(s.getdata())
+    sat_mean, sat_std = wstats(s)
+    val_mean, _ = wstats(v)
+    # circular hue variance, weighted by (saturation · mask) — how varied
+    # the region's own hues are (context pixels contribute nothing).
+    hd = list(h.getdata())
+    sd = list(s.getdata())
+    md = list(m.getdata())
     sx = sy = wsum = 0.0
-    for hh, ss in zip(hpix, spix):
-        w = ss / 255.0
+    for hh, ss, mm in zip(hd, sd, md):
+        w = (ss / 255.0) * (mm / 255.0)
         ang = math.radians(hh * 360.0 / 255.0)
         sx += math.cos(ang) * w
         sy += math.sin(ang) * w
@@ -1341,16 +1379,17 @@ def region_features(img: Image.Image) -> Dict[str, float]:
         sx /= wsum
         sy /= wsum
         hue_var = max(0.0, min(1.0, 1.0 - math.sqrt(sx * sx + sy * sy)))
-    # warmth: mean R minus mean B
+    # warmth: mean R minus mean B (mask-weighted)
     r, _, b = rgb.split()
-    warmth = (ImageStat.Stat(r).mean[0] - ImageStat.Stat(b).mean[0]) / 255.0
-    # edge density and detail (high-frequency energy) via FIND_EDGES
+    warmth = wstats(r)[0] - wstats(b)[0]
+    # edge density and detail (high-frequency energy) via FIND_EDGES,
+    # averaged over the region pixels only.
     lum = rgb.convert("L")
     edges = lum.filter(ImageFilter.FIND_EDGES)
-    edge_mean = ImageStat.Stat(edges).mean[0] / 255.0
+    edge_mean, _ = wstats(edges)
     edges2 = edges.filter(ImageFilter.FIND_EDGES)
-    detail = ImageStat.Stat(edges2).mean[0] / 255.0
-    lum_std = ImageStat.Stat(lum).stddev[0] / 255.0
+    detail, _ = wstats(edges2)
+    _, lum_std = wstats(lum)
     return {
         "sat_mean": sat_mean,
         "sat_std": sat_std,
@@ -1386,14 +1425,15 @@ def method_scores(level: int, f: Dict[str, float]) -> Dict[str, float]:
     }
 
 
-def auto_methods(level_map: Dict[int, int], zone_images: Dict[int, Image.Image],
+def auto_methods(level_map: Dict[int, int], zone_analysis: Dict[int, Tuple[Image.Image, Image.Image]],
                  seed: int) -> Dict[int, str]:
     """Content-aware deterministic Primary Method per abstraction level.
 
-    For each level, read the color and structure features of the region that
-    owns that level (saturation, hue variance, warmth, edge density, detail)
-    and pick the best-fitting method INSIDE that level's pool. Ties are
-    broken by a stable source+seed hash, so the same photo + seed always
+    For each level, read the color and structure features of the ACTUAL
+    region that owns that level (its bounding-box crop plus its zone mask,
+    so only the region's own pixels are measured — never the context
+    margin) and pick the best-fitting method INSIDE that level's pool. Ties
+    are broken by a stable source+seed hash, so the same photo + seed always
     repeats exactly while different photos select different methods per
     level (pools stay sets, never singletons).
     """
@@ -1402,7 +1442,8 @@ def auto_methods(level_map: Dict[int, int], zone_images: Dict[int, Image.Image],
         zones = [z for z, lv in level_map.items() if lv == level]
         if not zones:
             continue
-        f = region_features(zone_images[zones[0]])
+        region_img, region_mask = zone_analysis[zones[0]]
+        f = region_features(region_img, region_mask)
         scores = method_scores(level, f)
         pool = METHOD_POOLS[level]
         best = max(pool, key=lambda m: (scores[m], zlib.crc32(m.encode()) ^ seed))
@@ -1411,18 +1452,19 @@ def auto_methods(level_map: Dict[int, int], zone_images: Dict[int, Image.Image],
 
 
 def parse_methods(value: Optional[str], level_map: Dict[int, int],
-                  zone_images: Dict[int, Image.Image], seed: int) -> Dict[int, str]:
+                  zone_analysis: Dict[int, Tuple[Image.Image, Image.Image]],
+                  seed: int) -> Dict[int, str]:
     """Resolve the Primary Method per level.
 
-    `value` may be None (auto: content-aware `auto_methods`) or a comma list
-    of `LEVEL:METHOD` entries. Every explicit method must belong to ITS
-    level's pool; a method from another level's pool (e.g. ink wash at 65%)
-    is refused — level gates the pool first, then the method is picked inside
-    that pool. Color Blocking is Supporting-only and is refused as a Primary
-    Method.
+    `value` may be None (auto: content-aware `auto_methods`, which measures
+    each ACTUAL region via its mask) or a comma list of `LEVEL:METHOD`
+    entries. Every explicit method must belong to ITS level's pool; a method
+    from another level's pool (e.g. ink wash at 65%) is refused — level
+    gates the pool first, then the method is picked inside that pool. Color
+    Blocking is Supporting-only and is refused as a Primary Method.
     """
     if value is None:
-        return auto_methods(level_map, zone_images, seed)
+        return auto_methods(level_map, zone_analysis, seed)
     methods = {}
     for part in value.split(","):
         part = part.strip()
@@ -1575,9 +1617,10 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
     # Level-Gated Primary Method routing (deterministic hard rule): level
     # gates the pool first, then the Primary Method is picked inside that
-    # pool. Auto reads each region's own slice (color/structure features) to
-    # pick the best-fitting method in the level's pool; --methods overrides
-    # are validated against each level's pool.
+    # pool. Auto reads the ACTUAL region (its bbox crop + zone mask, so the
+    # context margin never leaks into the features) to pick the best-fitting
+    # method in the level's pool; --methods overrides are validated against
+    # each level's pool.
     zone_crops = []
     for i, mask in enumerate(masks):
         bbox = mask.getbbox()
@@ -1586,11 +1629,11 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         box = tuple(bbox)
         crop_box = crop_box_for(box, width, height, args.margin)
         zone_crops.append((box, crop_box, img.crop(crop_box)))
-    method_map = parse_methods(
-        args.methods, level_map,
-        {i: zone_crops[i][2] for i in range(4) if i != anchor},
-        args.seed,
-    )
+    zone_analysis = {
+        i: (img.crop(zone_crops[i][0]), masks[i].crop(zone_crops[i][0]))
+        for i in range(4) if i != anchor
+    }
+    method_map = parse_methods(args.methods, level_map, zone_analysis, args.seed)
     for level in LEVELS:
         print(f"Primary Method @ {level}% -> {method_map[level]} "
               f"(pool: {', '.join(METHOD_POOLS[level])})")
@@ -2250,7 +2293,10 @@ def cmd_verify(args: argparse.Namespace) -> None:
                   "the primary head is still source-protected, but a boundary cuts its region.")
 
     counts = [m.histogram()[255] for m in masks]
-    if manifest.get("boundary") != "collage":
+    if manifest.get("boundary") not in ("natural", "collage"):
+        # natural/collage are composition-driven (regions may differ a lot in
+        # area — no quarter-based balance requirement); only the non-natural
+        # families stay roughly balanced.
         ratio = max(counts) / max(1, min(counts))
         if ratio > BALANCE_RATIO:
             print(f"  warning: zone areas are unbalanced (max/min = {ratio:.1f}); "
@@ -2346,15 +2392,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--methods",
         default=None,
-        help="Primary Abstraction Method per level, e.g. "
+        help="AGENT OVERRIDE: Primary Abstraction Method per level, e.g. "
              "\"30:Colored Sketch,65:Fragmentation,90:Shape Reduction\". "
-             "Level-Gated system: each method must belong to ITS level's pool "
-             "(30% = Colored Sketch/Line Abstraction/Painterly Abstraction; "
-             "65% = Geometric Abstraction/Fragmentation/Collage Abstraction; "
-             "90% = Shape Reduction/Chinese Ink Wash/Cartoon Pixel); a method "
+             "Semantic routing (subject + structure + color) on top of the "
+             "Level-Gated pools: each method must belong to ITS level's pool "
+             "(30%% = Colored Sketch/Line Abstraction/Painterly Abstraction; "
+             "65%% = Geometric Abstraction/Fragmentation/Collage Abstraction; "
+             "90%% = Shape Reduction/Chinese Ink Wash/Cartoon Pixel); a method "
              "from another level's pool or Color Blocking (Supporting-only) "
-             "is refused. Default: deterministic auto pick per pool from the "
-             "source+seed hash (same photo + seed always repeats exactly)",
+             "is refused. Default: AUTO ROUTER — deterministic visual-feature "
+             "routing (color + structure): the script measures each ACTUAL "
+             "region via its zone mask (saturation, hue variance, warmth, "
+             "edge density, detail) and picks the best-fitting method inside "
+             "that level's pool; same photo + seed always repeats exactly",
     )
     parser.add_argument(
         "--margin",

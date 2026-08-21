@@ -350,20 +350,22 @@ Options:
   `30,65,90`), so the three abstract states are always non-linearly arranged.
   Pass an explicit permutation for composition-driven choices.
 - `--methods "30:Colored Sketch,65:Fragmentation,90:Shape Reduction"` —
-  Primary Abstraction Method per level, routed by the **Level-Gated system**
-  (see [abstraction-language.md](abstraction-language.md)): the level gates
-  the eligible pool FIRST, then the method is picked inside that pool. Each
-  explicit method must belong to ITS level's pool (30% = Colored Sketch /
-  Line Abstraction / Painterly Abstraction; 65% = Geometric Abstraction /
-  Fragmentation / Collage Abstraction; 90% = Shape Reduction / Chinese Ink
-  Wash / Cartoon Pixel); a method from another level's pool or Color Blocking
-  (Supporting-only) is refused. Default: a **content-aware** deterministic
-  auto pick — the script reads each region's color/structure features
-  (saturation, hue variance, warmth, edge density, detail) and selects the
-  best-fitting method inside that level's pool; same photo + seed always
-  repeats exactly, and different photos produce different methods. The routed
-  methods are written into the manifest (`methods` and each zone's
-  `primary_method`) and are checked again by `--mode verify`.
+  **AGENT OVERRIDE** (semantic routing: subject + structure + color) on top
+  of the **Level-Gated system** (see [abstraction-language.md](abstraction-language.md)):
+  the level gates the eligible pool FIRST, then the method is picked inside
+  that pool. Each explicit method must belong to ITS level's pool (30% =
+  Colored Sketch / Line Abstraction / Painterly Abstraction; 65% = Geometric
+  Abstraction / Fragmentation / Collage Abstraction; 90% = Shape Reduction /
+  Chinese Ink Wash / Cartoon Pixel); a method from another level's pool or
+  Color Blocking (Supporting-only) is refused. Default: **AUTO ROUTER** —
+  deterministic visual-feature routing (color + structure): the script
+  measures each ACTUAL region via its zone mask (saturation, hue variance,
+  warmth, edge density, detail — the context margin never leaks in) and
+  selects the best-fitting method inside that level's pool; same photo +
+  seed always repeats exactly, and method selection varies with region
+  character, not with file identity. The routed methods are written into the
+  manifest (`methods` and each zone's `primary_method`) and are checked again
+  by `--mode verify`.
 - `--margin 0.12` — context margin around each zone crop, as a fraction of the
   zone's bounding box. Give the model enough context to keep the scene
   semantically connected.

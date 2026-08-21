@@ -124,10 +124,10 @@ generation residue.
 
 Use Hybrid Transition as the default boundary strategy:
 
-- Allow backgrounds, skies, ground planes, low-information areas, and large color fields to change abruptly across a boundary.
+- Allow backgrounds, skies, ground planes, low-information areas, and large color fields to change rendering abruptly across a boundary (structure and medium change; the shared photographic color identity does not).
 - Preserve semantic continuity for important people through recognizable pose, silhouette, gesture, and head/body relationship.
 - Preserve semantic continuity for important buildings through silhouette, roofline, perspective, primary massing, and landmark structure.
-- Permit visible medium, color, value, texture, or abstraction changes across the same continuous subject.
+- Permit visible medium, texture, or abstraction changes across the same continuous subject — never module-level color changes: the region keeps the source's color at its abstraction, with color differences emerging only from the abstraction itself.
 - Keep transitions local and selective; do not force every boundary or every object to blend.
 
 Semantic continuity does not require visual seamlessness. A person or building may remain readable while its rendering language changes sharply at the exact module boundary.
@@ -216,6 +216,6 @@ Inspect the poster at thumbnail size and ask:
 - Are the head contour, hair silhouette, and face-to-neck connection coherent? (Body and building continuity across states may be soft or intentionally broken.)
 - If important architecture owns the Anchor, does it preserve silhouette, massing, perspective, landmark identity, and structural rhythm while using cross-module state contrast effectively?
 - Does any unifying treatment flatten the four states into one painting?
-- Are color differences purposeful and poster-level relationships sufficient?
+- Do color differences emerge only from each region's abstraction of the shared source color (never from module-level palette roles)?
 
 Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. In the default natural family, also reject if the poster reads as four separate paper sheets, as four wavy strips with decorative lines, as arbitrary blob segmentation, or if the paper material is painted over whole regions instead of representing only the boundary. Accept visible boundaries and color breaks when they are clean, controlled, and compositionally intentional.

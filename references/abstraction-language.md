@@ -193,23 +193,36 @@ the region character picks the method inside that pool.
 ### Deterministic router in the script (hard rule, not agent discretion)
 
 The pool gate is enforced by `scripts/slice_and_compose.py`, not left to the
-agent:
+agent. Method selection happens in TWO levels:
 
-* `--mode prepare` routes the Primary Method per level through these pools
-  and writes it into the manifest (top-level `methods`, plus each zone's
-  `primary_method`; the anchor zone is `Reality`). The default pick is
-  **content-aware**: the script reads each region's own color/structure
-  features (saturation, hue variance, warmth, edge density, detail) and
-  selects the best-fitting method inside that level's pool. It is fully
-  deterministic — the same photo + seed always repeats exactly, and different
-  photos get different methods per level (pools stay sets, never
-  singletons).
-* `--methods "30:Colored Sketch,65:Fragmentation,90:Shape Reduction"`
-  overrides the pick with an explicit content-driven choice. The script
-  **refuses** a method that is not in ITS level's pool (e.g. Chinese Ink
-  Wash at 65%), and **refuses** Color Blocking as a Primary Method — the
-  level gates the pool first, then the region's subject/structure/color
-  picks inside that pool.
+```text
+LEVEL
+→ gates the eligible pool FIRST
+
+AUTO ROUTER      = deterministic visual-feature routing (color + structure)
+AGENT OVERRIDE   = semantic routing (subject + structure + color)
+```
+
+* **AUTO ROUTER (default, no `--methods`):** `--mode prepare` routes the
+  Primary Method per level through these pools and writes it into the
+  manifest (top-level `methods`, plus each zone's `primary_method`; the
+  anchor zone is `Reality`). The script measures each ACTUAL region — its
+  bounding-box crop masked by its zone mask, so the context margin never
+  leaks in — and reads its visual features (saturation, hue variance,
+  warmth, edge density, detail, luminance contrast). It then picks the
+  best-fitting method INSIDE that level's pool. It is fully deterministic:
+  the same photo + seed always repeats exactly, and method selection varies
+  with region character, not with file identity (pools stay sets, never
+  singletons). The auto router is color + structure only: it cannot see
+  subject semantics.
+* **AGENT OVERRIDE (`--methods "30:Colored Sketch,65:Fragmentation,90:Shape
+  Reduction"`):** when subject knowledge matters (a face, a landmark, a
+  crowd, a poetic subject), the agent overrides the pick with a semantic
+  choice based on subject + structure + color. The script still enforces the
+  hard rule: it **refuses** a method that is not in ITS level's pool (e.g.
+  Chinese Ink Wash at 65%), and **refuses** Color Blocking as a Primary
+  Method — the level gates the pool first, then the region's
+  subject/structure/color picks inside that pool.
 * `--mode verify` re-checks every recorded zone method against its level's
   pool (a stale manifest without method routing only warns, keeping old
   workdirs working).

@@ -34,7 +34,7 @@ Derive geometry from actual façade planes, volumes, rooflines, perspective, and
 Never:
 
 1. Create more or fewer than four logical states or output them as independent images.
-2. Stretch or compress the source, or move the hidden equal logical boundaries after ownership assignment.
+2. Stretch or compress the source, or move the state-ownership boundaries after ownership assignment.
 3. Create more than one Reality Anchor, or discard its intended reality role without reason.
 4. Treat filters as abstraction or turn all four slices into illustrations.
 5. Force levels into sequential order or derive them from anchor distance.
@@ -53,7 +53,7 @@ Never:
 18. Collapse the design into one dominant image with three tiny fragments, random scraps, or an unstructured montage.
 19. Treat component reduction as permission to remove the primary person, identity-critical face, dominant crowd event, landmark or primary architecture, or a major scene-defining mass.
 20. Fall back to Logical Zone 2 before checking for an important architectural subject, or choose an architectural Anchor from minor façade detail alone.
-21. Move hidden logical boundaries to contain an important building, or force the entire building into one photographic module when a coherent cross-state treatment would strengthen the composition.
+21. Move the ownership boundaries to contain an important building, or force the entire building into one photographic module when a coherent cross-state treatment would strengthen the composition.
 22. Trigger architecture-anchor selection from an ordinary background building, generic streetscape façade, distant structure, incidental urban fabric, or visible area alone.
 23. Treat 30%, 65%, and 90% as the same structural abstraction level with only palette, brush texture, rendering style, or medium changes.
 24. Output the four states as four full-image versions of the photograph — a 2×2 grid, a strip, a contact sheet, or any layout where the full scene appears more than once — instead of one continuous image tiled by four adjacent regions.
