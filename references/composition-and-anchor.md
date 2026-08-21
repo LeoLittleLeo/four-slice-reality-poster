@@ -2,7 +2,7 @@
 
 ## Contents
 
-* Canvas and equal logical zones
+* Canvas and state-ownership regions
 * Ordered Strip Topology
 * Source ownership exclusivity
 * Direction selection
@@ -13,20 +13,20 @@
 * Abstraction assignment
 * Spatial freedom and cohesion
 
-## Canvas and equal logical zones
+## Canvas and state-ownership regions
 
 Preserve the source image's aspect ratio and use its dimensions as the compositional basis unless the user explicitly requests another format. Do not stretch, compress, or arbitrarily extend the canvas.
 
 Ownership is defined directly by the four **state-ownership regions** — the
 region masks produced by the boundary family. They tile the source-ratio
-canvas exactly (every pixel has one owner). The "four hidden logical zones"
-mentioned throughout this document are that ownership model: a conceptual
-reference, NOT a separate geometric layer. "Four geometrically EQUAL hidden
-logical zones" is literally true only in the `rect` family (the strips are
-the quarters) and as the nominal band centers of the `contour` family. In the
-default `natural` family (and `collage`/`torn`) the ownership regions are the
-composition-driven masks themselves — they are NOT quarter-based. Never
-re-shape an ownership region to protect content after it is created.
+canvas exactly (every pixel has one owner). They are the ownership model
+itself, NOT a separate geometric layer and NOT a set of equal quarters:
+"four geometrically EQUAL regions" is literally true only in the `rect`
+family (the strips are the quarters) and as the nominal band centers of the
+`contour` family. In the default `natural` family (and `collage`/`torn`) the
+ownership regions are the composition-driven masks themselves — they are NOT
+quarter-based. Never re-shape an ownership region to protect content after
+it is created.
 
 Translate the hidden ownership system into four visible modules governed by
 the family-specific topology (see below). In the default natural family the
@@ -44,7 +44,7 @@ full-image versions.
 
 Applies to the **legacy torn** family and the `vertical-strip` /
 `horizontal-strip` collage layouts: the visible regions must preserve the
-sequential four-region order of the hidden logical zones. Visible boundaries
+sequential four-region order. Visible boundaries
 may deviate locally, but every internal boundary must remain **one continuous
 edge-to-edge seam**, and the global module topology must stay simple and
 ordered.
@@ -180,7 +180,7 @@ Non-semantic decorative repetition is allowed only when it does not create a sec
 
 ### Continuous subjects are not duplicates
 
-A person, building, crowd, road, skyline, tree canopy, or other large subject may naturally cross multiple hidden logical zones.
+A person, building, crowd, road, skyline, tree canopy, or other large subject may naturally cross multiple state-ownership regions.
 
 When this occurs, each module may render only the portion of that continuous subject that spatially belongs to its own logical zone.
 
@@ -256,7 +256,12 @@ Select a slice as the Reality Anchor when:
 
 Determine crowd ownership by combining visible-people concentration, density of human activity, semantic importance of the group, and whether the crowd reads as one coherent event or focal cluster. Do not use raw person count alone when another slice contains the more important human event.
 
-Keep all four hidden equal boundaries fixed. Do not move or resize logical zones to accommodate a crowd. If a crowd spans multiple zones, select the zone with the strongest combined concentration and semantic importance. Allow the visible Reality module to follow the crowd grouping when the overall module system remains balanced, but do not reproduce the entire crowd event in neighboring modules.
+Keep the ownership boundaries fixed (the exact masks the script writes). Do
+not move or resize the regions to accommodate a crowd. If a crowd spans
+multiple regions, select the region with the strongest combined
+concentration and semantic importance. Allow the visible Reality module to
+follow the crowd grouping when the overall module system remains balanced,
+but do not reproduce the entire crowd event in neighboring modules.
 
 ## Architecture Anchor fallback
 
@@ -272,13 +277,13 @@ Treat architecture as important when it is visually prominent, carries landmark 
 
 Require genuine subject importance, not mere presence or background area. Ordinary background buildings, generic streetscape façades, incidental urban fabric, distant structures, and buildings that only fill space must not automatically trigger architecture-anchor selection. Large visible area alone is insufficient when the architecture does not carry scene recognition, landmark identity, compositional dominance, or main-subject status.
 
-Do not determine ownership from minor façade detail alone. If the building spans multiple logical zones, choose the zone containing the most identity-critical and semantically important share. Keep all hidden logical boundaries fixed.
+Do not determine ownership from minor façade detail alone. If the building spans multiple regions, choose the region containing the most identity-critical and semantically important share. Keep all ownership boundaries fixed.
 
 When an important building becomes the Reality Anchor, keep its most identity-critical portion in the photographic Reality module whenever compositionally possible. Allow other portions of the same building to continue through neighboring abstract modules to create stronger reality-versus-abstraction contrast, especially along a bridge, roofline, tower, façade rhythm, or skyline.
 
-This continuation must follow source provenance. Each neighboring module may reinterpret only the building portion that originally lies within its own logical zone. Do not regenerate the entire building in each module.
+This continuation must follow source provenance. Each neighboring module may reinterpret only the building portion that originally lies within its own ownership region. Do not regenerate the entire building in each module.
 
-Across those modules, preserve silhouette, primary massing, perspective, landmark identity, and major structural rhythm. Allow abstract portions to simplify surface detail, windows, texture, decoration, and minor structures. Design visible module boundaries around the architecture when useful, but never move hidden ownership boundaries to contain the building.
+Across those modules, preserve silhouette, primary massing, perspective, landmark identity, and major structural rhythm. Allow abstract portions to simplify surface detail, windows, texture, decoration, and minor structures. Design visible module boundaries around the architecture when useful, but never move the ownership boundaries to contain the building.
 
 ## Default Anchor fallback
 

@@ -42,7 +42,7 @@ from collections import deque
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageStat
 
 Box = Tuple[int, int, int, int]
 LEVELS = (30, 65, 90)
@@ -1310,34 +1310,119 @@ def assign_levels(anchor: int, levels: List[int]) -> Dict[int, int]:
     return {zone: level for zone, level in zip(non_anchor, levels)}
 
 
-def auto_methods(source: Path, seed: int) -> Dict[int, str]:
-    """Deterministic default Primary Method per abstraction level.
+def region_features(img: Image.Image) -> Dict[str, float]:
+    """Color and structure features of a region crop, read by the
+    content-aware method router. PIL only — no numpy.
 
-    Picks one method from each level's own pool (Level-Gated system) from a
-    stable hash of `source` and `seed`, so different photos get different
-    methods per level while the same source + seed always repeats exactly.
-    Pools are pairwise disjoint, so `30% ≠ 65% ≠ 90%` holds by construction.
+    Returns saturation / hue variance / warmth / edge density / detail /
+    luminance contrast of the region's own slice of the photograph.
+    """
+    rgb = img.convert("RGB")
+    hsv = rgb.convert("HSV")
+    h, s, v = hsv.split()
+    sat = ImageStat.Stat(s)
+    val = ImageStat.Stat(v)
+    sat_mean = sat.mean[0] / 255.0
+    sat_std = sat.stddev[0] / 255.0
+    val_mean = val.mean[0] / 255.0
+    # circular hue variance, weighted by saturation (desaturated pixels
+    # contribute less) — how varied the region's hues are.
+    hpix = list(h.getdata())
+    spix = list(s.getdata())
+    sx = sy = wsum = 0.0
+    for hh, ss in zip(hpix, spix):
+        w = ss / 255.0
+        ang = math.radians(hh * 360.0 / 255.0)
+        sx += math.cos(ang) * w
+        sy += math.sin(ang) * w
+        wsum += w
+    hue_var = 0.0
+    if wsum > 0:
+        sx /= wsum
+        sy /= wsum
+        hue_var = max(0.0, min(1.0, 1.0 - math.sqrt(sx * sx + sy * sy)))
+    # warmth: mean R minus mean B
+    r, _, b = rgb.split()
+    warmth = (ImageStat.Stat(r).mean[0] - ImageStat.Stat(b).mean[0]) / 255.0
+    # edge density and detail (high-frequency energy) via FIND_EDGES
+    lum = rgb.convert("L")
+    edges = lum.filter(ImageFilter.FIND_EDGES)
+    edge_mean = ImageStat.Stat(edges).mean[0] / 255.0
+    edges2 = edges.filter(ImageFilter.FIND_EDGES)
+    detail = ImageStat.Stat(edges2).mean[0] / 255.0
+    lum_std = ImageStat.Stat(lum).stddev[0] / 255.0
+    return {
+        "sat_mean": sat_mean,
+        "sat_std": sat_std,
+        "val_mean": val_mean,
+        "hue_var": hue_var,
+        "warmth": warmth,
+        "edge_mean": edge_mean,
+        "detail": detail,
+        "lum_std": lum_std,
+    }
+
+
+def method_scores(level: int, f: Dict[str, float]) -> Dict[str, float]:
+    """Content-fit score of every method in `level`'s pool against the
+    region's features. Higher = better fit for THIS region's color/structure.
+    """
+    if level == 30:
+        return {
+            "Colored Sketch": f["sat_mean"] * 0.6 + f["hue_var"] * 0.5 + f["sat_std"] * 0.3,
+            "Line Abstraction": f["edge_mean"] * 0.7 + f["detail"] * 0.3,
+            "Painterly Abstraction": (1.0 - f["edge_mean"]) * 0.5 + f["warmth"] * 0.3 + f["val_mean"] * 0.2,
+        }
+    if level == 65:
+        return {
+            "Geometric Abstraction": f["edge_mean"] * 0.6 + f["lum_std"] * 0.4,
+            "Fragmentation": f["detail"] * 0.6 + f["edge_mean"] * 0.4,
+            "Collage Abstraction": f["hue_var"] * 0.7 + f["sat_std"] * 0.3,
+        }
+    return {
+        "Shape Reduction": f["lum_std"] * 0.5 + f["edge_mean"] * 0.3 + (1.0 - f["detail"]) * 0.2,
+        "Chinese Ink Wash": (1.0 - f["sat_mean"]) * 0.5 + (1.0 - f["edge_mean"]) * 0.3 + f["val_mean"] * 0.2,
+        "Cartoon Pixel": f["sat_mean"] * 0.5 + f["edge_mean"] * 0.3 + (1.0 - f["hue_var"]) * 0.2,
+    }
+
+
+def auto_methods(level_map: Dict[int, int], zone_images: Dict[int, Image.Image],
+                 seed: int) -> Dict[int, str]:
+    """Content-aware deterministic Primary Method per abstraction level.
+
+    For each level, read the color and structure features of the region that
+    owns that level (saturation, hue variance, warmth, edge density, detail)
+    and pick the best-fitting method INSIDE that level's pool. Ties are
+    broken by a stable source+seed hash, so the same photo + seed always
+    repeats exactly while different photos select different methods per
+    level (pools stay sets, never singletons).
     """
     methods = {}
     for level in LEVELS:
+        zones = [z for z, lv in level_map.items() if lv == level]
+        if not zones:
+            continue
+        f = region_features(zone_images[zones[0]])
+        scores = method_scores(level, f)
         pool = METHOD_POOLS[level]
-        idx = (zlib.crc32(str(source).encode()) ^ seed ^ level) % len(pool)
-        methods[level] = pool[idx]
+        best = max(pool, key=lambda m: (scores[m], zlib.crc32(m.encode()) ^ seed))
+        methods[level] = best
     return methods
 
 
-def parse_methods(value: Optional[str], source: Path, seed: int) -> Dict[int, str]:
+def parse_methods(value: Optional[str], level_map: Dict[int, int],
+                  zone_images: Dict[int, Image.Image], seed: int) -> Dict[int, str]:
     """Resolve the Primary Method per level.
 
-    `value` may be None (auto: `auto_methods`) or a comma list of
-    `LEVEL:METHOD` entries. Every explicit method must belong to ITS level's
-    pool; a method from another level's pool (e.g. ink wash at 65%) is
-    refused — level gates the pool first, then the method is picked inside
+    `value` may be None (auto: content-aware `auto_methods`) or a comma list
+    of `LEVEL:METHOD` entries. Every explicit method must belong to ITS
+    level's pool; a method from another level's pool (e.g. ink wash at 65%)
+    is refused — level gates the pool first, then the method is picked inside
     that pool. Color Blocking is Supporting-only and is refused as a Primary
     Method.
     """
     if value is None:
-        return auto_methods(source, seed)
+        return auto_methods(level_map, zone_images, seed)
     methods = {}
     for part in value.split(","):
         part = part.strip()
@@ -1361,8 +1446,7 @@ def parse_methods(value: Optional[str], source: Path, seed: int) -> Dict[int, st
             raise SystemExit(
                 f"--methods: {name!r} is not in the {level}% pool "
                 f"{list(METHOD_POOLS[level])}. Level gates the pool FIRST; "
-                f"pick the method inside that pool (or override the pools "
-                f"explicitly)."
+                f"pick the method inside that pool."
             )
         methods[level] = name
     if sorted(methods) != list(LEVELS):
@@ -1491,9 +1575,22 @@ def cmd_prepare(args: argparse.Namespace) -> None:
 
     # Level-Gated Primary Method routing (deterministic hard rule): level
     # gates the pool first, then the Primary Method is picked inside that
-    # pool. Auto picks from a stable source+seed hash; --methods overrides
+    # pool. Auto reads each region's own slice (color/structure features) to
+    # pick the best-fitting method in the level's pool; --methods overrides
     # are validated against each level's pool.
-    method_map = parse_methods(args.methods, source, args.seed)
+    zone_crops = []
+    for i, mask in enumerate(masks):
+        bbox = mask.getbbox()
+        if bbox is None:
+            raise SystemExit(f"Zone mask {i + 1} is empty.")
+        box = tuple(bbox)
+        crop_box = crop_box_for(box, width, height, args.margin)
+        zone_crops.append((box, crop_box, img.crop(crop_box)))
+    method_map = parse_methods(
+        args.methods, level_map,
+        {i: zone_crops[i][2] for i in range(4) if i != anchor},
+        args.seed,
+    )
     for level in LEVELS:
         print(f"Primary Method @ {level}% -> {method_map[level]} "
               f"(pool: {', '.join(METHOD_POOLS[level])})")
@@ -1511,17 +1608,11 @@ def cmd_prepare(args: argparse.Namespace) -> None:
         head_mask.save(head_mask_path)
 
     manifest_zones = []
-    for i, mask in enumerate(masks):
-        bbox = mask.getbbox()
-        if bbox is None:
-            raise SystemExit(f"Zone mask {i + 1} is empty.")
-        box = tuple(bbox)
-        crop_box = crop_box_for(box, width, height, args.margin)
-        crop = img.crop(crop_box)
+    for i, (box, crop_box, crop) in enumerate(zone_crops):
         crop_path = crops_dir / f"zone{i}.png"
         crop.save(crop_path)
         mask_path = masks_dir / f"zone{i}.png"
-        mask.save(mask_path)
+        masks[i].save(mask_path)
         manifest_zones.append(
             {
                 "index": i,

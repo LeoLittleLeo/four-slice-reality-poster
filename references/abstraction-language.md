@@ -131,18 +131,18 @@ The three pools MUST be pairwise disjoint — no method is eligible at more
 than one abstraction level:
 
 ```text
-30% Primary Method Pool
-∩
-65% Primary Method Pool
-∩
-90% Primary Method Pool
-=
-∅
+(30% Primary Method Pool) ∩ (65% Primary Method Pool) = ∅
+(30% Primary Method Pool) ∩ (90% Primary Method Pool) = ∅
+(65% Primary Method Pool) ∩ (90% Primary Method Pool) = ∅
 ```
 
-Because the pools are disjoint, choosing one Primary Method from each level's
-pool AUTOMATICALLY satisfies `30% ≠ 65% ≠ 90%` — the methods are distinct by
-construction, never by review.
+Pairwise disjointness is stronger than a single empty triple intersection:
+every pair of pools shares NO method, so no method can appear at two
+different abstraction levels.
+
+Because the pools are pairwise disjoint, choosing one Primary Method from
+each level's pool AUTOMATICALLY satisfies `30% ≠ 65% ≠ 90%` — the methods
+are distinct by construction, never by review.
 
 ### Pools are sets, not singletons
 
@@ -197,15 +197,19 @@ agent:
 
 * `--mode prepare` routes the Primary Method per level through these pools
   and writes it into the manifest (top-level `methods`, plus each zone's
-  `primary_method`; the anchor zone is `Reality`). Default: a deterministic
-  auto pick per pool from the source+seed hash — the same photo + seed always
-  repeats exactly, and different photos get different methods per level
-  (pools stay sets, never singletons).
+  `primary_method`; the anchor zone is `Reality`). The default pick is
+  **content-aware**: the script reads each region's own color/structure
+  features (saturation, hue variance, warmth, edge density, detail) and
+  selects the best-fitting method inside that level's pool. It is fully
+  deterministic — the same photo + seed always repeats exactly, and different
+  photos get different methods per level (pools stay sets, never
+  singletons).
 * `--methods "30:Colored Sketch,65:Fragmentation,90:Shape Reduction"`
-  overrides the pick for content-aware selection. The script **refuses** a
-  method that is not in ITS level's pool (e.g. Chinese Ink Wash at 65%), and
-  **refuses** Color Blocking as a Primary Method — the level gates the pool
-  first, then the region's subject/structure/color picks inside that pool.
+  overrides the pick with an explicit content-driven choice. The script
+  **refuses** a method that is not in ITS level's pool (e.g. Chinese Ink
+  Wash at 65%), and **refuses** Color Blocking as a Primary Method — the
+  level gates the pool first, then the region's subject/structure/color
+  picks inside that pool.
 * `--mode verify` re-checks every recorded zone method against its level's
   pool (a stale manifest without method routing only warns, keeping old
   workdirs working).
@@ -354,10 +358,10 @@ Do not automatically translate higher abstraction into larger, flatter, or fewer
 
 Color Blocking is **Supporting-only** under the Level-Gated system: it
 belongs to NO Primary pool and has NO Primary eligibility at any level
-(30%, 65%, or 90%). It may become a Primary Method ONLY when the user
-explicitly overrides the default method-pool system. Without that
-override, never select it as a Primary Method — even when the source image
-contains strong naturally occurring graphic color structures such as:
+(30%, 65%, or 90%). There is no override pathway in the deterministic
+pipeline — `--methods` refuses Color Blocking as a Primary Method. Never
+select it as a Primary Method — even when the source image contains strong
+naturally occurring graphic color structures such as:
 
 * large façades;
 * strong shadow fields;

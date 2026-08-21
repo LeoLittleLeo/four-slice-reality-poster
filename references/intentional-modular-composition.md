@@ -145,7 +145,13 @@ Differentiate adjacent modules with at least two deliberate signals such as rend
 
 For the 30%, 65%, and 90% modules, at least one differentiating signal between every pair must be structural information density: detail retention, component count, spatial fidelity, shape fidelity, or photographic surface retention. Palette, brush texture, and medium changes may reinforce the difference but cannot create it alone.
 
-Keep all four modules roughly balanced in area and visual importance. Do not create one dominant main image with three tiny fragments, random collage scraps, or an unstructured montage. The Reality module may expand or contract around a protected subject, but rebalance the other modules so all four states remain substantial.
+Keep every module substantial and readable. Do not create one dominant main
+image with three tiny fragments, random collage scraps, or an unstructured
+montage. The Reality module may expand or contract around a protected
+subject, but rebalance the other modules so all four states remain
+substantial. In the default natural family region sizes are
+composition-driven (no quarter-based balance requirement); the non-natural
+families stay roughly balanced in area.
 
 Keep ONE photographic color identity across all four slices: every region
 shows the source photograph's color passed through its own abstraction

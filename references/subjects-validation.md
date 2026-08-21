@@ -66,7 +66,7 @@ Never:
 
 Confirm before delivery:
 
-- Four disjoint state-ownership regions tile the source-ratio canvas exactly (conceptual "hidden logical zones"; literally equal quarters only in the rect family). Ownership, Reality Anchor selection, and 30/65/90 assignment are defined directly by the region masks.
+- Four disjoint state-ownership regions tile the source-ratio canvas exactly (the exact masks the script writes). Ownership, Reality Anchor selection, and 30/65/90 assignment are defined directly by the region masks. Equal/quarter-based regions exist only in the `rect` family; the default `natural`/`collage` families are composition-driven.
 - Direction follows semantic structure rather than orientation alone.
 - Exactly one anchor exists via the script's `--anchor auto`: primary-face ownership (the PRIMARY face's largest overlap inside the region masks) -> side-weighted central corridor (no primary face) -> Logical Zone 2 fallback. Crowd/architecture anchors are agent-chosen via `--anchor 1..4` — the script does not auto-detect them.
 - Crowd ownership reflects concentration, activity density, event significance, and coherent focal grouping—not raw person count alone.

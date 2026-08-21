@@ -19,10 +19,9 @@ to be one continuous image tiled by four adjacent regions of the source — neve
 a 2x2 grid, strip, or contact sheet of four full-image versions.
 
 The four states are owned by the four state-ownership regions (the exact
-pixel masks the script writes); the "equal hidden logical zones" reference of
-[composition-and-anchor.md](composition-and-anchor.md) is literal only for the
-`rect` family (equal strips) and as nominal band centers for `contour`. The
-default `natural`/`collage` families are composition-driven and NOT
+pixel masks the script writes). Equal/quarter-based regions exist only in
+the `rect` family (equal strips) and as nominal band centers for `contour`;
+the default `natural`/`collage` families are composition-driven and NOT
 quarter-based.
 
 ## Boundary families
@@ -358,11 +357,13 @@ Options:
   Line Abstraction / Painterly Abstraction; 65% = Geometric Abstraction /
   Fragmentation / Collage Abstraction; 90% = Shape Reduction / Chinese Ink
   Wash / Cartoon Pixel); a method from another level's pool or Color Blocking
-  (Supporting-only) is refused. Default: a deterministic auto pick per pool
-  from the source+seed hash — same photo + seed always repeats exactly, and
-  different photos produce different methods. The routed methods are written
-  into the manifest (`methods` and each zone's `primary_method`) and are
-  checked again by `--mode verify`.
+  (Supporting-only) is refused. Default: a **content-aware** deterministic
+  auto pick — the script reads each region's color/structure features
+  (saturation, hue variance, warmth, edge density, detail) and selects the
+  best-fitting method inside that level's pool; same photo + seed always
+  repeats exactly, and different photos produce different methods. The routed
+  methods are written into the manifest (`methods` and each zone's
+  `primary_method`) and are checked again by `--mode verify`.
 - `--margin 0.12` — context margin around each zone crop, as a fraction of the
   zone's bounding box. Give the model enough context to keep the scene
   semantically connected.
@@ -414,9 +415,22 @@ Supporting Methods only when they reinforce the Primary Method; they must
 never visually override it. The rest of the photograph does not exist for
 you: do NOT reconstruct, complete, extrapolate, or invent content outside
 this crop, and do NOT show the full scene. The output must contain exactly
-the same slice, the same framing, the same camera angle, the same subject
-placement, and the same aspect ratio as the input crop — nothing new may
-enter the frame. The output image must keep the SAME aspect ratio and
+the same slice, the same framing, the same camera angle, and the same aspect
+ratio as the input crop — nothing new may enter the frame.
+
+PLACEMENT RULE (depends on {PRIMARY_METHOD}):
+- For Line Abstraction, Colored Sketch, Painterly Abstraction, Geometric
+  Abstraction, Shape Reduction, Chinese Ink Wash, and Cartoon Pixel: keep the
+  same subject placement as the input crop — do not move, offset, or
+  restructure the subjects' positions.
+- For Fragmentation and Collage Abstraction: you MAY displace, offset,
+  rotate, crop, separate, reorder, or re-layer the source elements WITHIN
+  this slice — that is the method. The result must still read as fragments or
+  pieces of THIS slice's subjects (never as separate full objects), must
+  never import content from outside the crop, and must not duplicate any
+  recognizable source subject.
+
+The output image must keep the SAME aspect ratio and
 orientation as the input crop: a portrait crop stays portrait, a landscape
 crop stays landscape — never rotate, never change the output format. Keep it
 as ONE continuous slice with no frames, borders, gutters, labels, dividers,
@@ -482,12 +496,17 @@ photograph, using {PRIMARY_METHOD} as the dominant abstraction language. The
 Primary Abstraction Method is mandatory and must be perceptually dominant —
 do not substitute another Primary Method. Use Supporting Methods only when
 they reinforce the Primary Method; they must never visually override it.
+PLACEMENT RULE: for Fragmentation and Collage Abstraction you may displace,
+offset, crop, or re-layer the source elements WITHIN the masked region (that
+is the method); for every other method keep the masked region's subject
+placement identical to the source. Never import content from outside the
+mask, and never duplicate a recognizable source subject.
 The mask marks the ONLY region you may change. Keep every pixel outside the
 mask EXACTLY unchanged — do not redraw, complete, reformat, or recompose
 content outside the mask. The output is the SAME single canvas at the SAME
 aspect ratio, never a new image, a grid, a contact sheet, or multiple
-versions of the scene. Keep the masked region's composition, framing, and
-subject placement identical to the source. Do not add frames, borders,
+versions of the scene. Keep the masked region's framing and aspect identical
+to the source. Do not add frames, borders,
 gutters, labels, or panels. Keep the warm, nostalgic, sunlit, slightly retro
 Robot Dreams-inspired palette.
 ```
