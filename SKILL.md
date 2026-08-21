@@ -63,36 +63,35 @@ Do not force every color into every image. Adapt the palette to the source while
 
 ### Robot Dreams Shared Palette System
 
-The four regions share **one shared limited palette** — the photograph's own
-colors mapped through the uniform warm Robot Dreams-inspired grade. The
-palette is ONE set of hues, accents, and relationships used by all four
-regions; each abstraction region may **rebalance the proportions** of those
-shared colors (30% stays close to the source's local color distribution, 65%
-groups the shared colors into broader masses, 90% narrows the proportion set
-toward the most essential shared hues) — but must never change WHICH colors
-are available.
+The four regions share **one shared limited palette**, built by
+reinterpreting the source photograph's color EVIDENCE through the Robot
+Dreams palette families — NOT by copying the colors that literally exist in
+the photo. The palette is ONE set of hues, accents, and relationships used
+by all four regions; each abstraction region may **rebalance the
+proportions** of those shared colors (30% stays closest to the source color
+evidence, 65% groups the shared colors into broader masses, 90% narrows the
+proportion set toward the most essential shared hues) — but must never
+change WHICH colors are available.
 
 ```text
-SOURCE PHOTO
+SOURCE COLOR EVIDENCE
++
+ROBOT DREAMS PALETTE FAMILIES
 ↓
-GLOBAL ROBOT-DREAMS PALETTE MAPPING
+GLOBAL PALETTE INTERPRETATION
 ↓
-shared limited palette
-↓
-each abstraction region may rebalance
-the proportions of those shared colors
-↓
-ONE coherent poster
+LIMITED SHARED POSTER PALETTE
 ```
 
 Regions must NOT be separated by region-specific color roles, dominant hues,
 warm/cool contrasts, or value roles: that would turn the poster back into
 four differently-colored design modules instead of one photo.
 
-In other words: a region's color is always derived from ITS OWN slice of the
-source, transformed by that region's abstraction level (30% stays closest to
-the photo's local color, 90% is most interpretive) — the shared palette
-stays the same, only its proportions are rebalanced. Assigning clearly
+In other words: a region's color is always a reinterpretation of ITS OWN
+slice of the source evidence through the shared palette, transformed by that
+region's abstraction level (30% stays closest to the source color evidence,
+90% is most interpretive) — the shared palette stays the same, only its
+proportions are rebalanced. Assigning clearly
 different dominant color roles per region (e.g. Slice A → terracotta, Slice
 B → cream, Slice C → dusty blue, Slice D → ochre) is an OPTIONAL artistic
 choice only when the user explicitly requests it — never the default.

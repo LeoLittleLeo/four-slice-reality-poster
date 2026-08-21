@@ -159,8 +159,9 @@ substantial. In the default natural family region sizes are
 composition-driven (no quarter-based balance requirement); the non-natural
 families stay roughly balanced in area.
 
-Keep ONE shared limited palette across all four slices: every region shows
-the source photograph's color passed through its own abstraction method,
+Keep ONE shared limited poster palette across all four slices: every region
+shows the source photograph's color EVIDENCE reinterpreted through the Robot
+Dreams palette families, passed through its own abstraction method,
 rebalancing the proportions of the shared colors. Color differences appear
 only where the abstraction itself reinterprets the shared colors (strokes,
 planes, silhouettes, washes) — never as module-level palette shifts, hue
@@ -223,6 +224,6 @@ Inspect the poster at thumbnail size and ask:
 - Are the head contour, hair silhouette, and face-to-neck connection coherent? (Body and building continuity across states may be soft or intentionally broken.)
 - If important architecture owns the Anchor, does it preserve silhouette, massing, perspective, landmark identity, and structural rhythm while using cross-module state contrast effectively?
 - Does any unifying treatment flatten the four states into one painting?
-- Do color differences emerge only from each region's abstraction of the shared source color (never from module-level palette roles)?
+- Do color differences emerge only from each region's abstraction of the shared poster palette (never from module-level palette roles)?
 
 Reject the result if the four states merge into an almost continuous illustration, if 30%, 65%, and 90% are perceptually interchangeable or differ only by color or medium, if seamlessness hides the modular structure, or if any restoration creates facial patches, geometry mismatch, or human stitching errors. In the default natural family, also reject if the poster reads as four separate paper sheets, as four wavy strips with decorative lines, as arbitrary blob segmentation, or if the paper material is painted over whole regions instead of representing only the boundary. Accept visible boundaries and medium/abstraction changes when they are clean, controlled, and compositionally intentional — color breaks that shift a region away from the shared photographic identity are not acceptable in the default natural family.

@@ -16,37 +16,42 @@ The poster is ONE photograph, and its color comes from ONE shared, limited
 palette — not four independent palettes:
 
 ```text
-SOURCE PHOTO
+SOURCE COLOR EVIDENCE
++
+ROBOT DREAMS PALETTE FAMILIES
 ↓
-GLOBAL ROBOT-DREAMS PALETTE MAPPING
+GLOBAL PALETTE INTERPRETATION
 ↓
-shared limited palette
-↓
-each abstraction region may rebalance
-the proportions of those shared colors
-↓
-ONE coherent poster
+LIMITED SHARED POSTER PALETTE
 ```
 
-The shared palette is derived from the source photograph's own colors under
-the uniform warm Robot Dreams-inspired grade (the deterministic pipeline
-applies this mapping to the whole poster via `--paper-grade`, a color-only
-transform: no grain, no structure change, no per-region tinting). The
-Reality Anchor and the primary head are re-composited from the GRADED
-source, so they live in exactly the same shared palette as every abstract
-region.
+The source photograph is **color evidence, not a literal color list**: the
+final palette is NOT derived only from colors that already exist literally
+in the photograph. Instead, the source's color character (its hues, warmth,
+contrast relationships, dominant and supporting colors, accents) is read as
+evidence and **reinterpreted through the Robot Dreams palette families**
+(below) — warm foundations, air and sky, balanced greens, controlled
+accents. The result is a **global palette interpretation**: one limited,
+coherent set of hues for the whole poster that honors the photograph's
+evidence while living fully inside the Robot Dreams-inspired world.
+
+The deterministic pipeline applies this mapping to the whole poster via
+`--paper-grade` (a color-only transform: no grain, no structure change, no
+per-region tinting). The Reality Anchor and the primary head are
+re-composited from the GRADED source, so they live in exactly the same
+shared poster palette as every abstract region.
 
 The color language is therefore:
 
 - **one shared limited palette** for all four regions — the same hue family,
   the same warm/cool relationship, the same accents, the same emotional
-  temperature;
+  temperature, produced by the global palette interpretation;
 - **regional palette rebalancing**: each abstraction region may shift the
-  PROPORTIONS of those shared colors — a 30% region stays close to the
-  source's local color distribution, a 65% region groups the shared colors
-  into broader masses, a 90% region narrows the proportion set toward the
-  most essential shared hues. Rebalancing changes how much of each shared
-  color appears, never which colors are available;
+  PROPORTIONS of those shared colors — a 30% region stays closest to the
+  source color evidence, a 65% region groups the shared colors into broader
+  masses, a 90% region narrows the proportion set toward the most essential
+  shared hues. Rebalancing changes how much of each shared color appears,
+  never which colors are available;
 - **no palette identity per region**: a region must never introduce a hue,
   accent, or color relationship that is not in the shared palette, and never
   assign itself a distinct dominant-hue role that breaks the shared
@@ -94,6 +99,25 @@ Build the shared palette primarily from:
 Adapt these families to the source rather than forcing every named hue into
 every image. Preserve major source color identity when it supports the shared
 emotional palette.
+
+### Default interpretation examples (source color evidence → palette families)
+
+The source photograph's colors are EVIDENCE, reinterpreted through the
+families — never copied literally. When a source region shows a color like
+one below, default to its Robot Dreams-family reinterpretation (the exact
+choice depends on the region's content and the poster's balance):
+
+```text
+gray asphalt        → ochre / muted terracotta / dusty blue / warm gray
+digital blue sky    → dusty blue / pale cyan / aged cream / muted teal
+green vegetation    → sage / dusty olive / softened blue-green / ochre-green
+white concrete      → warm cream / sand / pale peach / soft gray-blue
+```
+
+These are the DEFAULT interpretation directions, not a fixed palette: the
+same source evidence may lean to different family members in different
+regions, as long as every choice stays inside the shared poster palette and
+the four regions keep rebalancing one limited color set.
 
 ## Saturation, contrast, and accents
 
@@ -194,16 +218,20 @@ comes from their abstraction languages, never from per-region color roles.
 
 ## Execution and validation
 
-1. Establish the global palette mood.
+1. Read the source photograph as COLOR EVIDENCE — its hues, warmth, contrast
+   relationships, dominant and supporting colors, and accents — then build
+   the GLOBAL PALETTE INTERPRETATION by reinterpreting that evidence through
+   the Robot Dreams palette families. Never copy the photograph's literal
+   color list.
 2. Keep the Reality Anchor photographic and source-faithful: the deterministic
    pipeline composites it from the (uniformly graded) source; the primary head
    is force-composited from the source on top. Optionally grade the Reality
    candidate with deterministic non-generative operations that cannot alter
    facial geometry, facial texture structure, feature placement, or identity;
    otherwise leave it unchanged.
-3. Render each abstract zone from the SHARED palette — the method's structural
-   language carries the shared colors, rebalancing their proportions per
-   region.
+3. Render each abstract zone from the LIMITED SHARED POSTER PALETTE — the
+   method's structural language carries the shared colors, rebalancing their
+   proportions per region.
 4. Apply the same warm grade uniformly to the whole poster; never tint regions
    differently.
 5. Repeat a small, controlled accent set consistently wherever the same source
@@ -211,7 +239,8 @@ comes from their abstraction languages, never from per-region color roles.
 
 Before delivery, confirm that the poster reads as ONE photograph whose four
 regions differ only by abstraction: the anchor is the (graded) source; the
-30%, 65%, and 90% regions reinterpret their own slice of the SAME shared
-palette, rebalancing its proportions; saturation and contrast remain
-controlled; accents are intentional; and no region has been given its own
-palette, hue role, or color identity.
+30%, 65%, and 90% regions reinterpret their own slice of the SAME limited
+shared poster palette (built from source color evidence through the Robot
+Dreams palette families), rebalancing its proportions; saturation and
+contrast remain controlled; accents are intentional; and no region has been
+given its own palette, hue role, or color identity.

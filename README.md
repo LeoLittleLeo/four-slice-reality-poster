@@ -425,19 +425,25 @@ four ordered sequential regions
 
 ### Robot Dreams Shared Palette System
 
-四个区域共享**同一个有限调色板**——源照片本色经统一微暖 Robot Dreams 调色映射而成。每个抽象区域可以**再平衡这些共享颜色的比例**（30% 贴近源图颜色分布、65% 把共享色聚成更大色块、90% 收敛到最核心的共享色），但**不能改变调色板本身**：不得引入共享色之外的色相、强调色或色相角色。
+四个区域共享**同一个有限调色板**——它由源照片的**颜色证据**经 Robot Dreams 调色板家族**重新诠释**而成，**不是照抄源照片里已有的颜色**。每个抽象区域可以**再平衡这些共享颜色的比例**（30% 贴近源图颜色证据、65% 把共享色聚成更大色块、90% 收敛到最核心的共享色），但**不能改变调色板本身**：不得引入共享色之外的色相、强调色或色相角色。
 
 ```text
-SOURCE PHOTO
+SOURCE COLOR EVIDENCE
++
+ROBOT DREAMS PALETTE FAMILIES
 ↓
-GLOBAL ROBOT-DREAMS PALETTE MAPPING
+GLOBAL PALETTE INTERPRETATION
 ↓
-shared limited palette
-↓
-each abstraction region may rebalance
-the proportions of those shared colors
-↓
-ONE coherent poster
+LIMITED SHARED POSTER PALETTE
+```
+
+默认诠释示例（源颜色证据 → 家族色）：
+
+```text
+gray asphalt        → ochre / muted terracotta / dusty blue / warm gray
+digital blue sky    → dusty blue / pale cyan / aged cream / muted teal
+green vegetation    → sage / dusty olive / softened blue-green / ochre-green
+white concrete      → warm cream / sand / pale peach / soft gray-blue
 ```
 
 禁止用"每区一套主色"来区分状态：
@@ -750,7 +756,8 @@ then the region's content picks one method inside that pool;
 
 ```text
 ROBOT DREAMS SHARED PALETTE —
-one shared limited palette for all four regions;
+source color evidence reinterpreted through the palette families,
+one shared limited poster palette for all four regions;
 each region rebalances the proportions of those shared colors,
 never its own palette identity.
 ```
