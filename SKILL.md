@@ -26,7 +26,7 @@ The four states must be immediately legible while the poster stays one coherent 
 
 ## Final Output Layout — Hard Constraint
 
-The deliverable is **one continuous image at the source aspect ratio**. The four states (Reality, 30%, 65%, 90%) are four **adjacent regions** of that one canvas: they tile the entire canvas, share edges with each other, and each region shows a different **slice** of the original photograph. The scene appears **exactly once**. Never deliver a 2×2 grid, a contact sheet, a strip of four full-image versions, four panels each containing the full scene, gutters, or panel gaps.
+The deliverable is **one continuous image at the source aspect ratio**. The four states (Reality, 30%, 65%, 90%) are four **adjacent regions** of that one canvas: they tile the entire canvas, share edges with each other, and **each region — Reality included — shows a different slice of the original photograph**. Reality is the photographic version of ITS slice only; it is never the full image. The scene appears **exactly once** across the four slices. Never deliver a 2×2 grid, a contact sheet, a strip of four full-image versions, four panels each containing the full scene, gutters, or panel gaps.
 
 Prefer the deterministic path: define the four zones, render each abstract zone separately, and compose with `scripts/slice_and_compose.py` — the image model never decides the slicing. See [deterministic-layout.md](references/deterministic-layout.md) for the pipeline, CLI usage, and the verbatim prompt blocks.
 

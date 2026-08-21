@@ -98,7 +98,7 @@ Confirm before delivery:
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains. The default soft transition band (`--feather`, ~2%) keeps boundaries gentle, but the four states remain readable at thumbnail size.
 - The final image is ONE continuous source-ratio canvas tiled by four adjacent regions that share edges; the scene appears exactly once.
 - One-Scene / One-Object Ownership: every recognizable scene object appears once, spatially continuous on the final canvas; an object may cross regions and change rendering language, but never restarts, repeats, or is redrawn as another copy inside another region.
-- The full photograph appears exactly once (the Reality module). Each abstract zone re-renders only its own slice — never a second, third or fourth full-image copy at different abstraction levels; `--mode verify` warns when a zone render resembles the full source scene.
+- Every region — including Reality — shows only its own SLICE of the photograph; the four slices together compose the full photograph exactly once. Reality is the photographic version of ITS slice only; no region contains the full image, and no abstract zone is a second full-image copy at a different abstraction level; `--mode verify` warns when a zone render resembles the full source scene.
 - The default boundary family is **Natural Regions** (`--boundary natural`):
   ONE photograph jointly composed of four natural regions, each region
   differing only by its abstraction; the paper material layer is the
