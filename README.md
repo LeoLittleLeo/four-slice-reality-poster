@@ -399,29 +399,19 @@ four ordered sequential regions
 
 > **温暖、怀旧、阳光感、略带复古、情绪柔和。**
 
-主要颜色家族：
+为整张海报建立**一个有限的 Robot Dreams 调色板宇宙**，优先以下家族（按源场景选择紧凑子集，不要把每个家族都塞进每张照片）：
 
-* cream
-* warm beige
-* dusty peach
-* muted coral
-* terracotta
-* warm brown
-* ochre
-* muted yellow
-* dusty sky blue
-* powder blue
-* muted teal
-* softened blue-green
-* sage
-* dusty olive
+**暖基础**：warm cream、aged ivory、soft beige、warm sand、sunlit ochre、mustard、dusty peach、muted coral、terracotta、faded orange-red、soft brick、warm brown
 
-少量强调色可以使用：
+**空气/天空**：dusty blue、powder blue、pale cyan、washed turquoise、muted teal、gray-blue、warm cloud gray
 
-* tomato red
-* coral
-* navy
-* warm denim
+**绿色**：sage、dusty olive、gray-green、muted teal-green、softened blue-green
+
+**深色**：warm charcoal、dark olive、muted navy、soft brown-black
+
+**受控强调色**：tomato red、muted cherry red、coral、mustard yellow、terracotta orange、warm denim blue
+
+调色板应让人感到：温暖、怀旧、柔和、阳光、轻微褪色、复古、编辑感、梦幻、平静。避免：霓虹赛博朋克、冷钢蓝主导、紫品红科幻辉光、随机彩虹抽象、荧光波普、重度 HDR、商业广告光泽、暗黑恐怖调色、死气沉沉的灰。
 
 ### Robot Dreams Shared Palette System
 

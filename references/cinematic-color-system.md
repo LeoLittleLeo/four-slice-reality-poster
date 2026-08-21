@@ -75,7 +75,7 @@ different color identities.
 ## Global emotional palette
 
 Establish one shared palette universe for the whole poster before any
-abstraction. Aim for the broad emotional qualities of *Robot Dreams*—warm,
+abstraction. Aim for the broad emotional qualities of *Robot Dreams* — warm,
 nostalgic, gentle, sunlit, slightly retro, harmonious, and dreamlike without
 copying a specific frame. Keep the result stylized but not excessively
 saturated.
@@ -83,18 +83,36 @@ saturated.
 Make all four abstraction states belong to one related emotional family — the
 same warm, nostalgic, sunlit, slightly retro cinematic universe, applied
 uniformly. Favor soft urban sunlight, tender melancholy, quiet optimism,
-softened memory-like color, editorial dreaminess, and cinematic calm. Avoid
-harsh, metallic, coldly futuristic, neon, horror-like, blockbuster-contrast,
-or random pop-art moods unless explicitly requested.
+softened memory-like color, editorial dreaminess, and cinematic calm.
 
 ## Palette families
 
-Build the shared palette primarily from:
+Establish ONE limited Robot Dreams-inspired palette universe for the entire
+poster. Prefer these families:
 
-- **Warm foundations:** warm beige, cream, dusty peach, muted coral, warm sand, soft terracotta, sunlit ochre, warm light brown, soft brick, and faded orange-red.
-- **Air and sky:** powder blue, dusty sky blue, pale cyan, washed turquoise, muted teal, and soft cloud gray-blue. Keep these airy rather than digital.
-- **Balanced greens:** sage, dusty olive, gray-green, muted teal-green, and softened blue-green. Avoid acidic green unless justified by the source.
-- **Controlled accents:** tomato or muted cherry red, mustard yellow, coral, muted navy, warm denim blue, and terracotta red-orange.
+- **Warm foundations:** warm cream, aged ivory, soft beige, warm sand, sunlit ochre, mustard, dusty peach, muted coral, terracotta, faded orange-red, soft brick, warm brown.
+- **Air / sky:** dusty blue, powder blue, pale cyan, washed turquoise, muted teal, gray-blue, warm cloud gray.
+- **Greens:** sage, dusty olive, gray-green, muted teal-green, softened blue-green.
+- **Darks:** warm charcoal, dark olive, muted navy, soft brown-black.
+- **Controlled accents:** tomato red, muted cherry red, coral, mustard yellow, terracotta orange, warm denim blue.
+
+Do NOT force every color family into every photograph. Select a compact
+subset that suits the source scene — the palette should feel:
+
+```text
+warm        nostalgic   gentle      sunlit
+slightly faded          retro       editorial
+dreamlike   calm
+```
+
+Avoid:
+
+```text
+neon cyberpunk          cold steel blue domination
+purple-magenta sci-fi glow           random rainbow abstraction
+fluorescent pop-art     severe HDR  commercial-ad gloss
+dark horror grading     lifeless gray
+```
 
 Adapt these families to the source rather than forcing every named hue into
 every image. Preserve major source color identity when it supports the shared

@@ -48,16 +48,15 @@ Treat the Robot Dreams-inspired cinematic palette as a **default visual identity
 
 Unless the user explicitly requests another color direction, make the final poster inhabit a warm, nostalgic, sunlit, slightly retro, emotionally gentle color world inspired by the broad visual feeling of *Robot Dreams*.
 
-Build primarily from a controlled family of:
+Establish ONE limited Robot Dreams-inspired palette universe for the entire poster, preferring these families (select a compact subset suited to the source scene — do NOT force every family into every photo):
 
-- cream and warm beige;
-- dusty peach and muted coral;
-- terracotta and warm brown;
-- sunlit ochre and muted yellow;
-- dusty sky blue and powder blue;
-- muted teal and softened blue-green;
-- sage and dusty olive;
-- restrained tomato red, coral, navy, or warm denim accents.
+- **Warm foundations:** warm cream, aged ivory, soft beige, warm sand, sunlit ochre, mustard, dusty peach, muted coral, terracotta, faded orange-red, soft brick, warm brown.
+- **Air / sky:** dusty blue, powder blue, pale cyan, washed turquoise, muted teal, gray-blue, warm cloud gray.
+- **Greens:** sage, dusty olive, gray-green, muted teal-green, softened blue-green.
+- **Darks:** warm charcoal, dark olive, muted navy, soft brown-black.
+- **Controlled accents:** tomato red, muted cherry red, coral, mustard yellow, terracotta orange, warm denim blue.
+
+The palette should feel warm, nostalgic, gentle, sunlit, slightly faded, retro, editorial, dreamlike, calm — and avoid neon cyberpunk, cold steel blue domination, purple-magenta sci-fi glow, random rainbow abstraction, fluorescent pop-art, severe HDR, commercial-ad gloss, dark horror grading, and lifeless gray.
 
 Do not force every color into every image. Adapt the palette to the source while preserving this broad emotional identity.
 
