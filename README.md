@@ -443,7 +443,7 @@ Reality
 
 ## ✦ Ordered Torn-Strip Modules
 
-虽然逻辑层严格维护四等分区域，但最终视觉层默认不是规则四切片，而是四条有序区域的撕纸式接缝。
+虽然状态所有权区域由脚本的精确掩码定义，但最终视觉层默认不是规则四切片，而是四条有序区域的撕纸式接缝。
 
 ```text
 logical zones
@@ -457,7 +457,7 @@ four ordered sequential regions
 
 > **IRREGULAR EDGE ≠ IRREGULAR TERRITORY**
 
-> **Hidden ownership is mathematical. Visible boundaries are designed.**
+> **Ownership is defined by the exact region masks. Visible boundaries are designed.**
 
 > **Torn boundaries are layout-defined seams, not semantic segmentation contours.**
 
@@ -814,7 +814,7 @@ Make abstraction structural, not filter-based.
 ```
 
 ```text
-Keep hidden logical ownership mathematically equal.
+The four state-ownership regions tile the canvas exactly.
 ```
 
 ```text

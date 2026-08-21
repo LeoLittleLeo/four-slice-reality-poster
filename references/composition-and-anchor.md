@@ -28,14 +28,14 @@ ownership regions are the composition-driven masks themselves — they are NOT
 quarter-based. Never re-shape an ownership region to protect content after
 it is created.
 
-Translate the hidden ownership system into four visible modules governed by
+Translate the state-ownership regions into four visible modules governed by
 the family-specific topology (see below). In the default natural family the
 modules are four natural regions of ONE photograph (paper-material seam only
 at the boundaries); in the optional collage family they are layered paper
 pieces; in the legacy torn family they are four sequential regions with
 irregular seam edges; in the optional contour family they may follow semantic
 contours. In every family the visible modules must not duplicate or transfer
-recognizable source content across logical owners, must tile the same
+recognizable source content across owners, must tile the same
 continuous canvas at source scale, share edges, and the scene must appear
 exactly once. Never deliver a 2×2 grid, strip, or contact sheet of four
 full-image versions.
@@ -208,7 +208,7 @@ Visible-boundary flexibility may change which treatment visually occupies a smal
 
 Use boundary overlap only as a narrow transition device, not as permission to repeat source content.
 
-When a visible module crosses a hidden ownership boundary for contour-aware design, treat the crossing as a local rendering transition only. Do not use it to introduce a second copy of content whose source provenance belongs elsewhere.
+When a visible module crosses a state-ownership boundary for contour-aware design, treat the crossing as a local rendering transition only. Do not use it to introduce a second copy of content whose source provenance belongs elsewhere.
 
 
 ## Direction selection
@@ -239,7 +239,7 @@ are **agent guidance for choosing an explicit `--anchor 1..4`** when the
 scene's main subject is a crowd or an important building; they are not
 promises of automatic behavior. Documentation matches implementation.
 
-If a face crosses hidden logical boundaries, keep them fixed and use largest-area ownership. The visible Reality module may expand around the protected face or follow its contour while logical ownership remains unchanged. For multiple people, use only the primary visual subject to determine the single anchor.
+If a face crosses state-ownership boundaries, keep them fixed and use largest-area ownership. The visible Reality module may expand around the protected face or follow its contour while ownership remains unchanged. For multiple people, use only the primary visual subject to determine the single anchor.
 
 Expansion of the visible Reality module around a protected face is a local treatment exception, not a transfer of source ownership. Do not duplicate the face, head, body, or surrounding scene into neighboring modules.
 

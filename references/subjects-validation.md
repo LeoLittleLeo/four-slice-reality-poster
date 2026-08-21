@@ -11,13 +11,13 @@
 
 Only the primary head is hard-locked: preserve the primary face identity and natural head anatomy above everything. The rest of the body is not hard-locked — body parts may cross module boundaries and exist at different abstraction levels simultaneously, like buildings.
 
-Keep head protection first: preserve face identity, head contour, hairline, and face-to-neck continuity longest. For the body, prioritize shape simplification, contour abstraction, color blocking, and painterly support; silhouette, head/body relationship, pose, gesture, and presence are soft preferences — readable fragments across abstraction states are acceptable and can be more impactful than a fully continuous body.
+Keep head protection first: preserve face identity, head contour, hairline, and face-to-neck continuity longest. For the body, the treatment comes from the region's own level's pool (see [abstraction-language.md](abstraction-language.md)); silhouette, head/body relationship, pose, gesture, and presence are soft preferences — readable fragments across abstraction states are acceptable and can be more impactful than a fully continuous body. Color Blocking may support any Primary Method but is never a Primary Method.
 
-- At 30%, preserve proportions, pose, silhouette, clothing structure, and face direction; reduce surface detail; normally omit geometry.
-- At 65%, strengthen simplification, contours, color blocks, and painterly masses; simplify face and body detail; use geometry only as an accent.
-- At 90%, permit a symbolic figure, dominant color blocking, painterly treatment, and limited geometry while retaining a recognizable human silhouette, head/body relation, pose direction, and presence.
+- **30% (30% pool: Colored Sketch / Line Abstraction / Painterly Abstraction):** preserve proportions, pose, silhouette, clothing structure, and face direction; reduce surface detail. Colored Sketch carries the figure through strokes and clothing color; Line Abstraction through contour/pose lines; Painterly Abstraction through brush masses. Normally omit geometry (Geometry is not in the 30% pool).
+- **65% (65% pool: Geometric Abstraction / Fragmentation / Collage Abstraction):** restructure the figure through source-derived geometric planes (clothing, massing), controlled fragmentation, or collage recomposition — not through painterly masses or color blocks (those belong to other pools). Simplify face and body detail; keep the figure traceable.
+- **90% (90% pool: Shape Reduction / Chinese Ink Wash / Cartoon Pixel):** permit a symbolic or silhouette figure (Shape Reduction), a 写意 ink figure with dominant negative space (Chinese Ink Wash), or a flat pixel icon figure (Cartoon Pixel), retaining a recognizable human silhouette, head/body relation, pose direction, and presence. Painterly treatment, geometry, and dominant color blocking are NOT eligible at 90% under the default pools.
 
-Do not use fragmentation as the default for important people. If used, keep each fragment readable and avoid duplicated anatomy, displaced face fragments, malformed photorealistic remnants, misaligned cutouts, or random polygon bodies. When fidelity is difficult, prefer an intentional silhouette, contour, color block, or painterly mass. A body may span multiple abstraction states, but never accidentally duplicate limbs or faces.
+Do not use fragmentation as the default for important people. If the 65% pool selects Fragmentation, keep each fragment readable and avoid duplicated anatomy, displaced face fragments, malformed photorealistic remnants, misaligned cutouts, or random polygon bodies. When fidelity is difficult, prefer an intentional silhouette, contour, or geometric mass from the 65% pool. A body may span multiple abstraction states, but never accidentally duplicate limbs or faces.
 
 ## Architecture
 
@@ -72,7 +72,7 @@ Confirm before delivery:
 - Crowd ownership reflects concentration, activity density, event significance, and coherent focal grouping—not raw person count alone.
 - Architecture ownership reflects silhouette, primary massing, landmark features, perspective-defining structure, and semantic importance—not minor façade detail alone.
 - Ordinary background buildings do not trigger architecture ownership unless one demonstrably functions as a landmark, scene-recognition cue, major compositional subject, or main non-human subject.
-- Hidden logical boundaries remain unchanged even when a face, crowd, or important building crosses them; visible module edges may adapt around content.
+- The state-ownership boundaries remain fixed even when a face, crowd, or important building crosses them; visible module edges may adapt around content.
 - On the deterministic pipeline the primary head is source-composited by construction and verified by `--mode verify` — the Face Restoration Gate does NOT run and no restoration is performed. The Candidate A/B gate items below apply ONLY to the one-shot / non-deterministic fallback path.
 - Candidate A, the pre-restoration coherent candidate, remains eligible for final delivery (fallback path only).
 - The Face Restoration Gate confirms recognizable identity, natural facial proportions and feature placement, coherent jaw/cheek/hairline/neck relationships, and absence of obvious artifacts.
@@ -94,8 +94,8 @@ Confirm before delivery:
 - When important architecture owns the Anchor, its identity-critical portion remains photographic while other portions may continue through abstract modules with coherent silhouette, massing, perspective, landmark identity, and major structural rhythm.
 - Abstract slices retain source visual DNA even when spatial relationships change.
 - Four substantial natural regions are immediately readable at thumbnail size as parts of ONE photograph, and neighboring states differ through at least two deliberate visual signals.
-- Hybrid Transition is applied: backgrounds and large color fields may break abruptly, while important people and buildings retain semantic continuity.
-- Hidden ownership zones remain geometrically equal while visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight.
+- Hybrid Transition is applied: backgrounds, skies, ground planes, and large color fields may change rendering abruptly across a boundary (structure and medium change), while important people and buildings retain semantic continuity. The shared photographic color identity does not change — no module-level color break.
+- The visible boundaries are intentionally contour-aware, collage-like, brush-defined, shape-defined, architectural, people-aware, or selectively straight; the underlying state-ownership masks stay exactly as the script wrote them.
 - No muddy feathering, ragged mask, accidental gap, misaligned body, ghost edge, duplicated form, or cutout halo remains. The default soft transition band (`--feather`, ~2%) keeps boundaries gentle, but the four states remain readable at thumbnail size.
 - The final image is ONE continuous source-ratio canvas tiled by four adjacent regions that share edges; the scene appears exactly once.
 - One-Scene / One-Object Ownership: every recognizable scene object appears once, spatially continuous on the final canvas; an object may cross regions and change rendering language, but never restarts, repeats, or is redrawn as another copy inside another region.
