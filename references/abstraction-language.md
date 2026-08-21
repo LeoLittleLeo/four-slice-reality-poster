@@ -91,6 +91,100 @@ BAD (unrelated mediums with no shared system)
 All methods stay inside the shared editorial print / paper / warm palette
 system — distinct structurally, unified materially.
 
+## Level-Gated Primary Abstraction Method System
+
+```text
+LEVEL DETERMINES ELIGIBLE METHOD FAMILY.
+CONTENT DETERMINES METHOD SELECTION.
+COLOR MODULATES THE SELECTION.
+```
+
+## Core principle
+
+Do not select the three Primary Abstraction Methods from one unrestricted global pool.
+
+Instead, bind each abstraction level to its own **non-overlapping Primary Method Pool** (a method family).
+
+The abstraction level determines which Primary Methods are eligible.
+
+The local source region then determines which eligible method is most appropriate.
+
+```text
+ABSTRACTION LEVEL
+→ determines the eligible Primary Method FAMILY (the pool)
+
+LOCAL REGION CONTENT
+→ selects the Primary Method inside that family
+
+LOCAL COLOR CHARACTER
+→ modulates (refines or breaks ties in) the selection
+```
+
+### Disjointness invariant
+
+The three pools MUST be pairwise disjoint — no method is eligible at more
+than one abstraction level:
+
+```text
+30% Primary Method Pool
+∩
+65% Primary Method Pool
+∩
+90% Primary Method Pool
+=
+∅
+```
+
+Because the pools are disjoint, choosing one Primary Method from each level's
+pool AUTOMATICALLY satisfies `30% ≠ 65% ≠ 90%` — the methods are distinct by
+construction, never by review.
+
+### Pools are sets, not singletons
+
+The disjointness requirement is HARD, but it must NOT be satisfied by
+permanently pinning one fixed method to each abstraction level.
+
+A pool is a SET of eligible methods with genuine alternatives — the same
+abstraction level must remain capable of producing DIFFERENT visual languages
+across different source photographs:
+
+```text
+NEVER:  30% = Colored Sketch (always)   ← singleton, level locked to one language
+        65% = Geometric Abstraction (always)
+        90% = Fragmentation (always)
+
+DO:     30% may be Colored Sketch on one photo, Painterly Abstraction on
+        another, Line Abstraction on a third — whichever the region character
+        selects, from the 30% pool only.
+```
+
+The level gates WHICH methods are eligible; the region character decides
+which one is used. Every pool therefore contains at least two eligible
+methods, so each level keeps visual variety across photographs.
+
+### Default pools (nine of the ten approved methods, each in exactly one pool)
+
+| Abstraction level | Eligible Primary Method Pool | Why |
+|---|---|---|
+| **30%** | 1. Colored Sketch, 2. Line Abstraction, 3. Painterly Abstraction | structure-preserving; keep ~70% source recognition and high spatial fidelity |
+| **65%** | 1. Geometric Abstraction, 2. Fragmentation, 3. Collage Abstraction | substantial restructuring while staying traceable (~35% recognition) |
+| **90%** | 1. Shape Reduction, 2. Chinese Ink Wash, 3. Cartoon Pixel | semantic-skeleton / strongly reinterpreted representation |
+
+**Color Blocking belongs to NO Primary pool.** It is a Supporting-only
+method: it may support any Primary Method (simplifying tones, organizing
+masses) but is never selected as a Primary Abstraction Method at any level.
+
+These pools are the default. Moving a method between pools, or adding a
+method, requires explicit user direction. Within a pool, choose the method by
+the region's color, structural, and subject character (see Content-aware
+selection below).
+
+```text
+LEVEL ≠ MEDIUM:
+a level does not prescribe a fixed method, it prescribes an eligible pool;
+the region character picks the method inside that pool.
+```
+
 ## Method diversity and dominant language
 
 The three abstract modules must not only differ in abstraction level; they must also differ clearly in their dominant abstraction language.
@@ -116,12 +210,15 @@ Method diversity does not override source-content ownership.
 30% Primary Method ≠ 65% Primary Method ≠ 90% Primary Method
 ```
 
-The three abstract states of one poster MUST use three different Primary
-Abstraction Methods. Repetition of a Primary Method across the three abstract
-states is not permitted.
+This is guaranteed BY CONSTRUCTION through the Level-Gated system: the three
+levels draw from three pairwise-disjoint Primary Method Pools, so repetition
+across levels is structurally impossible. Each level selects exactly one
+Primary Method from ITS OWN pool (see Level-Gated Primary Abstraction Method
+System above).
 
-If a method repeats because the available alternatives are unsuitable,
-re-select the whole set: no two abstract states may share a Primary Method.
+If the available alternatives in a pool are unsuitable for the region,
+re-select from that same pool — never borrow a method from another level's
+pool.
 
 For example:
 
@@ -565,7 +662,7 @@ Changing abstraction level or method never grants permission to duplicate or imp
 
 ## Content-aware selection
 
-Choose the Primary Abstraction Method from the semantic and structural character of each module.
+Choose the Primary Abstraction Method from the semantic and structural character of each module — **inside that level's eligible Primary Method Pool** (see Level-Gated Primary Abstraction Method System above). The level already narrowed the family; the region's content decides which member of the family is used, and local color character modulates (refines or breaks ties in) that choice.
 
 Do not repeatedly select the easiest universally applicable method.
 
@@ -683,11 +780,11 @@ Do not duplicate an entire tree cluster, skyline, road section, cloud formation,
 
 ### Fit of the newer methods
 
-Chinese Ink Wash suits landscape, atmospheric, architectural, and poetic modules; it also works for people when a 写意 silhouette or symbolic figure strengthens the module.
+Chinese Ink Wash suits landscape, atmospheric, architectural, and poetic modules; it also works for people when a 写意 silhouette or symbolic figure strengthens the module. It is in the **90% pool** only.
 
-Cartoon Pixel suits people, urban scenes, architecture, and objects; it reads strongest at 65% and 90%.
+Cartoon Pixel suits people, urban scenes, architecture, and objects; it reads strongest at 90%. It is in the **90% pool** only.
 
-Choose either like any other method — by the owned content and the module's desired perceptual mechanism — and respect the primary-diversity rule. Both methods still operate only on source content owned by their logical zone.
+Choose either like any other method — from its level's pool, by the owned content and the module's desired perceptual mechanism. Both methods still operate only on source content owned by their logical zone.
 
 ### Cross-module selection rule
 

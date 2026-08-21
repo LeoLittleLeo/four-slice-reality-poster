@@ -115,8 +115,7 @@ Confirm before delivery:
 - The four regions are substantial and connected (each >= ~6% of the canvas,
   no islands/pockets/scattered fragments) and may have very different visible
   areas — no quarter-based balance requirement in the default natural family.
-- The three abstract states MUST use three different Primary Abstraction
-  Methods (30% ≠ 65% ≠ 90%), all inside the same photograph — LEVEL ≠ MEDIUM.
+- The three abstract states select their Primary Abstraction Methods through the **Level-Gated system** (each level's pool is disjoint, so `30% ≠ 65% ≠ 90%` is guaranteed by construction): 30% = Colored Sketch / Line Abstraction / Painterly Abstraction; 65% = Geometric Abstraction / Fragmentation / Collage Abstraction; 90% = Shape Reduction / Chinese Ink Wash / Cartoon Pixel; Color Blocking is Supporting-only. All inside the same photograph — LEVEL ≠ MEDIUM.
 - Reality Anchor: script `--anchor auto` implements face ownership ->
   side-weighted central corridor -> Logical Zone 2; crowd/architecture anchors
   are agent-chosen via `--anchor 1..4` (documentation matches implementation).
