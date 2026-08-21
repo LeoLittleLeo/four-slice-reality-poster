@@ -18,9 +18,12 @@ decision in this Skill is a deterministic operation performed by
 to be one continuous image tiled by four adjacent regions of the source — never
 a 2x2 grid, strip, or contact sheet of four full-image versions.
 
-The four states remain the four hidden logical zones of
-[composition-and-anchor.md](composition-and-anchor.md); the script simply turns
-them into exact pixel regions.
+The four states are owned by the four state-ownership regions (the exact
+pixel masks the script writes); the "equal hidden logical zones" reference of
+[composition-and-anchor.md](composition-and-anchor.md) is literal only for the
+`rect` family (equal strips) and as nominal band centers for `contour`. The
+default `natural`/`collage` families are composition-driven and NOT
+quarter-based.
 
 ## Boundary families
 

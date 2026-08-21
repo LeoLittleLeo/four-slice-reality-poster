@@ -12,7 +12,7 @@
 
 ## Default hierarchy
 
-Prioritize a readable four-state modular poster over seamless cinematic blending. Make Reality, 30%, 65%, and 90% visually distinguishable at first inspection. Use equal hidden logical zones for ownership, but prefer four designed irregular visible fragments over rigid rectangular bands.
+Prioritize a readable four-state modular poster over seamless cinematic blending. Make Reality, 30%, 65%, and 90% visually distinguishable at first inspection. Use the four state-ownership regions (the region masks) for ownership, but prefer natural, designed region shapes over rigid rectangular bands.
 
 Use this hierarchy:
 

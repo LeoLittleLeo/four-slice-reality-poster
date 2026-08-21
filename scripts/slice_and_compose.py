@@ -4,11 +4,13 @@
 The image model never decides the slicing. This script:
 
 - defines four regions that tile the source exactly (no gaps, no overlaps):
-  * --boundary torn     -> ordered torn-paper seams: three continuous
-                           edge-to-edge multi-scale irregular seams over four
-                           sequential regions (default)
+  * --boundary natural  -> ONE photo in four natural regions, each region
+                           differing only by abstraction, with the boundary
+                           expressed by a paper-material seam (default)
+  * --boundary collage  -> optional layered torn-paper sheets with a full
+                           paper finish
+  * --boundary torn     -> legacy ordered torn-strip composition
   * --boundary contour  -> optional semantic + edge-aware contour boundaries
-                           that follow silhouettes, rooflines, horizons
   * --boundary mask     -> four content-aware masks supplied by the agent,
                            normalized to exact tiling automatically
   * --boundary rect     -> four equal vertical/horizontal strips (fallback)
@@ -17,8 +19,9 @@ The image model never decides the slicing. This script:
   (Scheme B);
 - composes the final poster by pasting rendered zones back at fixed
   coordinates, always keeping the Reality Anchor pasted from the source
-  (--mode compose / --mode enforce-anchor), and optionally overlays a warm
-  torn-paper seam for --boundary torn;
+  (--mode compose / --mode enforce-anchor); the paper material layer is drawn
+  at the region boundaries for --boundary natural (paper seam) and through
+  the full paper finish for --boundary collage;
 - verifies that the output is one continuous source-ratio image whose scene
   appears exactly once, with the anchor region unchanged (--mode verify).
 
@@ -57,9 +60,9 @@ BIG = 10 ** 6        # face penalty weight
 STEP = 6             # max column change per row in boundary path search
 BALANCE_RATIO = 2.5  # warn when max/min zone area ratio exceeds this
 
-# Torn-strip (default) parameters. Each seam is conceptually
+# Torn-strip (legacy) parameters. Each seam is conceptually
 #   nominal position + broad low-frequency drift + medium tear + micro fiber.
-DEFAULT_SEED = 42          # deterministic torn generator seed
+DEFAULT_SEED = 42          # deterministic generator seed (torn/natural/collage)
 TORN_BAND_DEFAULT = 0.06   # typical torn deviation (~6% of the slice axis)
 TORN_EXCURSION_MULT = 1.5  # local excursion cap = torn_band * this (9% at default)
 TORN_MIN_SEP_FRAC = 0.04   # minimum seam separation (fraction of the slice axis)
@@ -579,7 +582,7 @@ def masks_from_paths(direction: str, width: int, height: int,
 
 
 # ---------------------------------------------------------------------------
-# Torn-strip boundaries (multi-scale, deterministic, DEFAULT)
+# Torn-strip boundaries (multi-scale, deterministic, legacy)
 # ---------------------------------------------------------------------------
 
 def moving_average(values: List[float], window: int) -> List[float]:
@@ -907,7 +910,7 @@ def check_tiling(masks: List[Image.Image], width: int, height: int) -> None:
 
 
 # ---------------------------------------------------------------------------
-# Collage: Layered Torn-Paper Collage (DEFAULT)
+# Collage: layered torn-paper sheets (optional)
 #
 # TORN EDGE IS REGION GEOMETRY, NOT A DECORATIVE LINE DRAWN ON TOP.
 # Pieces are layered paper shapes (not 1/4-based strips) that tile exactly

@@ -61,22 +61,31 @@ Build primarily from a controlled family of:
 
 Do not force every color into every image. Adapt the palette to the source while preserving this broad emotional identity.
 
-### Modular Color Principle
+### One-Photo Color Principle
 
-Keep the four visible modules inside the **same cinematic emotional universe**, but do not force them into nearly identical grading. Give each module a clearly different dominant color role when useful. For example:
+The four regions share **one photographic color identity** — the photograph's
+own colors under the uniform warm Robot Dreams-inspired grade. Because each
+region differs ONLY by abstraction, regions must NOT be separated by
+region-specific color roles, dominant hues, warm/cool contrasts, or value
+roles: that would turn the poster back into four differently-colored design
+modules instead of one photo. Abstraction may change how the shared color is
+carried (30% stays closest to the photo's local color, 90% is most
+interpretive), but the color world itself is one and the same across all four
+regions.
 
-```text
-Slice A → terracotta / warm brown / sand
-Slice B → cream / dusty peach / warm beige
-Slice C → dusty blue / muted teal
-Slice D → ochre / muted yellow / soft brick
-```
+Assigning clearly different dominant color roles per region (e.g. Slice A →
+terracotta, Slice B → cream, Slice C → dusty blue, Slice D → ochre) is an
+OPTIONAL artistic choice only when the user explicitly requests it — never
+the default.
 
-Treat these as examples, not fixed assignments. Do not derive a fixed hue from abstraction level. Use color differences to strengthen four-module readability.
+### Color Separation
 
-### Chromatic Separation
-
-Allow deliberate color contrast to create a visible boundary. Prefer dominant hue change, warm/cool contrast, value contrast, large color-field change, or different accent emphasis over artificial divider lines. Accept a clear chromatic boundary when both sides remain inside the broader Robot Dreams-inspired palette family. Do not automatically smooth away intentional color differences.
+The boundary between regions is expressed by the paper-material seam, not by
+per-region color contrast. Do not rely on hue shifts, warm/cool breaks, or
+value jumps between regions to make the states readable — the states differ
+structurally (information density, method), and the seam marks the boundary.
+Never intentionally shift one region's color away from the photograph to
+create a divider.
 
 ### Color Character
 
@@ -87,14 +96,14 @@ Avoid neon cyberpunk, purple-magenta sci-fi glow, random rainbow abstraction, ag
 ### Core Color Rule
 
 ```text
-ONE ROBOT DREAMS-INSPIRED COLOR UNIVERSE
-+
-FOUR DISTINCT DOMINANT COLOR ROLES
+ONE PHOTO'S COLOR IDENTITY
++ UNIFORM WARM ROBOT DREAMS-INSPIRED GRADE
++ ABSTRACTION DIFFERS BY STRUCTURE, NOT BY REGION COLOR
 =
-ONE COHERENT BUT CLEARLY MODULAR POSTER
+ONE COHERENT POSTER THAT IS STILL ONE PHOTO
 ```
 
-Do not achieve coherence by making all four slices color-identical. Follow [cinematic-color-system.md](references/cinematic-color-system.md) for detailed implementation.
+Do not separate regions by assigning them different dominant color roles. Follow [cinematic-color-system.md](references/cinematic-color-system.md) for detailed implementation.
 
 ## Required reading
 
@@ -194,9 +203,10 @@ final candidate = restoration with a facial patch, geometry mismatch, or broken 
 1. Inspect the supplied photograph. Identify dimensions, orientation, semantic flow, primary people and faces, architecture, landmarks, important objects, dominant shapes, and palette.
 2. Choose the collage layout (and slicing direction for non-collage modes). Use the script's deterministic `--layout auto` (default): wide or horizontally-layered scenes -> `horizontal-layered`; portrait alleys / central-perspective streets -> `side-weighted`; strip modes only when a modular strip layout is wanted. Override only when the semantic composition clearly favors another layout. Preserve the source aspect ratio and overall rectangular canvas.
 3. Define the slicing deterministically with the script — never by the image model:
-   `python scripts/slice_and_compose.py --mode prepare --source <photo> --boundary <collage|torn|contour|mask|rect> [--layout <auto|horizontal-layered|side-weighted|vertical-strip|horizontal-strip>] [--direction <auto|vertical|horizontal>] [--face-boxes "<x0,y0,x1,y1;...>"] --levels <permutation> --workdir work/ [--masks-dir <dir>]`.
+   `python scripts/slice_and_compose.py --mode prepare --source <photo> --boundary <natural|collage|torn|contour|mask|rect> [--layout <auto|horizontal-layered|side-weighted|vertical-strip|horizontal-strip>] [--direction <auto|vertical|horizontal>] [--face-boxes "<x0,y0,x1,y1;...>"] --levels <permutation> --workdir work/ [--masks-dir <dir>]`.
+   Run it with `--boundary natural` (the default — it is also what happens when the flag is omitted) unless you explicitly want another family.
    Boundary family: `natural` (default) — ONE photo in four natural regions (composition-driven layouts), each region a different abstraction, with the boundary expressed by a paper-material seam; no z-order, no sheet bodies, no sheet grain. `collage` (optional) builds layered torn-paper sheets with a full paper finish. `torn` (legacy) keeps ordered torn-strip composition. `contour` (optional) derives semantic + edge-aware contours. `mask` accepts four supplied masks normalized to exact tiling; `rect` falls back to equal strips. The script writes the four exact pixel regions (masks), the manifest, per-zone context crops, and the zone masks. Follow [deterministic-layout.md](references/deterministic-layout.md).
-4. Select exactly one Reality Anchor. The script's `--anchor auto` implements: 1) primary-face ownership (largest face overlap inside the piece masks); 2) for `side-weighted` collage without a face, the central Reality corridor; 3) Logical Zone 2 fallback. Architecture/crowd anchors are NOT auto-detected by the script — choose them explicitly with `--anchor 1..4` when the scene's main subject is a building or crowd. Keep the hidden ownership boundaries fixed.
+4. Select exactly one Reality Anchor. The script's `--anchor auto` implements: 1) primary-face ownership (largest face overlap inside the region masks); 2) for `side-weighted` layout without a face, the central Reality corridor; 3) Logical Zone 2 fallback. Architecture/crowd anchors are NOT auto-detected by the script — choose them explicitly with `--anchor 1..4` when the scene's main subject is a building or crowd. Keep the state-ownership regions fixed (never re-shape them to protect content).
 5. Identify the primary face and surrounding head/body continuity context before generation; do not pre-commit to source-pixel restoration. Pass accurate `--face-boxes` (or a `--head-mask`) so the script derives a generous head protection region covering hair and jaw/neck — the head is force-composited from the source regardless of which zone it falls in.
 6. Assign 30%, 65%, and 90% abstraction exactly once to the remaining paper pieces. The script's default is an **auto-staggered permutation** (seed/source-derived, never the sequential `30,65,90` — e.g. `90,65,30`, `65,30,90`, `30,90,65`), so the three abstract states are always non-linearly arranged. Pass an explicit `--levels` (any permutation) for composition-driven choices. Choose based on balance, meaning, rhythm, and color—not distance from the anchor. As a default suggestion (not a hard rule), the strongest abstraction often works well at an outer paper layer (top, bottom, or side), while Reality benefits from a central or compositionally important region.
 7. Establish the Robot Dreams-inspired default color identity before generating the abstract modules. Treat this palette direction as a core visual constraint, not optional finishing. Give the three abstract modules distinct but related dominant color roles while keeping them inside the same warm, nostalgic, sunlit, slightly retro cinematic universe. Apply any Reality Anchor grading only deterministically and non-structurally, or leave the Anchor unchanged.
@@ -221,7 +231,7 @@ Resolve conflicts in this order:
 7. Intentional Modular Boundary Design.
 8. Artistic Experimentation.
 
-The Final Output Layout hard constraint (one continuous image, four adjacent regions, scene appears exactly once) outranks every rule in this list: reject any grid, strip, or contact-sheet output no matter how well it satisfies lower-priority goals. In the legacy torn family, Ordered Strip Topology outranks artistic boundary play: seams may be irregular, but the four regions must stay sequential and topologically simple. In the default natural family, one-photo topology outranks artistic boundary play: regions may be composition-driven, but never arbitrary blobs, islands, fragments, or separate paper sheets. Never let a lower-priority rule modify a higher-priority protected region. Maintain four equal hidden logical zones while allowing natural visible modules. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity and the paper-material boundary outrank minor boundary smoothing and general artistic experimentation.
+The Final Output Layout hard constraint (one continuous image, four adjacent regions, scene appears exactly once) outranks every rule in this list: reject any grid, strip, or contact-sheet output no matter how well it satisfies lower-priority goals. In the legacy torn family, Ordered Strip Topology outranks artistic boundary play: seams may be irregular, but the four regions must stay sequential and topologically simple. In the default natural family, one-photo topology outranks artistic boundary play: regions may be composition-driven, but never arbitrary blobs, islands, fragments, or separate paper sheets. Never let a lower-priority rule modify a higher-priority protected region. Maintain four disjoint state-ownership regions (conceptual "hidden logical zones"; literally equal quarters only in the rect family) while allowing natural visible modules. After face, source, human, architectural, and four-state protections are satisfied, make the Robot Dreams-inspired color identity and the paper-material boundary outrank minor boundary smoothing and general artistic experimentation.
 
 ## Core principles
 
@@ -233,7 +243,7 @@ The Final Output Layout hard constraint (one continuous image, four adjacent reg
 - Make 30%, 65%, and 90% differ in detail retention, component density, spatial fidelity, shape fidelity, and photographic surface retention.
 - Make abstraction a structural transformation, not a filter.
 - Treat the Robot Dreams-inspired warm, nostalgic, sunlit, slightly retro palette as the default visual identity of the Skill. Keep all four modules inside this shared emotional color universe while allowing strong, intentional slice-to-slice dominant color differences.
-- Keep hidden logical ownership mathematically equal; make visible module edges natural, designed, and readable.
+- Keep ownership exact and disjoint — the four state-ownership regions tile the canvas, every pixel has one owner (the "equal hidden logical zones" reference is literal only for rect); make visible module edges natural, designed, and readable.
 - ONE PHOTO, FOUR NATURAL REGIONS: each region differs only by its abstraction; the paper material layer is the representation of the boundary (a seam where the abstraction changes), never separate paper sheets.
 - In the default natural family the regions share the same photograph — LEVEL ≠ MEDIUM: differentiate abstraction by information density and structural reduction, and the three abstract states MUST use three different Primary Abstraction Methods (never three intensities of the same method).
 - The four states are four adjacent regions of ONE continuous image; the scene appears exactly once — never four full-image versions, grids, strips, or contact sheets.

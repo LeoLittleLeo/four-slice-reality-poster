@@ -17,7 +17,16 @@
 
 Preserve the source image's aspect ratio and use its dimensions as the compositional basis unless the user explicitly requests another format. Do not stretch, compress, or arbitrarily extend the canvas.
 
-Begin with exactly four geometrically equal hidden logical zones. Use either four equal vertical ownership zones or four equal horizontal ownership zones. Use them only for Reality Anchor selection, crowd and subject ownership, 30%/65%/90% assignment, and four-state validation. Do not move these hidden boundaries to protect content.
+Ownership is defined directly by the four **state-ownership regions** — the
+region masks produced by the boundary family. They tile the source-ratio
+canvas exactly (every pixel has one owner). The "four hidden logical zones"
+mentioned throughout this document are that ownership model: a conceptual
+reference, NOT a separate geometric layer. "Four geometrically EQUAL hidden
+logical zones" is literally true only in the `rect` family (the strips are
+the quarters) and as the nominal band centers of the `contour` family. In the
+default `natural` family (and `collage`/`torn`) the ownership regions are the
+composition-driven masks themselves — they are NOT quarter-based. Never
+re-shape an ownership region to protect content after it is created.
 
 Translate the hidden ownership system into four visible modules governed by
 the family-specific topology (see below). In the default natural family the
@@ -111,7 +120,7 @@ connected (no islands), and that the four pieces tile exactly.
 
 ## Source ownership exclusivity
 
-Treat the four hidden logical zones as exclusive source-content ownership regions, not merely abstraction-assignment guides.
+Treat the four state-ownership regions (the region masks) as exclusive source-content ownership regions, not merely abstraction-assignment guides.
 
 Every visible source-derived fragment must have one original spatial provenance in the source image and must remain owned by the logical zone containing that provenance.
 

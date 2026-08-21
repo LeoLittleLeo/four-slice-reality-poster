@@ -66,7 +66,7 @@ Never:
 
 Confirm before delivery:
 
-- Exactly four equal hidden logical zones govern ownership and abstraction assignment inside one source-ratio canvas.
+- Four disjoint state-ownership regions tile the source-ratio canvas exactly (conceptual "hidden logical zones"; literally equal quarters only in the rect family). Ownership, Reality Anchor selection, and 30/65/90 assignment are defined directly by the region masks.
 - Direction follows semantic structure rather than orientation alone.
 - Exactly one anchor exists in this order: primary-face ownership, crowd-dominant ownership, important-architecture ownership, then Logical Zone 2 fallback.
 - Crowd ownership reflects concentration, activity density, event significance, and coherent focal grouping—not raw person count alone.

@@ -72,7 +72,7 @@ GOOD（正例）：
 
 ## ✦ Four-State System
 
-Skill 首先根据原图的构图方向建立四个等分的隐藏逻辑区。
+Skill 把照片划分为**四个状态所有权区域**（region masks，精确平铺、每像素单一归属）。"四个等分的隐藏逻辑区"仅是概念参考——只在 `rect`（等分直条）家族字面成立；默认 `natural`/`collage` 家族的区域是构图驱动、非四等分的。
 
 ```text
 Vertical division
@@ -590,7 +590,7 @@ Input Photo
 Analyze
 people / faces / architecture / semantic flow
     ↓
-Create 4 equal hidden logical zones
+Create 4 state-ownership regions
     ↓
 Choose Reality Anchor
     ↓
