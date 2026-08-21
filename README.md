@@ -313,6 +313,8 @@ Reality → 30% → 65% → 90%
 
 生成完成后，首先执行 **Face Restoration Gate**。
 
+> **仅限 one-shot / 非确定性回退路径。** 确定性管线（prepare → render → compose → verify）的主头部由代码从源图强制合成并校验，**不运行 Gate、不做任何恢复**；Gate 只在一步式生成（未使用源头部合成）时启用。
+
 如果当前候选人脸已经满足：
 
 * 身份可识别；

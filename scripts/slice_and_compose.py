@@ -315,6 +315,21 @@ def head_mask_from_boxes(head_boxes: List[Box], width: int, height: int) -> Imag
     return mask
 
 
+def pick_primary_face(face_boxes: List[Box],
+                      forced_index: Optional[int] = None) -> Optional[Box]:
+    """The PRIMARY face = the largest face box by area (deterministic,
+    first box wins ties), unless `--primary-face N` forces a specific box.
+
+    Only the primary head is hard source-protected and used for anchor
+    selection; secondary faces in multi-person photos are regular content.
+    """
+    if not face_boxes:
+        return None
+    if forced_index is not None:
+        return face_boxes[forced_index - 1]
+    return max(face_boxes, key=lambda b: (b[2] - b[0]) * (b[3] - b[1]))
+
+
 def load_class_mask(path: Path, width: int, height: int, name: str) -> Image.Image:
     if not path.is_file():
         raise SystemExit(f"Missing class mask: {path}")

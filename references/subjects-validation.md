@@ -46,7 +46,7 @@ Never:
 11. Blend the four states into one nearly uniform painterly image or hide the modular structure behind broad feathering and continuous texture migration.
 12. Use defective boundary artifacts such as muddy blur, ragged masking, duplicated outlines, ghost edges, offset object copies, cutout halos, accidental gaps, or mismatched anatomy.
 13. Give slices unrelated palette identities or drift into neon cyberpunk, purple-magenta sci-fi glow, cold steel monochrome, random rainbow abstraction, hyper-saturated pop art, dark horror, lifeless gray, or glossy commercial-ad color unless explicitly requested.
-14. Perform source-face restoration without first applying the Face Restoration Gate.
+14. (One-shot fallback path only.) Perform source-face restoration without first applying the Face Restoration Gate. The deterministic pipeline never runs the gate — its primary head is source-composited and verify-checked.
 15. Replace an acceptable coherent face merely to increase source-pixel equality.
 16. Select any restoration candidate that introduces facial patch appearance, geometry mismatch, jaw or cheek mismatch, hairline mismatch, skin-tone discontinuity, neck mismatch, body continuity breaks, or unnatural proportions.
 17. Force all visible modules into four hard rectangular bands when irregular content-aware edges would produce a stronger composition.
@@ -73,7 +73,8 @@ Confirm before delivery:
 - Architecture ownership reflects silhouette, primary massing, landmark features, perspective-defining structure, and semantic importance—not minor façade detail alone.
 - Ordinary background buildings do not trigger architecture ownership unless one demonstrably functions as a landmark, scene-recognition cue, major compositional subject, or main non-human subject.
 - Hidden logical boundaries remain unchanged even when a face, crowd, or important building crosses them; visible module edges may adapt around content.
-- Candidate A, the pre-restoration coherent candidate, remains eligible for final delivery.
+- On the deterministic pipeline the primary head is source-composited by construction and verified by `--mode verify` — the Face Restoration Gate does NOT run and no restoration is performed. The Candidate A/B gate items below apply ONLY to the one-shot / non-deterministic fallback path.
+- Candidate A, the pre-restoration coherent candidate, remains eligible for final delivery (fallback path only).
 - The Face Restoration Gate confirms recognizable identity, natural facial proportions and feature placement, coherent jaw/cheek/hairline/neck relationships, and absence of obvious artifacts.
 - Restoration is skipped when Candidate A passes the gate.
 - When restoration is attempted, Candidate B replaces A only if identity visibly improves while anatomy and continuity remain natural and no patch artifact appears.
